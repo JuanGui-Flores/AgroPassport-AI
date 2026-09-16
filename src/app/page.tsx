@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Navbar } from '../components/navbar/Navbar';
-import { KpiHeader } from '../components/dashboard/KpiHeader';
-import { MapModule } from '../components/map/MapModule';
-import { PassportCard } from '../components/passport/PassportCard';
-import { CreditSimulator } from '../components/passport/CreditSimulator';
-import { TelemetryModule } from '../components/telemetry/TelemetryModule';
-import { LOTES_DATA } from './data/lotes';
+import { Navbar } from '@/components/navbar/Navbar';
+import { KpiHeader } from '@/components/dashboard/KpiHeader';
+import { MapModule } from '@/components/map/MapModule';
+import { PassportCard } from '@/components/passport/PassportCard';
+import { CreditSimulator } from '@/components/passport/CreditSimulator';
+import { TelemetryModule } from '@/components/telemetry/TelemetryModule';
+import { LOTES_DATA } from '@/app/data/lotes';
 
 export default function Home() {
   const [selectedLoteId, setSelectedLoteId] = useState<string>('ARG-SJ-2026');
