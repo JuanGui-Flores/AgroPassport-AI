@@ -131,7 +131,10 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
 
           <div className="border-t border-slate-800/80 pt-1">
             <button
-              onClick={() => setIsAddModalOpen(true)}
+              onClick={() => {
+                setIsOpen(false); // Cierra el menú desplegable antes de abrir el modal
+                setIsAddModalOpen(true);
+              }}
               className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-1.5 font-medium transition"
             >
               <Plus className="w-3.5 h-3.5" /> Agregar otra entidad...
@@ -140,7 +143,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
         </div>
       )}
 
-      {/* Modal para alta de nueva entidad */}
+      {/* Modal para alta de nueva entidad (Centrado en pantalla completa) */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl">
