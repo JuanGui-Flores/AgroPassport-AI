@@ -13,7 +13,7 @@ interface PassportCardProps {
   score: number;
   ndvi: number;
   rindeEst: string;
-  entity?: EntityOption; // <-- Prop declarada correctamente
+  entity?: EntityOption; 
 }
 
 export const PassportCard: React.FC<PassportCardProps> = ({
