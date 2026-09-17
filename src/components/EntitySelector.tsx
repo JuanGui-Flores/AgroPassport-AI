@@ -173,10 +173,10 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
         </div>
       )}
 
-      {/* Modal Flotante para alta de nueva entidad con diseño moderno */}
+      {/* Modal Flotante Corregido y Centrado */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-sm p-6 space-y-5 shadow-2xl shadow-black/80">
+        <div className="fixed inset-0 z-9999 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-sm p-6 space-y-5 shadow-2xl shadow-black/90 my-auto">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
                 <Sparkles className="w-5 h-5" />
@@ -222,13 +222,13 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="w-1/2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2.5 rounded-xl transition-all"
+                  className="w-1/2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2.5 rounded-xl transition-all cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="w-1/2 bg-linear-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-slate-950 text-xs font-bold py-2.5 rounded-xl transition-all shadow-lg shadow-emerald-500/20"
+                  className="w-1/2 bg-linear-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-slate-950 text-xs font-bold py-2.5 rounded-xl transition-all shadow-lg shadow-emerald-500/20 cursor-pointer"
                 >
                   Guardar Entidad
                 </button>
