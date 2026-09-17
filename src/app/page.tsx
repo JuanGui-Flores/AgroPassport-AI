@@ -58,7 +58,8 @@ export default function Home() {
 
         <CreditSimulator 
           score={loteActivo.score} 
-          loteNombre={loteActivo.nombre} 
+          loteNombre={loteActivo.nombre}
+          entity={selectedEntity} 
         />
 
         <TelemetryModule />

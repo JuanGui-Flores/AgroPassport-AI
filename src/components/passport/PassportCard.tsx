@@ -112,6 +112,7 @@ export const PassportCard: React.FC<PassportCardProps> = ({
         onClose={() => setIsCreditModalOpen(false)}
         loteNombre={nombre}
         score={score}
+        entity={entity}
       />
 
       <InsuranceModal
