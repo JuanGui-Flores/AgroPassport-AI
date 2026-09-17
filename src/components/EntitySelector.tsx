@@ -36,7 +36,6 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
     e.preventDefault();
     if (!newName.trim()) return;
 
-    // Uso de crypto.randomUUID() para evitar la advertencia de Math.random()
     const newEntity: EntityOption = {
       id: `custom-${crypto.randomUUID()}`,
       name: newName.trim(),
@@ -65,7 +64,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
 
   return (
     <div className="relative inline-block text-left">
-      {/* Botón Principal */}
+      {/* Botón Principal del Selector */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -80,7 +79,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
         <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
       </button>
 
-      {/* Menú Desplegable */}
+      {/* Menú Desplegable Completo de Bancos y Aseguradoras */}
       {isOpen && (
         <div className="absolute left-0 mt-2 w-56 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl z-50 p-2 space-y-2 animate-in fade-in zoom-in-95 duration-100">
           <div>
@@ -132,7 +131,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
           <div className="border-t border-slate-800/80 pt-1">
             <button
               onClick={() => {
-                setIsOpen(false); // Cierra el menú desplegable antes de abrir el modal
+                setIsOpen(false);
                 setIsAddModalOpen(true);
               }}
               className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-1.5 font-medium transition"
@@ -143,7 +142,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
         </div>
       )}
 
-      {/* Modal para alta de nueva entidad (Centrado en pantalla completa) */}
+      {/* Modal flotante para alta de nueva entidad */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl">
