@@ -1,26 +1,46 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useSyncExternalStore } from 'react';
 import { Navbar } from '@/components/navbar/Navbar';
 import { KpiHeader } from '@/components/dashboard/KpiHeader';
 import { MapModule } from '@/components/map/MapModule';
 import { PassportCard } from '@/components/passport/PassportCard';
 import { CreditSimulator } from '@/components/passport/CreditSimulator';
 import { TelemetryModule } from '@/components/telemetry/TelemetryModule';
-import { LOTES_DATA } from '@/app/data/lotes';
+import { LOTES_DATA, Lote } from '@/app/data/lotes';
 import { INITIAL_BANKS, EntityOption } from '@/app/data/entities';
 
+// Hook para evitar descalce de hidratación en Next.js
+const subscribe = () => () => {};
+const useIsMounted = () => {
+  return useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false
+  );
+};
+
 export default function Home() {
+  const isMounted = useIsMounted();
   const [selectedLoteId, setSelectedLoteId] = useState<string>('ARG-SJ-2026');
-  
-  // Estado para la entidad seleccionada (por defecto Banco San Juan)
   const [selectedEntity, setSelectedEntity] = useState<EntityOption>(INITIAL_BANKS[0]);
 
-  const loteActivo = LOTES_DATA[selectedLoteId] || LOTES_DATA['ARG-SJ-2026'];
+  // Búsqueda segura y fuertemente tipada (sin 'any')
+  const loteActivo: Lote = Array.isArray(LOTES_DATA)
+    ? LOTES_DATA.find((l) => l.id === selectedLoteId) || LOTES_DATA[0]
+    : (LOTES_DATA as Record<string, Lote>)[selectedLoteId] || Object.values(LOTES_DATA)[0];
+
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-sm">
+        Cargando AgroPassport AI...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      {/* Pasamos las props requeridas al Navbar */}
+      {/* Navbar principal */}
       <Navbar 
         selectedEntity={selectedEntity} 
         onSelectEntity={(entity) => setSelectedEntity(entity)} 
@@ -62,7 +82,7 @@ export default function Home() {
           entity={selectedEntity} 
         />
 
-        {/* Pasamos el nombre del lote activo a la telemetría */}
+        {/* Telemetría */}
         <TelemetryModule loteNombre={loteActivo.nombre} />
       </main>
     </div>
