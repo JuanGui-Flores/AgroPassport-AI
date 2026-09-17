@@ -1,8 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useSyncExternalStore } from 'react';
 import { Building2, ChevronDown, Plus, ShieldCheck } from 'lucide-react';
 import { EntityOption, INITIAL_BANKS, INITIAL_INSURANCES } from '@/app/data/entities';
+
+// Hook para detectar el montaje sin violar las reglas de React Hooks
+const emptySubscribe = () => () => {};
+const useIsMounted = () => {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+};
 
 interface EntitySelectorProps {
   selectedEntity: EntityOption;
@@ -13,22 +23,22 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
   selectedEntity,
   onSelectEntity,
 }) => {
+  const isMounted = useIsMounted();
   const [isOpen, setIsOpen] = useState(false);
   const [banks, setBanks] = useState<EntityOption[]>(INITIAL_BANKS);
   const [insurances, setInsurances] = useState<EntityOption[]>(INITIAL_INSURANCES);
 
-  // Estado para el modal de agregar entidad
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [newType, setNewType] = useState<'bank' | 'insurance'>('bank');
 
-  // Corregido: Uso de React.SubmitEvent o Handler de Formulario estándar
   const handleAddEntity = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newName.trim()) return;
 
+    // Uso de crypto.randomUUID() para evitar la advertencia de Math.random()
     const newEntity: EntityOption = {
-      id: `custom-${Date.now()}`,
+      id: `custom-${crypto.randomUUID()}`,
       name: newName.trim(),
       type: newType,
     };
@@ -45,9 +55,17 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
     setIsOpen(false);
   };
 
+  if (!isMounted) {
+    return (
+      <div className="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400">
+        Cargando...
+      </div>
+    );
+  }
+
   return (
     <div className="relative inline-block text-left">
-      {/* Botón Principal (El Menú Desplegable) */}
+      {/* Botón Principal */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
