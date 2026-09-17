@@ -7,6 +7,7 @@ import { MapModule } from '@/components/map/MapModule';
 import { PassportCard } from '@/components/passport/PassportCard';
 import { CreditSimulator } from '@/components/passport/CreditSimulator';
 import { TelemetryModule } from '@/components/telemetry/TelemetryModule';
+import { IntegrationDashboard } from '@/components/IntegrationDashboard'; // <--- 1. Importamos el componente
 import { LOTES_DATA, Lote } from '@/app/data/lotes';
 import { INITIAL_BANKS, EntityOption } from '@/app/data/entities';
 
@@ -89,6 +90,11 @@ export default function Home() {
 
         {/* Telemetría */}
         <TelemetryModule loteNombre={loteActivo.nombre} />
+
+        {/* <--- 2. Panel de Conectividad y Middleware Integrado */}
+        <div className="pt-6 border-t border-slate-800/80">
+          <IntegrationDashboard />
+        </div>
       </main>
     </div>
   );
