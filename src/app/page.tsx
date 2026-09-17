@@ -60,20 +60,25 @@ export default function Home() {
 
         <KpiHeader />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <MapModule 
-            selectedLoteId={selectedLoteId} 
-            onSelectLote={(id) => setSelectedLoteId(id)} 
-          />
-          <PassportCard
-            loteId={loteActivo.id}
-            nombre={loteActivo.nombre}
-            hectareas={loteActivo.hectareas}
-            score={loteActivo.score}
-            ndvi={loteActivo.ndvi}
-            rindeEst={loteActivo.rindeEst}
-            entity={selectedEntity}
-          />
+        {/* Grilla balanceada de 12 columnas sin pasar props inválidas a MapModule */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8">
+            <MapModule 
+              selectedLoteId={selectedLoteId} 
+              onSelectLote={(id) => setSelectedLoteId(id)} 
+            />
+          </div>
+          <div className="lg:col-span-4">
+            <PassportCard
+              loteId={loteActivo.id}
+              nombre={loteActivo.nombre}
+              hectareas={loteActivo.hectareas}
+              score={loteActivo.score}
+              ndvi={loteActivo.ndvi}
+              rindeEst={loteActivo.rindeEst}
+              entity={selectedEntity}
+            />
+          </div>
         </div>
 
         <CreditSimulator 
