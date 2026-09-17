@@ -3,7 +3,13 @@
 import React from 'react';
 import { Cpu, CheckCircle, AlertTriangle, Fuel } from 'lucide-react';
 
-export const TelemetryModule: React.FC = () => {
+interface TelemetryModuleProps {
+  loteNombre?: string;
+}
+
+export const TelemetryModule: React.FC<TelemetryModuleProps> = ({
+  loteNombre = 'Lote Don Juan',
+}) => {
   return (
     <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-5 space-y-4">
       <div className="flex justify-between items-center border-b border-slate-800/80 pb-3">
@@ -24,8 +30,8 @@ export const TelemetryModule: React.FC = () => {
               <span className="text-xs font-bold text-white">Tractor Pauny 280A</span>
               <span className="text-[10px] text-emerald-400 font-mono">ID: T-882</span>
             </div>
-            <p className="text-[11px] text-slate-400 mb-3">Lote Don Juan • Parcela 4</p>
-            
+            <p className="text-[11px] text-slate-400 mb-3">{loteNombre} • Parcela 4</p>
+
             <div className="space-y-1.5 text-xs">
               <div className="flex justify-between text-slate-400">
                 <span>Horas Uso:</span>
@@ -53,7 +59,7 @@ export const TelemetryModule: React.FC = () => {
               <span className="text-xs font-bold text-white">Cosechadora Mainero 3500</span>
               <span className="text-[10px] text-amber-400 font-mono">ID: C-104</span>
             </div>
-            <p className="text-[11px] text-slate-400 mb-3">Parcela 12 • Sector Sur</p>
+            <p className="text-[11px] text-slate-400 mb-3">{loteNombre} • Sector Sur</p>
 
             <div className="space-y-1.5 text-xs">
               <div className="flex justify-between text-slate-400">
@@ -84,7 +90,7 @@ export const TelemetryModule: React.FC = () => {
               <span className="text-xs font-bold text-white">Pulverizadora Metalfor</span>
               <span className="text-[10px] text-emerald-400 font-mono">ID: P-402</span>
             </div>
-            <p className="text-[11px] text-slate-400 mb-3">Lote San José • Parcela 1</p>
+            <p className="text-[11px] text-slate-400 mb-3">{loteNombre} • Parcela 1</p>
 
             <div className="space-y-1.5 text-xs">
               <div className="flex justify-between text-slate-400">

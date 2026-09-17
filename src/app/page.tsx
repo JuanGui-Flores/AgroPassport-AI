@@ -62,7 +62,8 @@ export default function Home() {
           entity={selectedEntity} 
         />
 
-        <TelemetryModule />
+        {/* Pasamos el nombre del lote activo a la telemetría */}
+        <TelemetryModule loteNombre={loteActivo.nombre} />
       </main>
     </div>
   );
