@@ -47,7 +47,7 @@ export default function Home() {
         onSelectEntity={(entity) => setSelectedEntity(entity)} 
       />
 
-      <main className="p-6 space-y-6 flex-1 max-w-[1600px] mx-auto w-full">
+      <main className="p-3 sm:p-6 space-y-6 flex-1 max-w-[1600px] mx-auto w-full">
         <div className="flex justify-between items-center border-b border-slate-800/80 pb-3">
           <div>
             <h1 className="text-lg font-semibold text-white">
