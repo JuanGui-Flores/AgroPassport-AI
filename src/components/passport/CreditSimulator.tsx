@@ -2,19 +2,28 @@
 
 import React, { useState } from 'react';
 import { Calculator, TrendingDown, CheckCircle } from 'lucide-react';
+import { EntityOption } from '@/app/data/entities';
 
 interface CreditSimulatorProps {
   score: number;
   loteNombre: string;
+  entity?: EntityOption;
 }
 
-export const CreditSimulator: React.FC<CreditSimulatorProps> = ({ score, loteNombre }) => {
+export const CreditSimulator: React.FC<CreditSimulatorProps> = ({
+  score,
+  loteNombre,
+  entity,
+}) => {
   const [monto, setMonto] = useState<number>(120000);
   const [plazoMeses, setPlazoMeses] = useState<number>(12);
 
+  const entityName = entity?.name || 'Banco San Juan (BSJ)';
+  const isBank = entity?.type !== 'insurance';
+
   // Descuento de tasa por buen Passport Score
   const tasaBase = 18;
-  
+
   const getBonificacion = (pts: number) => {
     if (pts > 85) return 3.5;
     if (pts > 70) return 1.5;
@@ -38,12 +47,16 @@ export const CreditSimulator: React.FC<CreditSimulatorProps> = ({ score, loteNom
         <div className="flex items-center gap-2.5">
           <Calculator className="w-5 h-5 text-emerald-400" />
           <div>
-            <h3 className="text-base font-bold text-white">Simulador de Crédito Agrícola</h3>
+            <h3 className="text-base font-bold text-white">
+              {isBank
+                ? `Simulador de Crédito Agrícola — ${entityName}`
+                : `Simulador de Cobertura & Póliza — ${entityName}`}
+            </h3>
             <p className="text-xs text-slate-400">{loteNombre}</p>
           </div>
         </div>
         <span className="text-xs bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold px-3 py-1 rounded-full">
-          Tasa Pref. {tasaAnualEfectiva}% TNA
+          {isBank ? `Tasa Pref. ${tasaAnualEfectiva}% TNA` : `Prima Bonificada ${tasaAnualEfectiva}%`}
         </span>
       </div>
 
@@ -54,7 +67,7 @@ export const CreditSimulator: React.FC<CreditSimulatorProps> = ({ score, loteNom
           <div>
             <div className="flex justify-between text-xs mb-1.5">
               <label htmlFor="monto-range" className="text-slate-400 cursor-pointer">
-                Monto del Crédito
+                {isBank ? 'Monto del Crédito' : 'Suma Asegurada'}
               </label>
               <span className="text-white font-bold font-mono">USD {monto.toLocaleString()}</span>
             </div>
@@ -76,7 +89,9 @@ export const CreditSimulator: React.FC<CreditSimulatorProps> = ({ score, loteNom
 
           {/* Plazo de Pago */}
           <div>
-            <span className="text-xs text-slate-400 block mb-1.5">Plazo de Financiación</span>
+            <span className="text-xs text-slate-400 block mb-1.5">
+              {isBank ? 'Plazo de Financiación' : 'Vigencia de Cobertura'}
+            </span>
             <div className="grid grid-cols-4 gap-2">
               {[6, 12, 18, 24].map((meses) => (
                 <button
@@ -99,13 +114,13 @@ export const CreditSimulator: React.FC<CreditSimulatorProps> = ({ score, loteNom
         <div className="bg-slate-950 border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between space-y-3">
           <div className="space-y-2.5 text-xs">
             <div className="flex justify-between py-1 border-b border-slate-900 text-slate-400">
-              <span>Cuota Mensual Estimada:</span>
+              <span>{isBank ? 'Cuota Mensual Estimada:' : 'Prima Mensual Estimada:'}</span>
               <span className="text-emerald-400 font-bold font-mono text-sm">
                 USD {cuotaEstimada.toFixed(0)}
               </span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-900 text-slate-400">
-              <span>Intereses Totales:</span>
+              <span>{isBank ? 'Intereses Totales:' : 'Costo Total Póliza:'}</span>
               <span className="text-slate-200 font-mono">USD {totalIntereses.toFixed(0)}</span>
             </div>
             <div className="flex justify-between py-1 text-slate-400">
@@ -117,10 +132,13 @@ export const CreditSimulator: React.FC<CreditSimulatorProps> = ({ score, loteNom
           </div>
 
           <button
-            onClick={() => alert(`Simulación confirmada: USD ${monto} a ${plazoMeses} meses.`)}
+            onClick={() =>
+              alert(`Simulación confirmada con ${entityName}: USD ${monto} a ${plazoMeses} meses.`)
+            }
             className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5"
           >
-            <CheckCircle className="w-4 h-4" /> Solicitar Pre-Aprobación Oficial
+            <CheckCircle className="w-4 h-4" />
+            {isBank ? `Solicitar Pre-Aprobación (${entityName})` : `Cotizar Póliza (${entityName})`}
           </button>
         </div>
       </div>

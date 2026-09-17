@@ -8,14 +8,23 @@ import { PassportCard } from '@/components/passport/PassportCard';
 import { CreditSimulator } from '@/components/passport/CreditSimulator';
 import { TelemetryModule } from '@/components/telemetry/TelemetryModule';
 import { LOTES_DATA } from '@/app/data/lotes';
+import { INITIAL_BANKS, EntityOption } from '@/app/data/entities';
 
 export default function Home() {
   const [selectedLoteId, setSelectedLoteId] = useState<string>('ARG-SJ-2026');
+  
+  // Estado para la entidad seleccionada (por defecto Banco San Juan)
+  const [selectedEntity, setSelectedEntity] = useState<EntityOption>(INITIAL_BANKS[0]);
+
   const loteActivo = LOTES_DATA[selectedLoteId] || LOTES_DATA['ARG-SJ-2026'];
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <Navbar />
+      {/* Pasamos las props requeridas al Navbar */}
+      <Navbar 
+        selectedEntity={selectedEntity} 
+        onSelectEntity={(entity) => setSelectedEntity(entity)} 
+      />
 
       <main className="p-6 space-y-6 flex-1 max-w-[1600px] mx-auto w-full">
         <div className="flex justify-between items-center border-b border-slate-800/80 pb-3">
@@ -43,6 +52,7 @@ export default function Home() {
             score={loteActivo.score}
             ndvi={loteActivo.ndvi}
             rindeEst={loteActivo.rindeEst}
+            entity={selectedEntity}
           />
         </div>
 

@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShieldCheck, FileDown } from 'lucide-react';
+import { ShieldCheck, FileDown, ShieldAlert } from 'lucide-react';
 import { CreditModal } from './CreditModal';
 import { InsuranceModal } from './InsuranceModal';
+import { EntityOption } from '@/app/data/entities';
 
 interface PassportCardProps {
   loteId: string;
@@ -12,6 +13,7 @@ interface PassportCardProps {
   score: number;
   ndvi: number;
   rindeEst: string;
+  entity?: EntityOption; // <-- Prop declarada correctamente
 }
 
 export const PassportCard: React.FC<PassportCardProps> = ({
@@ -21,6 +23,7 @@ export const PassportCard: React.FC<PassportCardProps> = ({
   score,
   ndvi,
   rindeEst,
+  entity,
 }) => {
   const [isCreditModalOpen, setIsCreditModalOpen] = useState(false);
   const [isInsuranceModalOpen, setIsInsuranceModalOpen] = useState(false);
@@ -28,6 +31,9 @@ export const PassportCard: React.FC<PassportCardProps> = ({
   const handlePrint = () => {
     window.print();
   };
+
+  const isBank = entity?.type !== 'insurance';
+  const entityName = entity?.name || 'Banco San Juan (BSJ)';
 
   return (
     <>
@@ -76,18 +82,22 @@ export const PassportCard: React.FC<PassportCardProps> = ({
         </div>
 
         <div className="space-y-2 pt-2 print:hidden">
-          <button 
-            onClick={() => setIsCreditModalOpen(true)}
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 cursor-pointer"
-          >
-            <ShieldCheck className="w-4 h-4" /> Pre-Aprobar Financiación (BSJ)
-          </button>
-          <button 
-            onClick={() => setIsInsuranceModalOpen(true)}
-            className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 rounded-xl transition text-xs border border-slate-700 cursor-pointer"
-          >
-            Emitir Póliza de Cosecha (La Segunda)
-          </button>
+          {isBank ? (
+            <button 
+              onClick={() => setIsCreditModalOpen(true)}
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 cursor-pointer"
+            >
+              <ShieldCheck className="w-4 h-4" /> Pre-Aprobar Financiación ({entityName})
+            </button>
+          ) : (
+            <button 
+              onClick={() => setIsInsuranceModalOpen(true)}
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 cursor-pointer"
+            >
+              <ShieldAlert className="w-4 h-4" /> Emitir Póliza de Cosecha ({entityName})
+            </button>
+          )}
+
           <button
             onClick={handlePrint}
             className="w-full bg-transparent hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 font-medium py-2 rounded-xl flex items-center justify-center gap-2 transition text-xs border border-dashed border-slate-700/60 cursor-pointer"

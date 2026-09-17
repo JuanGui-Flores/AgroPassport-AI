@@ -1,9 +1,16 @@
 'use client';
 
 import React from 'react';
-import { Search, Building2, UserCircle, Bell, Calendar } from 'lucide-react';
+import { Search, UserCircle, Bell, Calendar } from 'lucide-react';
+import { EntitySelector } from '@/components/EntitySelector';
+import { EntityOption } from '@/app/data/entities';
 
-export const Navbar: React.FC = () => {
+interface NavbarProps {
+  selectedEntity: EntityOption;
+  onSelectEntity: (entity: EntityOption) => void;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }) => {
   return (
     <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between">
       {/* Brand & Contexto */}
@@ -17,11 +24,14 @@ export const Navbar: React.FC = () => {
           </span>
         </div>
 
-        <span className="hidden md:inline-block h-4 w-[1px] bg-slate-800"></span>
+        <span className="hidden md:inline-block h-4 w-px bg-slate-800"></span>
 
-        <div className="hidden md:flex items-center gap-1.5 text-xs text-slate-400 bg-slate-950/60 border border-slate-800 px-3 py-1 rounded-lg">
-          <Building2 className="w-3.5 h-3.5 text-slate-500" />
-          <span>Entidad: <strong className="text-slate-200">Banco San Juan (BSJ)</strong></span>
+        {/* Selector Dinámico de Bancos y Aseguradoras */}
+        <div className="hidden md:flex items-center gap-1.5">
+          <EntitySelector
+            selectedEntity={selectedEntity}
+            onSelectEntity={onSelectEntity}
+          />
         </div>
       </div>
 
