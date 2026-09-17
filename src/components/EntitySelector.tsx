@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useSyncExternalStore } from 'react';
+import React, { useState, useSyncExternalStore, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Building2, ChevronDown, Plus, ShieldCheck, Sparkles } from 'lucide-react';
+import { Building2, ChevronDown, Plus, ShieldCheck, Sparkles, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { EntityOption, INITIAL_BANKS, INITIAL_INSURANCES } from '@/app/data/entities';
 
 // Hook para detectar el montaje sin violar las reglas de React Hooks
@@ -20,6 +20,11 @@ interface EntitySelectorProps {
   onSelectEntity: (entity: EntityOption) => void;
 }
 
+interface ToastMessage {
+  type: 'success' | 'error';
+  message: string;
+}
+
 export const EntitySelector: React.FC<EntitySelectorProps> = ({
   selectedEntity,
   onSelectEntity,
@@ -32,14 +37,49 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [newType, setNewType] = useState<'bank' | 'insurance'>('bank');
+  
+  // Estado para validaciones y notificaciones Toast
+  const [errorText, setErrorText] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  // Auto-ocultar toast a los 3 segundos
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const handleAddEntity = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!newName.trim()) return;
+    setErrorText(null);
+
+    const trimmedName = newName.trim();
+    if (!trimmedName) {
+      setErrorText('El nombre de la entidad no puede estar vacío.');
+      return;
+    }
+
+    if (trimmedName.length < 3) {
+      setErrorText('El nombre debe tener al menos 3 caracteres.');
+      return;
+    }
+
+    // Verificar si ya existe en bancos o aseguradoras (case-insensitive)
+    const exists = [...banks, ...insurances].some(
+      (item) => item.name.toLowerCase() === trimmedName.toLowerCase() && item.type === newType
+    );
+
+    if (exists) {
+      setErrorText(`Ya existe un/a ${newType === 'bank' ? 'banco' : 'aseguradora'} con ese nombre.`);
+      return;
+    }
 
     const newEntity: EntityOption = {
       id: `custom-${crypto.randomUUID()}`,
-      name: newName.trim(),
+      name: trimmedName,
       type: newType,
     };
 
@@ -51,8 +91,15 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
 
     onSelectEntity(newEntity);
     setNewName('');
+    setErrorText(null);
     setIsAddModalOpen(false);
     setIsOpen(false);
+
+    // Lanzar toast de éxito
+    setToast({
+      type: 'success',
+      message: `¡${trimmedName} agregada y seleccionada con éxito!`,
+    });
   };
 
   if (!isMounted) {
@@ -161,6 +208,8 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
             <button
               onClick={() => {
                 setIsOpen(false);
+                setErrorText(null);
+                setNewName('');
                 setIsAddModalOpen(true);
               }}
               className="w-full text-left px-3 py-2 rounded-xl text-xs text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-2 font-medium transition-all group"
@@ -174,11 +223,11 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
         </div>
       )}
 
-      {/* Modal Flotante con Portal a nivel de body para escapar de cualquier contenedor */}
+      {/* Modal Flotante con Portal */}
       {isAddModalOpen &&
         createPortal(
           <div className="fixed inset-0 z-9999 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 overflow-y-auto">
-            <div className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-sm p-6 space-y-5 shadow-2xl shadow-black/90 my-auto">
+            <div className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-sm p-6 space-y-5 shadow-2xl shadow-black/90 my-auto animate-in fade-in zoom-in-95 duration-150">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
                   <Sparkles className="w-5 h-5" />
@@ -197,12 +246,24 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                   <input
                     id="entity-name"
                     type="text"
-                    required
                     value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
+                    onChange={(e) => {
+                      setNewName(e.target.value);
+                      if (errorText) setErrorText(null);
+                    }}
                     placeholder="Ej. Banco Galicia / Sancor Seguros"
-                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    className={`w-full bg-slate-950 border rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none transition-all ${
+                      errorText
+                        ? 'border-rose-500 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                        : 'border-slate-700/80 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500'
+                    }`}
                   />
+                  {errorText && (
+                    <div className="flex items-center gap-1.5 mt-1.5 text-rose-400 text-[11px] animate-in fade-in">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{errorText}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -223,7 +284,10 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                 <div className="flex gap-2.5 pt-2">
                   <button
                     type="button"
-                    onClick={() => setIsAddModalOpen(false)}
+                    onClick={() => {
+                      setIsAddModalOpen(false);
+                      setErrorText(null);
+                    }}
                     className="w-1/2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2.5 rounded-xl transition-all cursor-pointer"
                   >
                     Cancelar
@@ -236,6 +300,21 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                   </button>
                 </div>
               </form>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {/* Toast Flotante de Notificación */}
+      {toast &&
+        createPortal(
+          <div className="fixed bottom-6 right-6 z-9999 flex items-center gap-3 bg-slate-900/95 backdrop-blur-xl border border-emerald-500/30 text-slate-100 px-4 py-3 rounded-2xl shadow-2xl shadow-black/80 animate-in slide-in-from-bottom-5 duration-200">
+            <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-400">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+            <div className="text-xs">
+              <p className="font-bold text-white">Operación Exitosa</p>
+              <p className="text-slate-300">{toast.message}</p>
             </div>
           </div>,
           document.body
