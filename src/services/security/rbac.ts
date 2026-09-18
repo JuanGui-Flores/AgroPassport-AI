@@ -10,7 +10,7 @@ export type Permission =
   | 'security:audit'
   | 'financial:evaluate'
   | 'producer:manage'
-  | 'audit:view'
+  | 'audit:view';
 
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   PRODUCER: [
@@ -18,10 +18,15 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     'lotes:read',
     'lotes:update',
     'financial:query',
+    'producer:manage',    // <-- Telemetría visible para el Productor
+    'financial:evaluate', // <-- Permite ver el Simulador de Créditos
   ],
   FINANCIAL_ENTITY: [
     'lotes:read',
     'financial:query',
+    'financial:evaluate', // <-- Permite al Banco ver y operar el Simulador
+    'producer:manage',    // <-- Permite al Banco revisar la Telemetría técnica
+    'audit:view',         // <-- Muestra el Integration Dashboard/Middleware
   ],
   ADMIN: [
     'lotes:create',
@@ -29,6 +34,9 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     'lotes:update',
     'financial:query',
     'security:audit',
+    'financial:evaluate', // <-- Acceso total
+    'producer:manage',
+    'audit:view',
   ],
 };
 
