@@ -1,5 +1,7 @@
-import { Metadata } from "next";
+// src/app/layout.tsx
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { AuthProvider } from "@/context/AuthContext"; // <--- 1. Importamos el AuthProvider
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,7 +27,10 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
+        {/* 2. Envolvemos los hijos con el proveedor de autenticación y RBAC */}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
