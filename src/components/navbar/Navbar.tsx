@@ -1,9 +1,12 @@
+// src/components/navbar/Navbar.tsx
 'use client';
 
 import React from 'react';
-import { Search, UserCircle, Bell, Calendar } from 'lucide-react';
+import { Search, Bell, Calendar, Shield } from 'lucide-react';
 import { EntitySelector } from '@/components/EntitySelector';
 import { EntityOption } from '@/app/data/entities';
+import { useAuth } from '@/context/AuthContext';
+import { Role } from '@/services/security/rbac';
 
 interface NavbarProps {
   selectedEntity: EntityOption;
@@ -11,6 +14,27 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }) => {
+  const { user, login } = useAuth();
+
+  const handleRoleChange = (newRole: Role) => {
+    let name = 'Productor Agropecuario';
+    if (newRole === 'FINANCIAL_ENTITY') name = 'Entidad Financiera (Banco)';
+    if (newRole === 'ADMIN') name = 'Administrador General';
+
+    login({
+      id: '1',
+      name: name,
+      role: newRole,
+    });
+  };
+
+  // Función limpia para obtener las iniciales del rol (evita el ternario anidado)
+  const getRoleInitials = (role?: Role) => {
+    if (role === 'ADMIN') return 'AD';
+    if (role === 'FINANCIAL_ENTITY') return 'EF';
+    return 'PR';
+  };
+
   return (
     <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between gap-4">
       {/* Brand & Selector de Entidad */}
@@ -26,7 +50,6 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
 
         <span className="h-4 w-px bg-slate-800"></span>
 
-        {/* Selector visible en todas las pantallas */}
         <div className="flex items-center">
           <EntitySelector
             selectedEntity={selectedEntity}
@@ -47,8 +70,23 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
         </div>
       </div>
 
-      {/* Acciones del Usuario */}
+      {/* Acciones del Usuario & Selector de Roles */}
       <div className="flex items-center gap-3 shrink-0">
+        {/* --- SELECTOR DE ROL (RBAC TESTER) --- */}
+        <div className="hidden md:flex items-center gap-1.5 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl text-xs">
+          <Shield className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <select
+            value={user?.role || 'PRODUCER'}
+            onChange={(e) => handleRoleChange(e.target.value as Role)}
+            className="bg-transparent text-emerald-400 font-semibold focus:outline-none cursor-pointer"
+          >
+            <option value="PRODUCER" className="bg-slate-950 text-slate-200">Productor</option>
+            <option value="FINANCIAL_ENTITY" className="bg-slate-950 text-slate-200">Entidad Financiera</option>
+            <option value="ADMIN" className="bg-slate-950 text-slate-200">Administrador</option>
+          </select>
+        </div>
+        {/* -------------------------------------- */}
+
         <div className="hidden lg:flex items-center gap-2 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl text-xs text-slate-300">
           <Calendar className="w-3.5 h-3.5 text-emerald-400" />
           <span>Campaña 2025/2026</span>
@@ -60,9 +98,11 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
         </button>
 
         <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
-          <UserCircle className="w-7 h-7 text-slate-400" />
+          <div className="w-7 h-7 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center font-bold text-emerald-400 text-xs">
+            {getRoleInitials(user?.role)}
+          </div>
           <div className="hidden sm:block text-left">
-            <p className="text-xs font-semibold text-slate-200 leading-tight">Analista de Riesgo</p>
+            <p className="text-xs font-semibold text-slate-200 leading-tight">{user?.name || 'Analista de Riesgo'}</p>
             <p className="text-[10px] text-slate-500">Riesgo Agropecuario</p>
           </div>
         </div>

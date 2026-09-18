@@ -1,4 +1,5 @@
 // src/context/AuthContext.tsx
+'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback } from 'react';
 import { Role } from '../services/security/rbac';
@@ -27,7 +28,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = useCallback((newUser: User) => setUser(newUser), []);
   const logout = useCallback(() => setUser(null), []);
 
-  // Memorizamos el valor del contexto para cumplir con las buenas prácticas y evitar re-renders innecesarios
   const value = useMemo(() => ({
     user,
     login,
