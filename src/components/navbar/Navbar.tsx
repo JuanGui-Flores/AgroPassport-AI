@@ -2,6 +2,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation'; // <--- 1. Importamos el router de Next.js
 import { Search, Bell, Calendar, Shield } from 'lucide-react';
 import { EntitySelector } from '@/components/EntitySelector';
 import { EntityOption } from '@/app/data/entities';
@@ -15,6 +16,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }) => {
   const { user, login } = useAuth();
+  const router = useRouter(); // <--- 2. Inicializamos el router
 
   const handleRoleChange = (newRole: Role) => {
     let name = 'Productor Agropecuario';
@@ -26,9 +28,10 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
       name: name,
       role: newRole,
     });
+
+    router.refresh(); // <--- 3. Forzamos la actualización global de la vista al cambiar de rol
   };
 
-  // Función limpia para obtener las iniciales del rol (evita el ternario anidado)
   const getRoleInitials = (role?: Role) => {
     if (role === 'ADMIN') return 'AD';
     if (role === 'FINANCIAL_ENTITY') return 'EF';
@@ -36,9 +39,9 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
   };
 
   return (
-    <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between gap-4">
+    <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-2 sm:gap-4">
       {/* Brand & Selector de Entidad */}
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center font-bold text-emerald-400 text-sm">
             AP
@@ -48,7 +51,7 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
           </span>
         </div>
 
-        <span className="h-4 w-px bg-slate-800"></span>
+        <span className="h-4 w-px bg-slate-800 hidden md:block"></span>
 
         <div className="flex items-center">
           <EntitySelector
@@ -58,8 +61,8 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
         </div>
       </div>
 
-      {/* Buscador Global */}
-      <div className="flex-1 max-w-xs md:max-w-md mx-2">
+      {/* Buscador Global (se oculta en pantallas muy chicas para ganar espacio) */}
+      <div className="hidden md:block flex-1 max-w-xs md:max-w-md mx-2">
         <div className="relative">
           <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -71,18 +74,18 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
       </div>
 
       {/* Acciones del Usuario & Selector de Roles */}
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         {/* --- SELECTOR DE ROL (RBAC TESTER) --- */}
-        <div className="hidden md:flex items-center gap-1.5 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl text-xs">
+        <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs">
           <Shield className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
           <select
             value={user?.role || 'PRODUCER'}
             onChange={(e) => handleRoleChange(e.target.value as Role)}
-            className="bg-transparent text-emerald-400 font-semibold focus:outline-none cursor-pointer"
+            className="bg-transparent text-emerald-400 font-semibold focus:outline-none cursor-pointer text-xs"
           >
             <option value="PRODUCER" className="bg-slate-950 text-slate-200">Productor</option>
-            <option value="FINANCIAL_ENTITY" className="bg-slate-950 text-slate-200">Entidad Financiera</option>
-            <option value="ADMIN" className="bg-slate-950 text-slate-200">Administrador</option>
+            <option value="FINANCIAL_ENTITY" className="bg-slate-950 text-slate-200">Banco</option>
+            <option value="ADMIN" className="bg-slate-950 text-slate-200">Admin</option>
           </select>
         </div>
         {/* -------------------------------------- */}
@@ -92,7 +95,7 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
           <span>Campaña 2025/2026</span>
         </div>
 
-        <button className="relative p-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 hover:text-slate-200 transition">
+        <button className="relative p-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 hover:text-slate-200 transition hidden sm:block">
           <Bell className="w-4 h-4" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-400 rounded-full"></span>
         </button>
@@ -100,9 +103,11 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
         <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
           <div className="w-7 h-7 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center font-bold text-emerald-400 text-xs">
             {getRoleInitials(user?.role)}
+
+            
           </div>
           <div className="hidden sm:block text-left">
-            <p className="text-xs font-semibold text-slate-200 leading-tight">{user?.name || 'Analista de Riesgo'}</p>
+            <p className="text-xs font-semibold text-slate-200 leading-tight">{user?.name || 'Analista'}</p>
             <p className="text-[10px] text-slate-500">Riesgo Agropecuario</p>
           </div>
         </div>

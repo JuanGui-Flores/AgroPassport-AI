@@ -7,7 +7,10 @@ export type Permission =
   | 'lotes:read'
   | 'lotes:update'
   | 'financial:query'
-  | 'security:audit';
+  | 'security:audit'
+  | 'financial:evaluate'
+  | 'producer:manage'
+  | 'audit:view'
 
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   PRODUCER: [

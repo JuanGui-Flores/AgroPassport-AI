@@ -7,7 +7,8 @@ import { MapModule } from '@/components/map/MapModule';
 import { PassportCard } from '@/components/passport/PassportCard';
 import { CreditSimulator } from '@/components/passport/CreditSimulator';
 import { TelemetryModule } from '@/components/telemetry/TelemetryModule';
-import { IntegrationDashboard } from '@/components/IntegrationDashboard'; // <--- 1. Importamos el componente
+import { IntegrationDashboard } from '@/components/IntegrationDashboard';
+import { Can } from '@/components/security/Can'; // <--- Importamos el componente RBAC
 import { LOTES_DATA, Lote } from '@/app/data/lotes';
 import { INITIAL_BANKS, EntityOption } from '@/app/data/entities';
 
@@ -40,36 +41,39 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500/30">
       {/* Navbar principal */}
       <Navbar 
         selectedEntity={selectedEntity} 
         onSelectEntity={(entity) => setSelectedEntity(entity)} 
       />
 
-      <main className="p-3 sm:p-6 space-y-6 flex-1 max-w-[1600px] mx-auto w-full">
-        <div className="flex justify-between items-center border-b border-slate-800/80 pb-3">
+      <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 max-w-[1600px] mx-auto w-full">
+        {/* Encabezado Responsive */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-4">
           <div>
-            <h1 className="text-lg font-semibold text-white">
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
               Evaluación de Riesgo & Scoring Agrícola
             </h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs sm:text-sm text-slate-400">
               Monitoreo satelital y scoring crediticio consolidado
             </p>
           </div>
         </div>
 
+        {/* KPIs (Visibles para todos los usuarios) */}
         <KpiHeader />
 
-        {/* Grilla balanceada de 12 columnas sin pasar props inválidas a MapModule */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-8">
+        {/* Módulo Central: Mapa y Ficha del Pasaporte */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-8 w-full overflow-hidden rounded-2xl border border-slate-800/80">
             <MapModule 
               selectedLoteId={selectedLoteId} 
               onSelectLote={(id) => setSelectedLoteId(id)} 
             />
           </div>
-          <div className="lg:col-span-4">
+          
+          <div className="lg:col-span-4 w-full">
             <PassportCard
               loteId={loteActivo.id}
               nombre={loteActivo.nombre}
@@ -82,19 +86,30 @@ export default function Home() {
           </div>
         </div>
 
-        <CreditSimulator 
-          score={loteActivo.score} 
-          loteNombre={loteActivo.nombre}
-          entity={selectedEntity} 
-        />
+        {/* Simulador de Crédito: Solo visible si el usuario tiene permiso financiero o de gestión */}
+        <Can I="financial:evaluate">
+          <div className="transition-all duration-300">
+            <CreditSimulator 
+              score={loteActivo.score} 
+              loteNombre={loteActivo.nombre}
+              entity={selectedEntity} 
+            />
+          </div>
+        </Can>
 
-        {/* Telemetría */}
-        <TelemetryModule loteNombre={loteActivo.nombre} />
+        {/* Telemetría: Monitoreo técnico accesible para Productores y Admins */}
+        <Can I="producer:manage">
+          <div className="transition-all duration-300">
+            <TelemetryModule loteNombre={loteActivo.nombre} />
+          </div>
+        </Can>
 
-        {/* <--- 2. Panel de Conectividad y Middleware Integrado */}
-        <div className="pt-6 border-t border-slate-800/80">
-          <IntegrationDashboard />
-        </div>
+        {/* Integration Dashboard: Módulo avanzado / Middleware accesible para Admin o Entidad Financiera */}
+        <Can I="audit:view">
+          <div className="pt-6 border-t border-slate-800/80 transition-all duration-300">
+            <IntegrationDashboard />
+          </div>
+        </Can>
       </main>
     </div>
   );
