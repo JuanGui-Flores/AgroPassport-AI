@@ -1,3 +1,4 @@
+// src/components/passport/CreditModal.tsx
 'use client';
 
 import React from 'react';
@@ -7,6 +8,7 @@ import { EntityOption } from '@/app/data/entities';
 interface CreditModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onConfirm: () => void; // <--- Agregamos la prop para disparar el flujo con Toast
   loteNombre: string;
   score: number;
   entity?: EntityOption;
@@ -15,6 +17,7 @@ interface CreditModalProps {
 export const CreditModal: React.FC<CreditModalProps> = ({
   isOpen,
   onClose,
+  onConfirm,
   loteNombre,
   score,
   entity,
@@ -38,7 +41,7 @@ export const CreditModal: React.FC<CreditModalProps> = ({
         {/* Botón Cerrar */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-slate-500 hover:text-slate-300 transition"
+          className="absolute top-5 right-5 text-slate-500 hover:text-slate-300 transition cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -98,10 +101,7 @@ export const CreditModal: React.FC<CreditModalProps> = ({
             Cancelar
           </button>
           <button
-            onClick={() => {
-              alert(`Solicitud enviada exitosamente a ${entityName}`);
-              onClose();
-            }}
+            onClick={onConfirm} // <--- Reemplaza el alert por la notificación Toast
             className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-emerald-950/50"
           >
             <CheckCircle2 className="w-4 h-4" /> Confirmar

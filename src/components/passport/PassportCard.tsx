@@ -43,6 +43,7 @@ export const PassportCard: React.FC<PassportCardProps> = ({
 }) => {
   const [isCreditModalOpen, setIsCreditModalOpen] = useState(false);
   const [isInsuranceModalOpen, setIsInsuranceModalOpen] = useState(false);
+  const [isPreApproved, setIsPreApproved] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
   const isBank = entity?.type !== 'insurance';
@@ -53,6 +54,20 @@ export const PassportCard: React.FC<PassportCardProps> = ({
   const estadoTexto = isHighScore ? 'Apto Crédito & Seguro' : 'Requiere Revisión Hídrica';
   const saludNdviTexto = getSaludNdviTexto(ndvi);
 
+  // Manejador de pre-aprobación desde los modales o directo
+  const handlePreApproveConfirm = () => {
+    setIsPreApproved(true);
+    setIsCreditModalOpen(false);
+    setIsInsuranceModalOpen(false);
+    
+    toast.success(isBank ? 'Financiación Pre-Aprobada' : 'Póliza de Cosecha Emitida', {
+      description: `Operación confirmada exitosamente para ${nombre} con ${entityName}.`,
+      icon: <CheckCircle2 className="w-5 h-5 text-emerald-400" />,
+      duration: 5000,
+    });
+  };
+
+  // Generador dinámico de PDF directo
   const handleExportPdf = async () => {
     try {
       setIsExporting(true);
@@ -75,7 +90,8 @@ export const PassportCard: React.FC<PassportCardProps> = ({
         description: `Se descargó la Ficha Técnica para ${nombre}.`,
         icon: <CheckCircle2 className="w-5 h-5 text-emerald-400" />,
       });
-    } catch {
+    } catch (err) {
+      console.error('Error generando el PDF:', err);
       toast.error('Error al generar el PDF', {
         description: 'Ocurrió un problema durante la maquetación. Inténtalo de nuevo.',
       });
@@ -137,17 +153,35 @@ export const PassportCard: React.FC<PassportCardProps> = ({
           <div className="space-y-2 pt-2 print:hidden">
             {isBank ? (
               <button 
-                onClick={() => setIsCreditModalOpen(true)}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 cursor-pointer"
+                onClick={() => {
+                  if (isPreApproved) return;
+                  setIsCreditModalOpen(true);
+                }}
+                disabled={isPreApproved}
+                className={`w-full font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg cursor-pointer ${
+                  isPreApproved
+                    ? 'bg-slate-800 text-emerald-400 border border-emerald-500/40 cursor-default'
+                    : 'bg-emerald-600 hover:bg-emerald-500 text-slate-950 shadow-emerald-950/50'
+                }`}
               >
-                <ShieldCheck className="w-4 h-4" /> Pre-Aprobar Financiación ({entityName})
+                <ShieldCheck className="w-4 h-4" /> 
+                {isPreApproved ? 'Financiación Pre-Aprobada' : `Pre-Aprobar Financiación (${entityName})`}
               </button>
             ) : (
               <button 
-                onClick={() => setIsInsuranceModalOpen(true)}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 cursor-pointer"
+                onClick={() => {
+                  if (isPreApproved) return;
+                  setIsInsuranceModalOpen(true);
+                }}
+                disabled={isPreApproved}
+                className={`w-full font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg cursor-pointer ${
+                  isPreApproved
+                    ? 'bg-slate-800 text-emerald-400 border border-emerald-500/40 cursor-default'
+                    : 'bg-emerald-600 hover:bg-emerald-500 text-slate-950 shadow-emerald-950/50'
+                }`}
               >
-                <ShieldAlert className="w-4 h-4" /> Emitir Póliza de Cosecha ({entityName})
+                <ShieldAlert className="w-4 h-4" /> 
+                {isPreApproved ? 'Póliza Emitida' : `Emitir Póliza de Cosecha (${entityName})`}
               </button>
             )}
 
@@ -172,6 +206,7 @@ export const PassportCard: React.FC<PassportCardProps> = ({
           <CreditModal
             isOpen={isCreditModalOpen}
             onClose={() => setIsCreditModalOpen(false)}
+            onConfirm={handlePreApproveConfirm}
             loteNombre={nombre}
             score={score}
             entity={entity}
@@ -180,6 +215,7 @@ export const PassportCard: React.FC<PassportCardProps> = ({
           <InsuranceModal
             isOpen={isInsuranceModalOpen}
             onClose={() => setIsInsuranceModalOpen(false)}
+            onConfirm={handlePreApproveConfirm}
             loteNombre={nombre}
             hectareas={hectareas}
             ndvi={ndvi}

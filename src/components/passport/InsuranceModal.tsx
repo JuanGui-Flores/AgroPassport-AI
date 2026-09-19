@@ -1,3 +1,4 @@
+// src/components/passport/InsuranceModal.tsx
 'use client';
 
 import React from 'react';
@@ -6,6 +7,7 @@ import { X, ShieldAlert, CheckCircle2, CloudRain } from 'lucide-react';
 interface InsuranceModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onConfirm: () => void; // <--- Prop agregada para corregir el error de TypeScript
   loteNombre: string;
   hectareas: number;
   ndvi: number;
@@ -14,6 +16,7 @@ interface InsuranceModalProps {
 export const InsuranceModal: React.FC<InsuranceModalProps> = ({
   isOpen,
   onClose,
+  onConfirm,
   loteNombre,
   hectareas,
   ndvi,
@@ -27,10 +30,10 @@ export const InsuranceModal: React.FC<InsuranceModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-white transition"
+          className="absolute top-4 right-4 text-slate-400 hover:text-white transition cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -76,16 +79,13 @@ export const InsuranceModal: React.FC<InsuranceModalProps> = ({
         <div className="flex gap-3 pt-2">
           <button
             onClick={onClose}
-            className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-2.5 rounded-xl transition font-medium"
+            className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-2.5 rounded-xl transition font-medium cursor-pointer"
           >
             Cancelar
           </button>
           <button
-            onClick={() => {
-              alert('¡Póliza de cosecha emitida y vinculada al lote correctamente!');
-              onClose();
-            }}
-            className="flex-1 bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1"
+            onClick={onConfirm} // <--- Llama al handler del padre para activar la notificación Toast
+            className="flex-1 bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1 cursor-pointer shadow-lg shadow-blue-950/50"
           >
             <CheckCircle2 className="w-4 h-4" /> Emitir Póliza
           </button>
