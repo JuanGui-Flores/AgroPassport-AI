@@ -37,44 +37,47 @@ export default function Home() {
 
   if (!isMounted) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-sm">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-xs sm:text-sm">
         Cargando AgroPassport AI...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500/30">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500/30 overflow-x-hidden">
       {/* Navbar principal */}
       <Navbar 
         selectedEntity={selectedEntity} 
         onSelectEntity={(entity) => setSelectedEntity(entity)} 
       />
 
-      <main className="p-3 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 flex-1 max-w-[1600px] mx-auto w-full">
-        {/* Encabezado Responsive Compactado */}
-        <div className="border-b border-slate-800/80 pb-3 sm:pb-4">
-          <h1 className="text-lg sm:text-2xl font-bold text-white tracking-tight leading-snug">
-            Evaluación de Riesgo & Scoring Agrícola
-          </h1>
-          <p className="text-[11px] sm:text-sm text-slate-400 mt-0.5">
-            Monitoreo satelital y scoring crediticio consolidado
-          </p>
+      {/* Contenedor adaptativo: max-w-[1920px] para TVs/UltraWide y padding fluido */}
+      <main className="p-3 sm:p-5 md:p-6 lg:p-8 xl:p-10 space-y-4 sm:space-y-6 lg:space-y-8 flex-1 max-w-[1920px] mx-auto w-full">
+        
+        {/* Encabezado Principal */}
+        <div className="border-b border-slate-800/80 pb-3 sm:pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4">
+          <div>
+            <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-white tracking-tight leading-snug">
+              Evaluación de Riesgo & Scoring Agrícola
+            </h1>
+            <p className="text-[11px] sm:text-xs md:text-sm text-slate-400 mt-0.5">
+              Monitoreo satelital y scoring crediticio consolidado
+            </p>
+          </div>
         </div>
 
-        {/* KPIs */}
+        {/* KPIs (Conserva la grilla adaptativa 2x2 en mobile, 4x1 en TV/Desktop) */}
         <KpiHeader />
 
-        {/* Módulo Central: Mapa y Ficha del Pasaporte */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <div className="lg:col-span-8 w-full overflow-hidden rounded-2xl border border-slate-800/80">
-            <MapModule 
+        {/* Módulo Central: Mapa (7-8 col) y Ficha (4-5 col) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch">
+<div className="lg:col-span-7 xl:col-span-8 w-full overflow-hidden rounded-2xl border border-slate-800/80 shadow-2xl flex flex-col min-h-95 sm:min-h-112.5 lg:min-h-130">            <MapModule 
               selectedLoteId={selectedLoteId} 
               onSelectLote={(id) => setSelectedLoteId(id)} 
             />
           </div>
           
-          <div className="lg:col-span-4 w-full">
+          <div className="lg:col-span-5 xl:col-span-4 w-full flex flex-col justify-between">
             <LoteDetailPanel 
               selectedLoteId={selectedLoteId} 
               onExport={() => setIsModalOpen(true)}
@@ -93,7 +96,7 @@ export default function Home() {
           </div>
         </Can>
 
-        {/* Telemetría */}
+        {/* Telemetría IoT */}
         <Can I="producer:manage">
           <div className="transition-all duration-300">
             <TelemetryModule 
@@ -102,51 +105,54 @@ export default function Home() {
           </div>
         </Can>
 
-        {/* Integration Dashboard */}
+        {/* Dashboard de Integración / Auditoría */}
         <Can I="audit:view">
-          <div className="pt-6 border-t border-slate-800/80 transition-all duration-300">
+          <div className="pt-4 sm:pt-6 border-t border-slate-800/80 transition-all duration-300">
             <IntegrationDashboard />
           </div>
         </Can>
       </main>
 
-      {/* MODAL: VISTA PREVIA Y EXPORTACIÓN DE PASAPORTE */}
+      {/* MODAL RESPONSIVE: VISTA PREVIA Y EXPORTACIÓN */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full relative shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 max-w-md w-full relative shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3 sticky top-0 bg-slate-900/90 backdrop-blur-sm z-10 -mt-1 pt-1">
               <div className="flex items-center gap-2">
-                <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                <FileSpreadsheet className="w-4 h-4 text-emerald-400 shrink-0" />
+                <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-slate-300 truncate">
                   Vista Previa del Informe
                 </h3>
               </div>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white transition p-1 rounded-lg hover:bg-slate-800 cursor-pointer"
+                className="text-slate-400 hover:text-white transition p-1.5 rounded-lg hover:bg-slate-800 cursor-pointer"
+                aria-label="Cerrar modal"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* PassportCard como preview pre-descarga */}
-            <PassportCard
-              loteId={loteActivo.id}
-              nombre={loteActivo.nombre}
-              hectareas={loteActivo.hectareas}
-              score={loteActivo.score}
-              ndvi={loteActivo.ndvi}
-              rindeEst={loteActivo.rindeEst}
-              entity={selectedEntity}
-              hideButtons={true}
-            />
+            {/* PassportCard vista previa */}
+            <div className="w-full">
+              <PassportCard
+                loteId={loteActivo.id}
+                nombre={loteActivo.nombre}
+                hectareas={loteActivo.hectareas}
+                score={loteActivo.score}
+                ndvi={loteActivo.ndvi}
+                rindeEst={loteActivo.rindeEst}
+                entity={selectedEntity}
+                hideButtons={true}
+              />
+            </div>
 
             <button
               onClick={() => {
                 alert(`Generando documento PDF oficial para ${loteActivo.nombre}...`);
                 setIsModalOpen(false);
               }}
-              className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer shadow-lg shadow-emerald-500/10"
+              className="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-slate-950 font-bold py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition cursor-pointer shadow-lg shadow-emerald-500/10"
             >
               Confirmar y Descargar PDF
             </button>
