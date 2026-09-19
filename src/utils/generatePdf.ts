@@ -1,5 +1,4 @@
 // src/utils/generatePdf.ts
-import html2pdf from 'html2pdf.js';
 
 export interface PdfDataProps {
   loteName: string;
@@ -13,6 +12,12 @@ export interface PdfDataProps {
 }
 
 export const generatePassportPDF = async (data: PdfDataProps) => {
+  // Asegura que solo se ejecute en el navegador
+  if (typeof window === 'undefined') return;
+
+  // Importación dinámica para evitar que Node.js intente evaluar html2pdf en el servidor
+  const html2pdf = (await import('html2pdf.js')).default;
+
   const element = document.createElement('div');
   element.innerHTML = `
     <div style="font-family: Arial, sans-serif; padding: 30px; color: #0f172a; background-color: #ffffff;">
@@ -60,7 +65,6 @@ export const generatePassportPDF = async (data: PdfDataProps) => {
     </div>
   `;
 
-  // Se agrega `as const` para asegurar que TypeScript no infiera los tipos como strings genéricos
   const opt = {
     margin: 10,
     filename: `Ficha_Tecnica_${data.loteName.replace(/\s+/g, '_')}.pdf`,
