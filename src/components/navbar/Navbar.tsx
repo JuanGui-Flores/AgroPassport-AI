@@ -41,19 +41,22 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
   return (
     <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-50 px-2 sm:px-6 py-2 sm:py-3.5 flex items-center justify-between gap-1.5 sm:gap-4 overflow-hidden">
       {/* Brand & Selector de Entidad */}
-      <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 shrink">
+      <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
         <div className="flex items-center gap-1.5 shrink-0">
           <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center font-bold text-emerald-400 text-xs sm:text-sm">
             AP
           </div>
-          <span className="font-bold text-white tracking-wide text-xs sm:text-base hidden min-[400px]:inline">
+          {/* Se oculta el texto largo en pantallas muy pequeñas (<420px) para liberar espacio horizontal */}
+          <span className="font-bold text-white tracking-wide text-xs sm:text-base hidden min-[420px]:inline">
             AgroPassport <span className="text-emerald-400">AI</span>
           </span>
         </div>
 
         <span className="h-4 w-px bg-slate-800 hidden md:block"></span>
 
-<div className="flex items-center min-w-0 max-w-32.5 min-[380px]:max-w-42.5 sm:max-w-none">          <EntitySelector
+        {/* Selector de Entidad con ancho adaptable e invulnerabilidad a desbordamientos */}
+        <div className="flex items-center min-w-0 max-w-[110px] min-[380px]:max-w-[150px] min-[440px]:max-w-[180px] sm:max-w-none">
+          <EntitySelector
             selectedEntity={selectedEntity}
             onSelectEntity={onSelectEntity}
           />
@@ -98,7 +101,7 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-400 rounded-full"></span>
         </button>
 
-        {/* Perfil / Avatar (Se oculta el texto en móviles pequeños) */}
+        {/* Perfil / Avatar */}
         <div className="flex items-center gap-2 sm:pl-2 sm:border-l sm:border-slate-800">
           <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center font-bold text-emerald-400 text-[10px] sm:text-xs shrink-0">
             {getRoleInitials(user?.role)}

@@ -3,7 +3,7 @@
 
 import React, { useState, useSyncExternalStore, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Building2, ChevronDown, Plus, ShieldCheck, Sparkles, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Building2, ChevronDown, Plus, ShieldCheck, Sparkles, AlertCircle, CheckCircle2, X } from 'lucide-react';
 import { EntityOption, INITIAL_BANKS, INITIAL_INSURANCES } from '@/app/data/entities';
 
 // Hook para detectar el montaje sin violar las reglas de React Hooks
@@ -52,6 +52,8 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
       return () => clearTimeout(timer);
     }
   }, [toast]);
+
+  const handleClose = () => setIsOpen(false);
 
   const handleAddEntity = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -105,128 +107,151 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
 
   if (!isMounted) {
     return (
-      <div className="bg-slate-900/80 border border-slate-800/80 px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-400">
+      <div className="bg-slate-900/80 border border-slate-800/80 px-2 py-1 rounded-xl text-xs font-medium text-slate-400">
         Cargando...
       </div>
     );
   }
 
   return (
-    <div className="relative inline-block text-left min-w-0">
+    <div className="relative inline-block text-left w-full min-w-0">
       {/* Botón Principal Optimizado para Mobile */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="group flex items-center gap-1.5 sm:gap-2.5 bg-slate-900/90 hover:bg-slate-800/90 text-slate-100 border border-slate-700/60 hover:border-emerald-500/50 px-2 sm:px-3.5 py-1 sm:py-2 rounded-xl text-xs font-medium transition-all shadow-lg shadow-black/20 cursor-pointer min-w-0"
+        className="group w-full flex items-center justify-between gap-1 sm:gap-2 bg-slate-900/90 hover:bg-slate-800/90 text-slate-100 border border-slate-700/60 hover:border-emerald-500/50 px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-medium transition-all shadow-lg shadow-black/20 cursor-pointer min-w-0"
       >
-        <div className={`p-1 sm:p-1.5 rounded-lg shrink-0 ${selectedEntity.type === 'bank' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'}`}>
+        <div className={`p-1 rounded-lg shrink-0 ${selectedEntity.type === 'bank' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'}`}>
           {selectedEntity.type === 'bank' ? (
-            <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <Building2 className="w-3.5 h-3.5" />
           ) : (
-            <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <ShieldCheck className="w-3.5 h-3.5" />
           )}
         </div>
         
-        <div className="flex flex-col text-left min-w-0">
+        <div className="flex flex-col text-left min-w-0 flex-1 px-0.5">
           <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider leading-none hidden sm:block">
             {selectedEntity.type === 'bank' ? 'Entidad Financiera' : 'Aseguradora'}
           </span>
-          <span className="font-semibold text-slate-200 tracking-tight truncate leading-tight text-[11px] sm:text-xs max-w-22 min-[380px]:max-w-30 sm:max-w-40">
+          <span className="font-semibold text-slate-200 tracking-tight truncate leading-tight text-[11px] sm:text-xs">
             {selectedEntity.name}
           </span>
         </div>
 
-        <ChevronDown className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-emerald-400' : ''}`} />
+        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-emerald-400' : ''}`} />
       </button>
 
-      {/* Menú Desplegable Estilizado */}
-      {isOpen && (
-        <div className="absolute left-0 mt-2.5 w-64 rounded-2xl bg-slate-900/95 backdrop-blur-xl border border-slate-700/70 shadow-2xl shadow-black/60 z-50 p-2.5 space-y-3 animate-in fade-in zoom-in-95 duration-150">
-          
-          {/* Sección Bancos */}
-          <div className="space-y-1">
-            <div className="px-2.5 py-1 flex items-center justify-between">
-              <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
-                <Building2 className="w-3 h-3" /> Bancos / Crédito
-              </span>
-              <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-md font-mono">{banks.length}</span>
-            </div>
-            {banks.map((b) => (
-              <button
-                key={b.id}
-                onClick={() => {
-                  onSelectEntity(b);
-                  setIsOpen(false);
-                }}
-                className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-all cursor-pointer ${
-                  selectedEntity.id === b.id
-                    ? 'bg-emerald-500/15 text-emerald-300 font-semibold border border-emerald-500/30 shadow-inner'
-                    : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
-                }`}
-              >
-                <div className="flex items-center gap-2.5 truncate">
-                  <Building2 className={`w-3.5 h-3.5 shrink-0 ${selectedEntity.id === b.id ? 'text-emerald-400' : 'text-slate-400'}`} />
-                  <span className="truncate">{b.name}</span>
-                </div>
-                {selectedEntity.id === b.id && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
-                )}
-              </button>
-            ))}
-          </div>
-
-          <div className="border-t border-slate-800/80 my-1"></div>
-
-          {/* Sección Aseguradoras */}
-          <div className="space-y-1">
-            <div className="px-2.5 py-1 flex items-center justify-between">
-              <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest flex items-center gap-1.5">
-                <ShieldCheck className="w-3 h-3" /> Aseguradoras
-              </span>
-              <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-md font-mono">{insurances.length}</span>
-            </div>
-            {insurances.map((ins) => (
-              <button
-                key={ins.id}
-                onClick={() => {
-                  onSelectEntity(ins);
-                  setIsOpen(false);
-                }}
-                className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-all cursor-pointer ${
-                  selectedEntity.id === ins.id
-                    ? 'bg-blue-500/15 text-blue-300 font-semibold border border-blue-500/30 shadow-inner'
-                    : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
-                }`}
-              >
-                <div className="flex items-center gap-2.5 truncate">
-                  <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${selectedEntity.id === ins.id ? 'text-blue-400' : 'text-slate-400'}`} />
-                  <span className="truncate">{ins.name}</span>
-                </div>
-                {selectedEntity.id === ins.id && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]"></span>
-                )}
-              </button>
-            ))}
-          </div>
-
-          <div className="border-t border-slate-800/80 pt-1">
+      {/* Menú Desplegable Renderizado con Portal */}
+      {isOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-9990 flex items-start sm:items-none justify-center sm:justify-start">
+            {/* Backdrop interactivo compatible con accesibilidad */}
             <button
-              onClick={() => {
-                setIsOpen(false);
-                setErrorText(null);
-                setNewName('');
-                setIsAddModalOpen(true);
-              }}
-              className="w-full text-left px-3 py-2 rounded-xl text-xs text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-2 font-medium transition-all group cursor-pointer"
-            >
-              <div className="p-1 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20 text-emerald-400 transition-colors">
-                <Plus className="w-3.5 h-3.5" />
+              type="button"
+              onClick={handleClose}
+              className="fixed inset-0 bg-slate-950/60 z-9990 cursor-default border-none w-full h-full text-left p-0"
+              aria-label="Cerrar modal"
+            />
+
+            {/* Modal / Popover flotante */}
+            <div className="relative z-9991 mt-16 sm:mt-14 sm:ml-20 w-[90vw] max-w-72 sm:w-64 rounded-2xl bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 shadow-2xl shadow-black/80 p-3 space-y-3 animate-in fade-in zoom-in-95 duration-150">
+              
+              <div className="flex items-center justify-between sm:hidden pb-1 border-b border-slate-800">
+                <span className="text-xs font-bold text-slate-200">Seleccionar Entidad</span>
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className="p-1 text-slate-400 hover:text-white rounded-lg"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-              <span>Agregar otra entidad...</span>
-            </button>
-          </div>
-        </div>
-      )}
+
+              {/* Sección Bancos */}
+              <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+                <div className="px-2 py-1 flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <Building2 className="w-3 h-3" /> Bancos / Crédito
+                  </span>
+                  <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-md font-mono">{banks.length}</span>
+                </div>
+                {banks.map((b) => (
+                  <button
+                    key={b.id}
+                    onClick={() => {
+                      onSelectEntity(b);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full text-left px-2.5 py-2 rounded-xl text-xs flex items-center justify-between transition-all cursor-pointer ${
+                      selectedEntity.id === b.id
+                        ? 'bg-emerald-500/15 text-emerald-300 font-semibold border border-emerald-500/30 shadow-inner'
+                        : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <Building2 className={`w-3.5 h-3.5 shrink-0 ${selectedEntity.id === b.id ? 'text-emerald-400' : 'text-slate-400'}`} />
+                      <span className="truncate">{b.name}</span>
+                    </div>
+                    {selectedEntity.id === b.id && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <div className="border-t border-slate-800 my-1"></div>
+
+              {/* Sección Aseguradoras */}
+              <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+                <div className="px-2 py-1 flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <ShieldCheck className="w-3 h-3" /> Aseguradoras
+                  </span>
+                  <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-md font-mono">{insurances.length}</span>
+                </div>
+                {insurances.map((ins) => (
+                  <button
+                    key={ins.id}
+                    onClick={() => {
+                      onSelectEntity(ins);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full text-left px-2.5 py-2 rounded-xl text-xs flex items-center justify-between transition-all cursor-pointer ${
+                      selectedEntity.id === ins.id
+                        ? 'bg-blue-500/15 text-blue-300 font-semibold border border-blue-500/30 shadow-inner'
+                        : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${selectedEntity.id === ins.id ? 'text-blue-400' : 'text-slate-400'}`} />
+                      <span className="truncate">{ins.name}</span>
+                    </div>
+                    {selectedEntity.id === ins.id && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]"></span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <div className="border-t border-slate-800/80 pt-1">
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    setErrorText(null);
+                    setNewName('');
+                    setIsAddModalOpen(true);
+                  }}
+                  className="w-full text-left px-2.5 py-2 rounded-xl text-xs text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-2 font-medium transition-all group cursor-pointer"
+                >
+                  <div className="p-1 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20 text-emerald-400 transition-colors">
+                    <Plus className="w-3.5 h-3.5" />
+                  </div>
+                  <span>Agregar otra entidad...</span>
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
 
       {/* Modal Flotante con Portal */}
       {isAddModalOpen &&
