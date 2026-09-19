@@ -1,3 +1,4 @@
+// src/components/EntitySelector.tsx
 'use client';
 
 import React, { useState, useSyncExternalStore, useEffect } from 'react';
@@ -104,34 +105,38 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
 
   if (!isMounted) {
     return (
-      <div className="bg-slate-900/80 border border-slate-800/80 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-400">
+      <div className="bg-slate-900/80 border border-slate-800/80 px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-400">
         Cargando...
       </div>
     );
   }
 
   return (
-    <div className="relative inline-block text-left">
-      {/* Botón Principal con Estilo Moderno y Glow */}
+    <div className="relative inline-block text-left min-w-0">
+      {/* Botón Principal Optimizado para Mobile */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="group flex items-center gap-2.5 bg-slate-900/90 hover:bg-slate-800/90 text-slate-100 border border-slate-700/60 hover:border-emerald-500/50 px-3.5 py-2 rounded-xl text-xs font-medium transition-all shadow-lg shadow-black/20 cursor-pointer"
+        className="group flex items-center gap-1.5 sm:gap-2.5 bg-slate-900/90 hover:bg-slate-800/90 text-slate-100 border border-slate-700/60 hover:border-emerald-500/50 px-2 sm:px-3.5 py-1 sm:py-2 rounded-xl text-xs font-medium transition-all shadow-lg shadow-black/20 cursor-pointer min-w-0"
       >
-        <div className={`p-1.5 rounded-lg ${selectedEntity.type === 'bank' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'}`}>
+        <div className={`p-1 sm:p-1.5 rounded-lg shrink-0 ${selectedEntity.type === 'bank' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'}`}>
           {selectedEntity.type === 'bank' ? (
-            <Building2 className="w-4 h-4" />
+            <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           ) : (
-            <ShieldCheck className="w-4 h-4" />
+            <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           )}
         </div>
-        <div className="flex flex-col text-left">
-          <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+        
+        <div className="flex flex-col text-left min-w-0">
+          <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider leading-none hidden sm:block">
             {selectedEntity.type === 'bank' ? 'Entidad Financiera' : 'Aseguradora'}
           </span>
-          <span className="font-semibold text-slate-200 tracking-tight">{selectedEntity.name}</span>
+          <span className="font-semibold text-slate-200 tracking-tight truncate leading-tight text-[11px] sm:text-xs max-w-22 min-[380px]:max-w-30 sm:max-w-40">
+            {selectedEntity.name}
+          </span>
         </div>
-        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ml-1 ${isOpen ? 'rotate-180 text-emerald-400' : ''}`} />
+
+        <ChevronDown className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-emerald-400' : ''}`} />
       </button>
 
       {/* Menú Desplegable Estilizado */}
@@ -153,7 +158,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                   onSelectEntity(b);
                   setIsOpen(false);
                 }}
-                className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-all ${
+                className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-all cursor-pointer ${
                   selectedEntity.id === b.id
                     ? 'bg-emerald-500/15 text-emerald-300 font-semibold border border-emerald-500/30 shadow-inner'
                     : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
@@ -187,7 +192,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                   onSelectEntity(ins);
                   setIsOpen(false);
                 }}
-                className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-all ${
+                className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-all cursor-pointer ${
                   selectedEntity.id === ins.id
                     ? 'bg-blue-500/15 text-blue-300 font-semibold border border-blue-500/30 shadow-inner'
                     : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
@@ -212,7 +217,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                 setNewName('');
                 setIsAddModalOpen(true);
               }}
-              className="w-full text-left px-3 py-2 rounded-xl text-xs text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-2 font-medium transition-all group"
+              className="w-full text-left px-3 py-2 rounded-xl text-xs text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-2 font-medium transition-all group cursor-pointer"
             >
               <div className="p-1 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20 text-emerald-400 transition-colors">
                 <Plus className="w-3.5 h-3.5" />
