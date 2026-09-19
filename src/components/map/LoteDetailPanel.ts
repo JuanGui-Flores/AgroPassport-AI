@@ -6,6 +6,7 @@ import { CheckCircle2, ShieldCheck, Download } from 'lucide-react';
 
 interface LoteDetailPanelProps {
   selectedLoteId: string;
+  onExport?: () => void;
 }
 
 interface LoteData {
@@ -51,7 +52,7 @@ const LOTES_DATA: Record<string, LoteData> = {
   },
 };
 
-export const LoteDetailPanel: React.FC<LoteDetailPanelProps> = ({ selectedLoteId }) => {
+export const LoteDetailPanel: React.FC<LoteDetailPanelProps> = ({ selectedLoteId, onExport }) => {
   const lote = LOTES_DATA[selectedLoteId] || LOTES_DATA['ARG-SJ-2026'];
 
   return React.createElement(
@@ -156,7 +157,10 @@ export const LoteDetailPanel: React.FC<LoteDetailPanelProps> = ({ selectedLoteId
       ),
       React.createElement(
         'button',
-        { className: 'w-full bg-slate-950/60 hover:bg-slate-800 border border-slate-800 text-slate-300 font-medium py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer' },
+        { 
+          onClick: onExport,
+          className: 'w-full bg-slate-950/60 hover:bg-slate-800 border border-slate-800 text-slate-300 font-medium py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer' 
+        },
         React.createElement(Download, { className: 'w-3.5 h-3.5 text-slate-400' }),
         'Exportar Ficha Técnica (PDF)'
       )
