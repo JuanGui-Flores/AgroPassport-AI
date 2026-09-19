@@ -2,17 +2,24 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Layers, Compass, Plus, Minus, Image as ImageIcon, Grid } from 'lucide-react';
+import { Layers, Compass, Plus, Minus, Image as ImageIcon, Grid, MapPin } from 'lucide-react';
 
 interface MapModuleProps {
   selectedLoteId: string;
   onSelectLote: (id: string) => void;
 }
 
+const LOTE_DETAILS: Record<string, { name: string; hectareas: number; score: number }> = {
+  'ARG-SJ-2026': { name: 'Lote Don Juan', hectareas: 145, score: 92 },
+  'ARG-SJ-2027': { name: 'Parcela 12', hectareas: 88, score: 74 },
+};
+
 export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLote }) => {
   const [activeLayer, setActiveLayer] = useState<'ndvi' | 'estres'>('ndvi');
   const [mapView, setMapView] = useState<'vectorial' | 'satelital'>('vectorial');
   const [zoomLevel, setZoomLevel] = useState<number>(1);
+
+  const activeLote = LOTE_DETAILS[selectedLoteId] || LOTE_DETAILS['ARG-SJ-2026'];
 
   const handleZoomIn = () => setZoomLevel((prev) => Math.min(prev + 0.15, 1.4));
   const handleZoomOut = () => setZoomLevel((prev) => Math.max(prev - 0.15, 0.85));
@@ -29,7 +36,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
               : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200'
           }`}
         >
-          <Layers className="w-3.5 h-3.5 text-emerald-400" /> Capa: NDVI (Biomasa)
+          <Layers className="w-3.5 h-3.5 text-emerald-400" /> Capa: NDVI
         </button>
         <button
           onClick={() => setActiveLayer('estres')}
@@ -86,6 +93,19 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
             <Minus className="w-3.5 h-3.5" />
           </button>
         </div>
+      </div>
+
+      {/* INDICADOR DE SELECCIÓN ACTIVA (Badge en la barra superior o centro dinámico) */}
+      <div className="absolute top-16 sm:top-4 left-4 sm:left-1/2 sm:-translate-x-1/2 z-10 flex items-center gap-2 bg-slate-950/90 backdrop-blur-md border border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-lg shadow-emerald-950/20">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+        <span className="text-xs text-slate-300 whitespace-nowrap">
+          Activo: <strong className="text-white font-semibold">{activeLote.name}</strong>{' '}
+          <span className="text-emerald-400 font-mono">({activeLote.hectareas} Ha)</span>
+        </span>
       </div>
 
       {/* Contenedor del Mapa GIS */}
