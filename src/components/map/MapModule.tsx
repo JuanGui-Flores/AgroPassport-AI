@@ -95,7 +95,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
         </div>
       </div>
 
-      {/* INDICADOR DE SELECCIÓN ACTIVA (Badge en la barra superior o centro dinámico) */}
+      {/* INDICADOR DE SELECCIÓN ACTIVA (Badge Top Center / Top Left en mobile) */}
       <div className="absolute top-16 sm:top-4 left-4 sm:left-1/2 sm:-translate-x-1/2 z-10 flex items-center gap-2 bg-slate-950/90 backdrop-blur-md border border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-lg shadow-emerald-950/20">
         <span className="relative flex h-2 w-2">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -165,13 +165,18 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
           </div>
         </div>
 
-        {/* Motor GIS y Metadatos del Satélite (Abajo Derecha) */}
-        <div className="absolute bottom-4 right-4 z-10 text-right space-y-0.5">
-          <p className="text-[10px] text-slate-500 font-mono">
-            Sentinel-2 L2A • Capa: {mapView.toUpperCase()} • Zoom: {(zoomLevel * 100).toFixed(0)}%
+        {/* AUDITORÍA Y METADATOS DEL SATÉLITE (Abajo Derecha) */}
+        <div className="absolute bottom-4 right-4 z-10 bg-slate-950/80 backdrop-blur-md border border-slate-800/80 rounded-xl p-2 text-right space-y-1 shadow-lg">
+          <p className="text-[10px] text-slate-400 font-mono">
+            Última captura: <span className="text-slate-200">Sentinel-2 (hace 2 días)</span> • Resolución: <span className="text-emerald-400 font-semibold">10m/px</span>
           </p>
-          <div className="text-slate-600 flex items-center justify-end gap-1 text-xs">
-            <Compass className="w-3.5 h-3.5 text-slate-500" /> GIS Leaflet / Mapbox Engine
+          <div className="text-slate-500 flex items-center justify-end gap-1 text-[11px] font-mono">
+            <span>Capa: {mapView.toUpperCase()}</span>
+            <span>•</span>
+            <span>Zoom: {(zoomLevel * 100).toFixed(0)}%</span>
+            <span>•</span>
+            <Compass className="w-3 h-3 text-emerald-500 inline ml-0.5" />
+            <span className="text-slate-400">GIS Engine</span>
           </div>
         </div>
       </div>
