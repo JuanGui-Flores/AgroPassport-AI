@@ -1,7 +1,8 @@
 // src/app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { AuthProvider } from "@/context/AuthContext"; // <--- 1. Importamos el AuthProvider
+import { AuthProvider } from "@/context/AuthContext";
+import { Toaster } from "sonner"; // <--- Importamos Toaster
 import "./globals.css";
 
 const geistSans = Geist({
@@ -26,11 +27,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/* 2. Envolvemos los hijos con el proveedor de autenticación y RBAC */}
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-950 text-slate-100`}>
         <AuthProvider>
           {children}
         </AuthProvider>
+
+        {/* Notificaciones Toast flotantes estilizadas en Slate/Emerald */}
+        <Toaster 
+          theme="dark" 
+          position="bottom-right" 
+          toastOptions={{
+            style: {
+              background: '#0f172a',
+              borderColor: '#1e293b',
+              color: '#f8fafc',
+            },
+          }}
+        />
       </body>
     </html>
   );

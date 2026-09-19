@@ -2,10 +2,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShieldCheck, FileDown, ShieldAlert } from 'lucide-react';
+import { toast } from 'sonner';
+import { ShieldCheck, FileDown, ShieldAlert, Loader2, CheckCircle2 } from 'lucide-react';
 import { CreditModal } from './CreditModal';
 import { InsuranceModal } from './InsuranceModal';
 import { EntityOption } from '@/app/data/entities';
+import { generatePassportPDF } from '@/utils/generatePdf';
 
 interface PassportCardProps {
   loteId: string;
@@ -15,7 +17,7 @@ interface PassportCardProps {
   ndvi: number;
   rindeEst: string;
   entity?: EntityOption;
-  hideButtons?: boolean; // Prop para ocultar acciones en vista previa de modal
+  hideButtons?: boolean;
 }
 
 // Función auxiliar para evitar ternarios anidados (Regla SonarQube typescript:S3358)
@@ -41,10 +43,7 @@ export const PassportCard: React.FC<PassportCardProps> = ({
 }) => {
   const [isCreditModalOpen, setIsCreditModalOpen] = useState(false);
   const [isInsuranceModalOpen, setIsInsuranceModalOpen] = useState(false);
-
-  const handlePrint = () => {
-    window.print();
-  };
+  const [isExporting, setIsExporting] = useState(false);
 
   const isBank = entity?.type !== 'insurance';
   const entityName = entity?.name || 'Banco San Juan (BSJ)';
@@ -53,6 +52,37 @@ export const PassportCard: React.FC<PassportCardProps> = ({
   const isHighScore = score >= 80;
   const estadoTexto = isHighScore ? 'Apto Crédito & Seguro' : 'Requiere Revisión Hídrica';
   const saludNdviTexto = getSaludNdviTexto(ndvi);
+
+  const handleExportPdf = async () => {
+    try {
+      setIsExporting(true);
+      toast.info('Generando Ficha Técnica...', {
+        description: 'Maquetando informe ejecutivo para evaluación de riesgo.',
+      });
+
+      await generatePassportPDF({
+        loteName: nombre,
+        parcela: `ID: ${loteId}`,
+        location: 'San Juan, Argentina',
+        hectareas,
+        score,
+        ndvi,
+        rinde: rindeEst,
+        entityName,
+      });
+
+      toast.success('PDF Exportado con Éxito', {
+        description: `Se descargó la Ficha Técnica para ${nombre}.`,
+        icon: <CheckCircle2 className="w-5 h-5 text-emerald-400" />,
+      });
+    } catch {
+      toast.error('Error al generar el PDF', {
+        description: 'Ocurrió un problema durante la maquetación. Inténtalo de nuevo.',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <>
@@ -122,10 +152,16 @@ export const PassportCard: React.FC<PassportCardProps> = ({
             )}
 
             <button
-              onClick={handlePrint}
-              className="w-full bg-transparent hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 font-medium py-2 rounded-xl flex items-center justify-center gap-2 transition text-xs border border-dashed border-slate-700/60 cursor-pointer"
+              onClick={handleExportPdf}
+              disabled={isExporting}
+              className="w-full bg-transparent hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 font-medium py-2 rounded-xl flex items-center justify-center gap-2 transition text-xs border border-dashed border-slate-700/60 cursor-pointer disabled:opacity-50"
             >
-              <FileDown className="w-3.5 h-3.5" /> Exportar Ficha Técnica (PDF)
+              {isExporting ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
+              ) : (
+                <FileDown className="w-3.5 h-3.5" />
+              )}
+              <span>Exportar Ficha Técnica (PDF)</span>
             </button>
           </div>
         )}
