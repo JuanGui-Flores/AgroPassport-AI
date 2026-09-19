@@ -1,3 +1,4 @@
+// src/components/passport/PassportCard.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -13,8 +14,20 @@ interface PassportCardProps {
   score: number;
   ndvi: number;
   rindeEst: string;
-  entity?: EntityOption; 
+  entity?: EntityOption;
+  hideButtons?: boolean; // Prop para ocultar acciones en vista previa de modal
 }
+
+// Función auxiliar para evitar ternarios anidados (Regla SonarQube typescript:S3358)
+const getSaludNdviTexto = (ndviValue: number): string => {
+  if (ndviValue >= 0.8) {
+    return 'Óptimo';
+  }
+  if (ndviValue >= 0.6) {
+    return 'Moderado';
+  }
+  return 'Bajo';
+};
 
 export const PassportCard: React.FC<PassportCardProps> = ({
   loteId,
@@ -24,6 +37,7 @@ export const PassportCard: React.FC<PassportCardProps> = ({
   ndvi,
   rindeEst,
   entity,
+  hideButtons = false,
 }) => {
   const [isCreditModalOpen, setIsCreditModalOpen] = useState(false);
   const [isInsuranceModalOpen, setIsInsuranceModalOpen] = useState(false);
@@ -34,6 +48,11 @@ export const PassportCard: React.FC<PassportCardProps> = ({
 
   const isBank = entity?.type !== 'insurance';
   const entityName = entity?.name || 'Banco San Juan (BSJ)';
+
+  // Evaluación dinámica según el score
+  const isHighScore = score >= 80;
+  const estadoTexto = isHighScore ? 'Apto Crédito & Seguro' : 'Requiere Revisión Hídrica';
+  const saludNdviTexto = getSaludNdviTexto(ndvi);
 
   return (
     <>
@@ -57,14 +76,16 @@ export const PassportCard: React.FC<PassportCardProps> = ({
                 Passport Score
               </p>
               <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-black text-emerald-400 print:text-black">{score}</span>
+                <span className={`text-3xl font-black ${isHighScore ? 'text-emerald-400' : 'text-amber-400'} print:text-black`}>
+                  {score}
+                </span>
                 <span className="text-slate-600 text-xs font-bold">/100</span>
               </div>
-              <span className="text-[11px] font-semibold text-emerald-400 print:text-emerald-700">
-                Apto Crédito & Seguro
+              <span className={`text-[11px] font-semibold ${isHighScore ? 'text-emerald-400' : 'text-amber-400'} print:text-slate-800`}>
+                {estadoTexto}
               </span>
             </div>
-            <div className="w-14 h-14 rounded-full border-4 border-emerald-500 border-t-transparent flex items-center justify-center text-[10px] font-bold text-emerald-400 print:border-emerald-600 print:text-black">
+            <div className={`w-14 h-14 rounded-full border-4 ${isHighScore ? 'border-emerald-500 text-emerald-400' : 'border-amber-500 text-amber-400'} border-t-transparent flex items-center justify-center text-[10px] font-bold print:border-slate-800 print:text-black`}>
               {score}%
             </div>
           </div>
@@ -72,7 +93,7 @@ export const PassportCard: React.FC<PassportCardProps> = ({
           <div className="space-y-2 mb-4">
             <div className="flex justify-between text-xs py-1.5 border-b border-slate-800/60 print:border-slate-300">
               <span className="text-slate-400 print:text-slate-600">Salud Vegetal (NDVI)</span>
-              <span className="font-semibold text-slate-200 print:text-black">{ndvi} (Óptimo)</span>
+              <span className="font-semibold text-slate-200 print:text-black">{ndvi} ({saludNdviTexto})</span>
             </div>
             <div className="flex justify-between text-xs py-1.5 border-b border-slate-800/60 print:border-slate-300">
               <span className="text-slate-400 print:text-slate-600">Rinde Estimado</span>
@@ -81,47 +102,54 @@ export const PassportCard: React.FC<PassportCardProps> = ({
           </div>
         </div>
 
-        <div className="space-y-2 pt-2 print:hidden">
-          {isBank ? (
-            <button 
-              onClick={() => setIsCreditModalOpen(true)}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 cursor-pointer"
-            >
-              <ShieldCheck className="w-4 h-4" /> Pre-Aprobar Financiación ({entityName})
-            </button>
-          ) : (
-            <button 
-              onClick={() => setIsInsuranceModalOpen(true)}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 cursor-pointer"
-            >
-              <ShieldAlert className="w-4 h-4" /> Emitir Póliza de Cosecha ({entityName})
-            </button>
-          )}
+        {/* Botones de acción ocultables mediante hideButtons */}
+        {!hideButtons && (
+          <div className="space-y-2 pt-2 print:hidden">
+            {isBank ? (
+              <button 
+                onClick={() => setIsCreditModalOpen(true)}
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 cursor-pointer"
+              >
+                <ShieldCheck className="w-4 h-4" /> Pre-Aprobar Financiación ({entityName})
+              </button>
+            ) : (
+              <button 
+                onClick={() => setIsInsuranceModalOpen(true)}
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 cursor-pointer"
+              >
+                <ShieldAlert className="w-4 h-4" /> Emitir Póliza de Cosecha ({entityName})
+              </button>
+            )}
 
-          <button
-            onClick={handlePrint}
-            className="w-full bg-transparent hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 font-medium py-2 rounded-xl flex items-center justify-center gap-2 transition text-xs border border-dashed border-slate-700/60 cursor-pointer"
-          >
-            <FileDown className="w-3.5 h-3.5" /> Exportar Ficha Técnica (PDF)
-          </button>
-        </div>
+            <button
+              onClick={handlePrint}
+              className="w-full bg-transparent hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 font-medium py-2 rounded-xl flex items-center justify-center gap-2 transition text-xs border border-dashed border-slate-700/60 cursor-pointer"
+            >
+              <FileDown className="w-3.5 h-3.5" /> Exportar Ficha Técnica (PDF)
+            </button>
+          </div>
+        )}
       </div>
 
-      <CreditModal
-        isOpen={isCreditModalOpen}
-        onClose={() => setIsCreditModalOpen(false)}
-        loteNombre={nombre}
-        score={score}
-        entity={entity}
-      />
+      {!hideButtons && (
+        <>
+          <CreditModal
+            isOpen={isCreditModalOpen}
+            onClose={() => setIsCreditModalOpen(false)}
+            loteNombre={nombre}
+            score={score}
+            entity={entity}
+          />
 
-      <InsuranceModal
-        isOpen={isInsuranceModalOpen}
-        onClose={() => setIsInsuranceModalOpen(false)}
-        loteNombre={nombre}
-        hectareas={hectareas}
-        ndvi={ndvi}
-      />
+          <InsuranceModal
+            isOpen={isInsuranceModalOpen}
+            onClose={() => setIsInsuranceModalOpen(false)}
+            loteNombre={nombre}
+            hectareas={hectareas}
+            ndvi={ndvi}
+          />
+        </>
+      )}
     </>
   );
 };

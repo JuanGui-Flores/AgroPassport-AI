@@ -30,7 +30,7 @@ export default function Home() {
   const [selectedEntity, setSelectedEntity] = useState<EntityOption>(INITIAL_BANKS[0]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  // Mapeo dinámico del lote activo para PassportCard
+  // Mapeo dinámico del lote activo para PassportCard y componentes secundarios
   const loteActivo: Lote = Array.isArray(LOTES_DATA)
     ? LOTES_DATA.find((l) => l.id === selectedLoteId) || LOTES_DATA[0]
     : (LOTES_DATA as Record<string, Lote>)[selectedLoteId] || Object.values(LOTES_DATA)[0];
@@ -86,8 +86,8 @@ export default function Home() {
         <Can I="financial:evaluate">
           <div className="transition-all duration-300">
             <CreditSimulator 
-              score={selectedLoteId === 'ARG-SJ-2026' ? 92 : 74} 
-              loteNombre={selectedLoteId === 'ARG-SJ-2026' ? 'Lote Don Juan' : 'Parcela 12'}
+              score={loteActivo.score} 
+              loteNombre={loteActivo.nombre}
               entity={selectedEntity} 
             />
           </div>
@@ -97,7 +97,7 @@ export default function Home() {
         <Can I="producer:manage">
           <div className="transition-all duration-300">
             <TelemetryModule 
-              loteNombre={selectedLoteId === 'ARG-SJ-2026' ? 'Lote Don Juan' : 'Parcela 12'} 
+              loteNombre={loteActivo.nombre} 
             />
           </div>
         </Can>
@@ -138,6 +138,7 @@ export default function Home() {
               ndvi={loteActivo.ndvi}
               rindeEst={loteActivo.rindeEst}
               entity={selectedEntity}
+              hideButtons={true}
             />
 
             <button
