@@ -55,7 +55,7 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
         <span className="h-4 w-px bg-slate-800 hidden md:block"></span>
 
         {/* Selector de Entidad con ancho adaptable e invulnerabilidad a desbordamientos */}
-        <div className="flex items-center min-w-0 max-w-[110px] min-[380px]:max-w-[150px] min-[440px]:max-w-[180px] sm:max-w-none">
+        <div className="flex items-center min-w-0 max-w-27.5 min-[380px]:max-w-37.5 min-[440px]:max-w-45 sm:max-w-none">
           <EntitySelector
             selectedEntity={selectedEntity}
             onSelectEntity={onSelectEntity}

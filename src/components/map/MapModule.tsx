@@ -9,9 +9,9 @@ interface MapModuleProps {
   onSelectLote: (id: string) => void;
 }
 
-const LOTE_DETAILS: Record<string, { name: string; hectareas: number; score: number }> = {
-  'ARG-SJ-2026': { name: 'Lote Don Juan', hectareas: 145, score: 92 },
-  'ARG-SJ-2027': { name: 'Parcela 12', hectareas: 88, score: 74 },
+const LOTE_DETAILS: Record<string, { name: string; hectareas: number; score: number; lat: string; lng: string }> = {
+  'ARG-SJ-2026': { name: 'Lote Don Juan', hectareas: 145, score: 92, lat: '-31.5373', lng: '-68.5364' },
+  'ARG-SJ-2027': { name: 'Parcela 12', hectareas: 88, score: 74, lat: '-31.5421', lng: '-68.5298' },
 };
 
 export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLote }) => {
@@ -160,6 +160,13 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
             <div className="h-1.5 w-12 sm:w-24 rounded-full bg-linear-to-r from-red-500 via-amber-400 to-emerald-500"></div>
             <span className="text-[9px] sm:text-[10px] font-mono text-slate-400">0.2 - 0.9</span>
           </div>
+        </div>
+
+        {/* COORDENADAS GEOGRÁFICAS DINÁMICAS (Elemento 5 - Abajo Centro/Pantallas medianas+) */}
+        <div className="hidden min-[640px]:flex absolute bottom-2 left-1/2 -translate-x-1/2 z-10 items-center gap-2 bg-slate-950/90 backdrop-blur-md border border-slate-800/80 px-2.5 py-1 rounded-xl text-[10px] font-mono text-slate-400 shadow-lg">
+          <span className="text-emerald-400 font-bold">LAT:</span> {activeLote.lat}
+          <span className="text-slate-600">•</span>
+          <span className="text-emerald-400 font-bold">LNG:</span> {activeLote.lng}
         </div>
 
         {/* METADATOS DEL SATÉLITE (Abajo Derecha) */}
