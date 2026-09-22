@@ -64,7 +64,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
   };
 
   return (
-    <div className="col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden relative flex flex-col h-full min-h-105 shadow-2xl">
+    <div className="col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden relative flex flex-col h-full min-h-[460px] shadow-2xl">
       
       {/* Estilo local para forzar la desaparición de los botones de zoom de Leaflet si venían por defecto */}
       <style jsx global>{`
@@ -73,18 +73,18 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
         }
       `}</style>
 
-      {/* BARRA SUPERIOR DE CONTROLES */}
-      <div className="absolute top-3 left-3 right-3 z-40 flex items-center justify-between gap-2 pointer-events-none">
+      {/* BARRA SUPERIOR DE CONTROLES ADAPTATIVA (MOBILE-FRIENDLY) */}
+      <div className="absolute top-3 left-3 right-3 z-40 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pointer-events-none">
         
         {/* CUARTEL DE LA FINCA ACTIVO + CAPA GIS */}
-        <div className="flex items-center gap-2 pointer-events-auto">
-          <div className="flex items-center gap-1.5 bg-slate-950/90 backdrop-blur-md border border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-lg">
+        <div className="flex flex-wrap items-center gap-2 pointer-events-auto">
+          <div className="flex items-center gap-1.5 bg-slate-950/95 backdrop-blur-md border border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-lg">
             <span className="relative flex h-2 w-2 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
             <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span className="text-xs text-slate-300">
+            <span className="text-xs text-slate-300 truncate max-w-[200px] sm:max-w-none">
               <strong className="text-white font-semibold">{activeCuartel.name}</strong>{' '}
               <span className="text-emerald-400 font-mono">({activeCuartel.hectareas} Ha)</span>
             </span>
@@ -93,7 +93,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
           {/* Selector de Capas */}
           <button
             onClick={handleCycleLayer}
-            className="bg-slate-950/90 backdrop-blur-md border border-emerald-500/45 hover:border-emerald-500 text-xs px-3 py-1.5 rounded-xl text-emerald-400 font-medium flex items-center gap-1.5 shadow-lg transition cursor-pointer"
+            className="bg-slate-950/95 backdrop-blur-md border border-emerald-500/45 hover:border-emerald-500 text-xs px-3 py-1.5 rounded-xl text-emerald-400 font-medium flex items-center gap-1.5 shadow-lg transition cursor-pointer"
             title="Cambiar capa de análisis agronómico"
           >
             <Layers className="w-3.5 h-3.5" />
@@ -102,8 +102,8 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
         </div>
 
         {/* SELECTOR VISTA VEC / SAT */}
-        <div className="flex items-center gap-1 pointer-events-auto">
-          <div className="flex bg-slate-950/90 backdrop-blur-md border border-slate-800 rounded-xl p-1 shadow-lg text-xs">
+        <div className="flex items-center justify-end gap-1 pointer-events-auto">
+          <div className="flex bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-xl p-1 shadow-lg text-xs">
             <button
               onClick={() => {
                 setMapView('vectorial');
@@ -135,14 +135,14 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
 
       </div>
 
-      {/* SELECTOR RÁPIDO DE CUARTELES DE LA FINCA */}
-      <div className="absolute top-16 left-3 z-40 flex items-center gap-1.5 pointer-events-auto">
+      {/* SELECTOR RÁPIDO DE CUARTELES DE LA FINCA (POSICIONADO DEBAJO EN MÓVIL PARA EVITAR CHOQUES) */}
+      <div className="absolute top-24 sm:top-16 left-3 z-40 flex items-center gap-1.5 pointer-events-auto">
         <button
           onClick={() => onSelectLote('ARG-SJ-2026')}
           className={`px-2.5 py-1 rounded-lg text-xs font-medium shadow-md transition cursor-pointer ${
             selectedLoteId === 'ARG-SJ-2026'
               ? 'bg-emerald-500 text-slate-950 font-bold'
-              : 'bg-slate-950/80 text-slate-300 border border-slate-800 hover:bg-slate-800'
+              : 'bg-slate-950/90 text-slate-300 border border-slate-800 hover:bg-slate-800'
           }`}
         >
           Cuartel Principal
@@ -152,7 +152,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
           className={`px-2.5 py-1 rounded-lg text-xs font-medium shadow-md transition cursor-pointer ${
             selectedLoteId === 'ARG-SJ-2027'
               ? 'bg-amber-500 text-slate-950 font-bold'
-              : 'bg-slate-950/80 text-slate-300 border border-slate-800 hover:bg-slate-800'
+              : 'bg-slate-950/90 text-slate-300 border border-slate-800 hover:bg-slate-800'
           }`}
         >
           Cuartel Sur
@@ -160,7 +160,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
       </div>
 
       {/* CONTENEDOR PRINCIPAL CON LEAFLET REAL */}
-      <div className="flex-1 w-full relative z-10">
+      <div className="flex-1 w-full relative z-10 pt-10 sm:pt-0">
         <ExpoMapCore
           lat={activeCuartel.lat}
           lng={activeCuartel.lng}
@@ -170,15 +170,15 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
       </div>
 
       {/* BARRA INFERIOR DE LEYENDA Y METADATOS */}
-      <div className="absolute bottom-3 left-3 right-3 z-40 flex items-center justify-between pointer-events-none text-xs">
+      <div className="absolute bottom-3 left-3 right-3 z-40 flex flex-col sm:flex-row items-center justify-between gap-2 pointer-events-none text-xs">
         
         {/* LEYENDA */}
-        <div className="pointer-events-auto bg-slate-950/90 backdrop-blur-md border border-slate-800 rounded-xl p-2.5 shadow-xl space-y-1">
+        <div className="pointer-events-auto bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-xl p-2.5 shadow-xl space-y-1 w-full sm:w-auto">
           <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
             {getLayerTitle()}
           </p>
           <div className="flex items-center gap-2">
-            <div className={`h-2 w-20 sm:w-28 rounded-full ${getLayerGradientClass()}`}></div>
+            <div className={`h-2 w-24 sm:w-28 rounded-full ${getLayerGradientClass()}`}></div>
             <span className="text-[10px] font-mono text-slate-300 font-bold">
               {getLayerScaleRange()}
             </span>
@@ -186,14 +186,14 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
         </div>
 
         {/* COORDENADAS */}
-        <div className="pointer-events-auto hidden sm:flex items-center gap-2 bg-slate-950/90 backdrop-blur-md border border-slate-800 px-3 py-1.5 rounded-xl font-mono text-slate-300 shadow-xl">
+        <div className="pointer-events-auto hidden sm:flex items-center gap-2 bg-slate-950/95 backdrop-blur-md border border-slate-800 px-3 py-1.5 rounded-xl font-mono text-slate-300 shadow-xl">
           <span className="text-emerald-400 font-bold">LAT:</span> {activeCuartel.lat}
           <span className="text-slate-600">•</span>
           <span className="text-emerald-400 font-bold">LNG:</span> {activeCuartel.lng}
         </div>
 
         {/* METADATOS ESRI */}
-        <div className="pointer-events-auto hidden md:block bg-slate-950/90 backdrop-blur-md border border-slate-800 rounded-xl p-2.5 text-right space-y-0.5 shadow-xl">
+        <div className="pointer-events-auto hidden md:block bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-xl p-2.5 text-right space-y-0.5 shadow-xl">
           <p className="text-xs text-slate-300 font-mono">
             Monitoreo Finca: <span className="text-emerald-400 font-bold">Esri World Imagery</span>
           </p>
