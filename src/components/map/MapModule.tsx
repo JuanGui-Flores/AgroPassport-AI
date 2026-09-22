@@ -20,8 +20,8 @@ type LayerType = 'ndvi' | 'satelital' | 'termico';
 
 // Coordenadas actualizadas a zonas rurales/agrícolas reales (fincas con verde y cultivo en San Juan)
 const FINCA_CUARTELES: Record<string, { name: string; shortName: string; hectareas: number; score: number; lat: number; lng: number }> = {
-  'ARG-SJ-2026': { name: 'Cuartel Principal (Don Juan)', shortName: 'Cuartel Principal (Don Juan)', hectareas: 145, score: 92, lat: -31.5125, lng: -68.4682 },
-  'ARG-SJ-2027': { name: 'Cuartel Sur (Parcela 12)', shortName: 'Cuartel Sur (Parcela 12)', hectareas: 88, score: 74, lat: -31.5890, lng: -68.5920 },
+  'ARG-SJ-2026': { name: 'Cuartel Principal (Don Juan)', shortName: 'C. Principal', hectareas: 145, score: 92, lat: -31.5125, lng: -68.4682 },
+  'ARG-SJ-2027': { name: 'Cuartel Sur (Parcela 12)', shortName: 'C. Sur', hectareas: 88, score: 74, lat: -31.5890, lng: -68.5920 },
 };
 
 export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLote }) => {
@@ -64,7 +64,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
   };
 
   return (
-    <div className="col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden relative flex flex-col h-full min-h-125 shadow-2xl">
+    <div className="col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden relative flex flex-col h-full min-h-130 shadow-2xl">
       
       {/* Estilo local para forzar la desaparición de los botones de zoom de Leaflet */}
       <style jsx global>{`
@@ -73,7 +73,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
         }
       `}</style>
 
-      {/* BARRA SUPERIOR UNIFICADA (RESPONSIVA: En PC va en una sola línea, en móvil se acomoda) */}
+      {/* BARRA SUPERIOR ADAPTATIVA: Fila 1 en móvil / Línea completa en PC */}
       <div className="absolute top-3 left-3 right-3 z-40 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2 pointer-events-none">
         
         {/* GRUPO IZQUIERDA: Cuartel Activo + Botones de selección rápida */}
@@ -119,7 +119,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
         </div>
 
         {/* GRUPO DERECHA: Selector de Capas + Vista Vec/Sat */}
-        <div className="flex items-center justify-between md:justify-end gap-2 pointer-events-auto">
+        <div className="flex items-center justify-between md:justify-end gap-2 pointer-events-auto mt-1 md:mt-0">
           
           {/* Botón de Capa */}
           <button
@@ -165,8 +165,8 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
 
       </div>
 
-      {/* CONTENEDOR PRINCIPAL CON LEAFLET REAL */}
-      <div className="flex-1 w-full relative z-10 pt-16 md:pt-0">
+      {/* CONTENEDOR PRINCIPAL CON LEAFLET REAL (Con espacio superior dinámico para celular y PC) */}
+      <div className="flex-1 w-full relative z-10 pt-20 md:pt-0">
         <ExpoMapCore
           lat={activeCuartel.lat}
           lng={activeCuartel.lng}
@@ -184,7 +184,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
             {getLayerTitle()}
           </p>
           <div className="flex items-center gap-2">
-            <div className={`h-2 w-24 sm:w-28 rounded-full ${getLayerGradientClass()}`}></div>
+            <div className={`h-2 w-20 sm:w-28 rounded-full ${getLayerGradientClass()}`}></div>
             <span className="text-[10px] font-mono text-slate-300 font-bold">
               {getLayerScaleRange()}
             </span>
