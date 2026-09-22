@@ -18,10 +18,10 @@ interface MapModuleProps {
 
 type LayerType = 'ndvi' | 'satelital' | 'termico';
 
-// Actualizado para reflejar cuarteles o sectores dentro de una Finca Agrícola
+// Definición de los cuarteles de la Finca con coordenadas reales separadas para que notes el cambio de posición
 const FINCA_CUARTELES: Record<string, { name: string; hectareas: number; score: number; lat: number; lng: number }> = {
   'ARG-SJ-2026': { name: 'Cuartel Principal (Don Juan)', hectareas: 145, score: 92, lat: -31.5373, lng: -68.5364 },
-  'ARG-SJ-2027': { name: 'Cuartel Sur (Parcela 12)', hectareas: 88, score: 74, lat: -31.5421, lng: -68.5298 },
+  'ARG-SJ-2027': { name: 'Cuartel Sur (Parcela 12)', hectareas: 88, score: 74, lat: -31.5550, lng: -68.5500 },
 };
 
 export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLote }) => {
@@ -128,7 +128,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
 
       </div>
 
-      {/* SELECTOR RÁPIDO DE CUARTELES DE LA FINCA */}
+      {/* SELECTOR RÁPIDO DE CUARTELES DE LA FINCA (ACTUALIZADO CON IDs CORRECTOS) */}
       <div className="absolute top-16 left-3 z-40 flex items-center gap-1.5 pointer-events-auto">
         <button
           onClick={() => onSelectLote('ARG-SJ-2026')}
