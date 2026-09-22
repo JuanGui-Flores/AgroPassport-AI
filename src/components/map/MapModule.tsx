@@ -8,7 +8,7 @@ import dynamic from 'next/dynamic';
 // Importación dinámica obligatoria para Leaflet (evita errores de SSR en Next.js)
 const ExpoMapCore = dynamic(
   () => import('@/app/expo/ExpoMapCore').then((mod) => mod.ExpoMapCore),
-  { ssr: false, loading: () => <div className="w-full h-full bg-slate-950 flex items-center justify-center text-xs font-mono text-emerald-500 animate-pulse">Cargando mapa satelital GIS...</div> }
+  { ssr: false, loading: () => <div className="w-full h-full bg-slate-950 flex items-center justify-center text-xs font-mono text-emerald-500 animate-pulse">Cargando mapa de finca GIS...</div> }
 );
 
 interface MapModuleProps {
@@ -18,16 +18,17 @@ interface MapModuleProps {
 
 type LayerType = 'ndvi' | 'satelital' | 'termico';
 
-const LOTE_DETAILS: Record<string, { name: string; hectareas: number; score: number; lat: number; lng: number }> = {
-  'ARG-SJ-2026': { name: 'Lote Don Juan', hectareas: 145, score: 92, lat: -31.5373, lng: -68.5364 },
-  'ARG-SJ-2027': { name: 'Parcela 12', hectareas: 88, score: 74, lat: -31.5421, lng: -68.5298 },
+// Actualizado para reflejar cuarteles o sectores dentro de una Finca Agrícola
+const FINCA_CUARTELES: Record<string, { name: string; hectareas: number; score: number; lat: number; lng: number }> = {
+  'ARG-SJ-2026': { name: 'Cuartel Principal (Don Juan)', hectareas: 145, score: 92, lat: -31.5373, lng: -68.5364 },
+  'ARG-SJ-2027': { name: 'Cuartel Sur (Parcela 12)', hectareas: 88, score: 74, lat: -31.5421, lng: -68.5298 },
 };
 
 export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLote }) => {
   const [activeLayer, setActiveLayer] = useState<LayerType>('ndvi');
   const [mapView, setMapView] = useState<'vectorial' | 'satelital'>('satelital');
 
-  const activeLote = LOTE_DETAILS[selectedLoteId] || LOTE_DETAILS['ARG-SJ-2026'];
+  const activeCuartel = FINCA_CUARTELES[selectedLoteId] || FINCA_CUARTELES['ARG-SJ-2026'];
 
   // Funciones limpias para evitar ternarios anidados (SonarQube S3358)
   const handleCycleLayer = () => {
@@ -41,9 +42,9 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
   };
 
   const getLayerTitle = () => {
-    if (activeLayer === 'ndvi') return 'Vigor (NDVI)';
-    if (activeLayer === 'termico') return 'Estrés Térmico';
-    return 'Imagen Satelital';
+    if (activeLayer === 'ndvi') return 'Vigor Vegetativo (NDVI)';
+    if (activeLayer === 'termico') return 'Estrés Hídrico/Térmico';
+    return 'Imagen Satelital Finca';
   };
 
   const getLayerScaleRange = () => {
@@ -68,7 +69,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
       {/* BARRA SUPERIOR DE CONTROLES */}
       <div className="absolute top-3 left-3 right-3 z-40 flex items-center justify-between gap-2 pointer-events-none">
         
-        {/* LOTE ACTIVO + CAPA GIS */}
+        {/* FINCA / CUARTEL ACTIVO + CAPA GIS */}
         <div className="flex items-center gap-2 pointer-events-auto">
           <div className="flex items-center gap-1.5 bg-slate-950/90 backdrop-blur-md border border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-lg">
             <span className="relative flex h-2 w-2 shrink-0">
@@ -77,8 +78,8 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
             </span>
             <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
             <span className="text-xs text-slate-300">
-              <strong className="text-white font-semibold">{activeLote.name}</strong>{' '}
-              <span className="text-emerald-400 font-mono">({activeLote.hectareas} Ha)</span>
+              <strong className="text-white font-semibold">{activeCuartel.name}</strong>{' '}
+              <span className="text-emerald-400 font-mono">({activeCuartel.hectareas} Ha)</span>
             </span>
           </div>
 
@@ -86,7 +87,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
           <button
             onClick={handleCycleLayer}
             className="bg-slate-950/90 backdrop-blur-md border border-emerald-500/45 hover:border-emerald-500 text-xs px-3 py-1.5 rounded-xl text-emerald-400 font-medium flex items-center gap-1.5 shadow-lg transition cursor-pointer"
-            title="Cambiar capa de análisis"
+            title="Cambiar capa de análisis agronómico"
           >
             <Layers className="w-3.5 h-3.5" />
             <span className="capitalize">Capa: {activeLayer}</span>
@@ -127,7 +128,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
 
       </div>
 
-      {/* SELECTOR RÁPIDO DE LOTES */}
+      {/* SELECTOR RÁPIDO DE CUARTELES DE LA FINCA */}
       <div className="absolute top-16 left-3 z-40 flex items-center gap-1.5 pointer-events-auto">
         <button
           onClick={() => onSelectLote('ARG-SJ-2026')}
@@ -137,7 +138,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
               : 'bg-slate-950/80 text-slate-300 border border-slate-800 hover:bg-slate-800'
           }`}
         >
-          Lote Don Juan
+          Cuartel Principal
         </button>
         <button
           onClick={() => onSelectLote('ARG-SJ-2027')}
@@ -147,17 +148,17 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
               : 'bg-slate-950/80 text-slate-300 border border-slate-800 hover:bg-slate-800'
           }`}
         >
-          Parcela 12
+          Cuartel Sur
         </button>
       </div>
 
       {/* CONTENEDOR PRINCIPAL CON LEAFLET REAL */}
       <div className="flex-1 w-full relative z-10">
         <ExpoMapCore
-          lat={activeLote.lat}
-          lng={activeLote.lng}
+          lat={activeCuartel.lat}
+          lng={activeCuartel.lng}
           activeLayer={activeLayer}
-          loteNombre={activeLote.name}
+          loteNombre={activeCuartel.name}
         />
       </div>
 
@@ -179,15 +180,15 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
 
         {/* COORDENADAS */}
         <div className="pointer-events-auto hidden sm:flex items-center gap-2 bg-slate-950/90 backdrop-blur-md border border-slate-800 px-3 py-1.5 rounded-xl font-mono text-slate-300 shadow-xl">
-          <span className="text-emerald-400 font-bold">LAT:</span> {activeLote.lat}
+          <span className="text-emerald-400 font-bold">LAT:</span> {activeCuartel.lat}
           <span className="text-slate-600">•</span>
-          <span className="text-emerald-400 font-bold">LNG:</span> {activeLote.lng}
+          <span className="text-emerald-400 font-bold">LNG:</span> {activeCuartel.lng}
         </div>
 
         {/* METADATOS ESRI */}
         <div className="pointer-events-auto hidden md:block bg-slate-950/90 backdrop-blur-md border border-slate-800 rounded-xl p-2.5 text-right space-y-0.5 shadow-xl">
           <p className="text-xs text-slate-300 font-mono">
-            Motor: <span className="text-emerald-400 font-bold">Esri World Imagery</span>
+            Monitoreo Finca: <span className="text-emerald-400 font-bold">Esri World Imagery</span>
           </p>
           <div className="text-slate-400 flex items-center justify-end gap-1.5 text-[10px] font-mono">
             <span className="text-emerald-400 font-bold uppercase">{activeLayer}</span>
