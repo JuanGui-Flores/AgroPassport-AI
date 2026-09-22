@@ -26,7 +26,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
   const handleZoomOut = () => setZoomLevel((prev) => Math.max(prev - 0.15, 0.85));
 
   return (
-    <div className="col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden relative flex flex-col h-full min-h-80 sm:min-h-112.5 shadow-2xl">
+    <div className="col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden relative flex flex-col h-full min-h-105 shadow-2xl">
       
       {/* BARRA SUPERIOR DE CONTROLES */}
       <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between gap-2 pointer-events-none">
@@ -101,36 +101,37 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
       </div>
 
       {/* CONTENEDOR DEL MAPA */}
-      <div className="flex-1 bg-slate-950 relative flex items-center justify-center overflow-hidden min-h-75">
+      <div className="flex-1 w-full relative bg-slate-950 flex items-center justify-center overflow-hidden min-h-95">
         
         {/* FONDO VECTORIAL */}
-        <div className={`absolute inset-0 bg-slate-950 transition-opacity duration-300 ${mapView === 'vectorial' ? 'opacity-100 z-1' : 'opacity-0 pointer-events-none'}`}>
+        <div className={`absolute inset-0 bg-slate-950 transition-opacity duration-300 ${mapView === 'vectorial' ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none'}`}>
           <div className="absolute inset-0 bg-[radial-gradient(#334155_1.5px,transparent_1.5px)] bg-size-[24px_24px] opacity-60"></div>
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-size-[96px_96px] opacity-30"></div>
         </div>
 
-        {/* FONDO SATELITAL CON NEXT/IMAGE OPTIMIZADO */}
-        <div className={`absolute inset-0 bg-slate-950 transition-opacity duration-300 ${mapView === 'satelital' ? 'opacity-100 z-1' : 'opacity-0 pointer-events-none'}`}>
+        {/* FONDO SATELITAL CON RESPALDO VISUAL */}
+        <div className={`absolute inset-0 bg-emerald-950/40 transition-opacity duration-300 ${mapView === 'satelital' ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none'}`}>
           <Image
             src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1600&auto=format&fit=crop"
             alt="Mapa Satelital Agrícola"
             fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover opacity-70 contrast-125 saturate-75 filter"
+            sizes="100vw"
+            priority
+            className="object-cover opacity-75 contrast-110 saturate-100"
           />
-          <div className="absolute inset-0 bg-slate-950/40 mix-blend-multiply"></div>
-          <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-transparent to-slate-950/50"></div>
+          <div className="absolute inset-0 bg-slate-950/30 mix-blend-multiply pointer-events-none"></div>
+          <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-transparent to-slate-950/40 pointer-events-none"></div>
         </div>
 
         {/* LIENZO DE LOTES INTERACTIVOS */}
         <div
-          className="w-full h-full relative z-20 flex items-center justify-center transition-transform duration-300 ease-out"
+          className="w-full h-full absolute inset-0 z-20 flex items-center justify-center transition-transform duration-300 ease-out pointer-events-none"
           style={{ transform: `scale(${zoomLevel})` }}
         >
           {/* Lote Don Juan */}
           <button
             onClick={() => onSelectLote('ARG-SJ-2026')}
-            className={`absolute top-1/3 left-1/4 w-44 sm:w-60 h-28 sm:h-40 border-2 rounded-2xl flex flex-col items-center justify-center backdrop-blur-xs cursor-pointer transition shadow-2xl ${
+            className={`absolute top-1/3 left-1/4 w-44 sm:w-60 h-28 sm:h-40 border-2 rounded-2xl flex flex-col items-center justify-center backdrop-blur-xs cursor-pointer transition shadow-2xl pointer-events-auto ${
               selectedLoteId === 'ARG-SJ-2026'
                 ? 'bg-emerald-500/30 border-emerald-400 shadow-emerald-500/40 scale-105 z-30 ring-2 ring-emerald-400/50'
                 : 'bg-emerald-500/20 border-emerald-500/70 hover:bg-emerald-500/30 shadow-black/60'
@@ -144,7 +145,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
           {/* Parcela 12 */}
           <button
             onClick={() => onSelectLote('ARG-SJ-2027')}
-            className={`absolute bottom-1/4 right-1/4 w-36 sm:w-52 h-24 sm:h-36 border-2 rounded-xl flex flex-col items-center justify-center backdrop-blur-xs cursor-pointer transition shadow-2xl ${
+            className={`absolute bottom-1/4 right-1/4 w-36 sm:w-52 h-24 sm:h-36 border-2 rounded-xl flex flex-col items-center justify-center backdrop-blur-xs cursor-pointer transition shadow-2xl pointer-events-auto ${
               selectedLoteId === 'ARG-SJ-2027'
                 ? 'bg-amber-500/30 border-amber-400 shadow-amber-500/40 scale-105 z-30 ring-2 ring-amber-400/50'
                 : 'bg-amber-500/20 border-amber-500/70 hover:bg-amber-500/30 shadow-black/60'
