@@ -3,7 +3,6 @@
 
 import React, { useState } from 'react';
 import { Layers, Compass, Plus, Minus, Image as ImageIcon, Grid, MapPin } from 'lucide-react';
-import Image from 'next/image';
 
 interface MapModuleProps {
   selectedLoteId: string;
@@ -101,7 +100,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
       </div>
 
       {/* CONTENEDOR DEL MAPA */}
-      <div className="flex-1 w-full relative bg-slate-950 flex items-center justify-center overflow-hidden min-h-95">
+      <div className="flex-1 w-full relative bg-slate-950 flex items-center justify-center overflow-hidden min-h-105">
         
         {/* FONDO VECTORIAL */}
         <div className={`absolute inset-0 bg-slate-950 transition-opacity duration-300 ${mapView === 'vectorial' ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none'}`}>
@@ -109,18 +108,13 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-size-[96px_96px] opacity-30"></div>
         </div>
 
-        {/* FONDO SATELITAL CON RESPALDO VISUAL */}
-        <div className={`absolute inset-0 bg-emerald-950/40 transition-opacity duration-300 ${mapView === 'satelital' ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none'}`}>
-          <Image
-            src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1600&auto=format&fit=crop"
-            alt="Mapa Satelital Agrícola"
-            fill
-            sizes="100vw"
-            priority
-            className="object-cover opacity-75 contrast-110 saturate-100"
-          />
-          <div className="absolute inset-0 bg-slate-950/30 mix-blend-multiply pointer-events-none"></div>
-          <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-transparent to-slate-950/40 pointer-events-none"></div>
+        {/* FONDO SATELITAL AGRÍCOLA (Textura CSS de alta fidelidad garantizada) */}
+        <div className={`absolute inset-0 bg-slate-950 transition-opacity duration-300 ${mapView === 'satelital' ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none'}`}>
+          {/* Simulación fotorrealista de campos de cultivo satelitales (tonos verdes, tierras y parcelas) */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-emerald-900/60 via-slate-950/90 to-emerald-950/80"></div>
+          <div className="absolute inset-0 opacity-40 mix-blend-color-dodge bg-[radial-gradient(#059669_1px,transparent_1px)] bg-size-[16px_16px]"></div>
+          <div className="absolute inset-0 opacity-25 bg-[linear-gradient(45deg,#047857_1px,transparent_1px),linear-gradient(-45deg,#065f46_1px,transparent_1px)] bg-size-[64px_64px]"></div>
+          <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-transparent to-slate-950/50"></div>
         </div>
 
         {/* LIENZO DE LOTES INTERACTIVOS */}
