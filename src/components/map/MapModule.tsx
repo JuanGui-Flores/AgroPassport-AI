@@ -19,9 +19,9 @@ interface MapModuleProps {
 type LayerType = 'ndvi' | 'satelital' | 'termico';
 
 // Coordenadas actualizadas a zonas rurales/agrícolas reales (fincas con verde y cultivo en San Juan)
-const FINCA_CUARTELES: Record<string, { name: string; hectareas: number; score: number; lat: number; lng: number }> = {
-  'ARG-SJ-2026': { name: 'Cuartel Principal (Don Juan)', hectareas: 145, score: 92, lat: -31.5125, lng: -68.4682 }, // Zona rural este
-  'ARG-SJ-2027': { name: 'Cuartel Sur (Parcela 12)', hectareas: 88, score: 74, lat: -31.5890, lng: -68.5920 }, // Zona agrícola sur
+const FINCA_CUARTELES: Record<string, { name: string; shortName: string; hectareas: number; score: number; lat: number; lng: number }> = {
+  'ARG-SJ-2026': { name: 'Cuartel Principal (Don Juan)', shortName: 'C. Principal', hectareas: 145, score: 92, lat: -31.5125, lng: -68.4682 },
+  'ARG-SJ-2027': { name: 'Cuartel Sur (Parcela 12)', shortName: 'C. Sur', hectareas: 88, score: 74, lat: -31.5890, lng: -68.5920 },
 };
 
 export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLote }) => {
@@ -64,103 +64,104 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
   };
 
   return (
-    <div className="col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden relative flex flex-col h-full min-h-[460px] shadow-2xl">
+    <div className="col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden relative flex flex-col h-full min-h-120 shadow-2xl">
       
-      {/* Estilo local para forzar la desaparición de los botones de zoom de Leaflet si venían por defecto */}
+      {/* Estilo local para forzar la desaparición de los botones de zoom de Leaflet */}
       <style jsx global>{`
         .leaflet-control-zoom {
           display: none !important;
         }
       `}</style>
 
-      {/* BARRA SUPERIOR DE CONTROLES ADAPTATIVA (MOBILE-FRIENDLY) */}
-      <div className="absolute top-3 left-3 right-3 z-40 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pointer-events-none">
+      {/* BARRA SUPERIOR 1: CUARTEL ACTIVO Y CAPA (DISEÑO LIMPIO) */}
+      <div className="absolute top-3 left-3 right-3 z-40 flex items-center justify-between gap-2 pointer-events-none">
         
-        {/* CUARTEL DE LA FINCA ACTIVO + CAPA GIS */}
-        <div className="flex flex-wrap items-center gap-2 pointer-events-auto">
-          <div className="flex items-center gap-1.5 bg-slate-950/95 backdrop-blur-md border border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-lg">
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span className="text-xs text-slate-300 truncate max-w-[200px] sm:max-w-none">
-              <strong className="text-white font-semibold">{activeCuartel.name}</strong>{' '}
-              <span className="text-emerald-400 font-mono">({activeCuartel.hectareas} Ha)</span>
-            </span>
-          </div>
+        {/* Cuartel Activo */}
+        <div className="flex items-center gap-1.5 bg-slate-950/95 backdrop-blur-md border border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-lg pointer-events-auto max-w-[65%]">
+          <span className="relative flex h-2 w-2 shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <span className="text-xs text-slate-300 truncate">
+            <strong className="text-white font-semibold">{activeCuartel.shortName}</strong>{' '}
+            <span className="text-emerald-400 font-mono">({activeCuartel.hectareas} Ha)</span>
+          </span>
+        </div>
 
-          {/* Selector de Capas */}
+        {/* Botón de Capa */}
+        <button
+          onClick={handleCycleLayer}
+          className="bg-slate-950/95 backdrop-blur-md border border-emerald-500/45 hover:border-emerald-500 text-xs px-3 py-1.5 rounded-xl text-emerald-400 font-medium flex items-center gap-1.5 shadow-lg transition cursor-pointer pointer-events-auto shrink-0"
+          title="Cambiar capa de análisis agronómico"
+        >
+          <Layers className="w-3.5 h-3.5" />
+          <span className="capitalize">{activeLayer}</span>
+        </button>
+
+      </div>
+
+      {/* BARRA SUPERIOR 2: SELECTORES DE CUARTEL Y VISTA (UBICADOS DEBAJO SIN SOLAPARSE) */}
+      <div className="absolute top-14 left-3 right-3 z-40 flex items-center justify-between gap-2 pointer-events-none">
+        
+        {/* Selector rápido de Cuarteles */}
+        <div className="flex items-center gap-1.5 pointer-events-auto">
           <button
-            onClick={handleCycleLayer}
-            className="bg-slate-950/95 backdrop-blur-md border border-emerald-500/45 hover:border-emerald-500 text-xs px-3 py-1.5 rounded-xl text-emerald-400 font-medium flex items-center gap-1.5 shadow-lg transition cursor-pointer"
-            title="Cambiar capa de análisis agronómico"
+            onClick={() => onSelectLote('ARG-SJ-2026')}
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-medium shadow-md transition cursor-pointer ${
+              selectedLoteId === 'ARG-SJ-2026'
+                ? 'bg-emerald-500 text-slate-950 font-bold'
+                : 'bg-slate-950/90 text-slate-300 border border-slate-800 hover:bg-slate-800'
+            }`}
           >
-            <Layers className="w-3.5 h-3.5" />
-            <span className="capitalize">Capa: {activeLayer}</span>
+            Principal
+          </button>
+          <button
+            onClick={() => onSelectLote('ARG-SJ-2027')}
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-medium shadow-md transition cursor-pointer ${
+              selectedLoteId === 'ARG-SJ-2027'
+                ? 'bg-amber-500 text-slate-950 font-bold'
+                : 'bg-slate-950/90 text-slate-300 border border-slate-800 hover:bg-slate-800'
+            }`}
+          >
+            Sur
           </button>
         </div>
 
-        {/* SELECTOR VISTA VEC / SAT */}
-        <div className="flex items-center justify-end gap-1 pointer-events-auto">
-          <div className="flex bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-xl p-1 shadow-lg text-xs">
-            <button
-              onClick={() => {
-                setMapView('vectorial');
-                setActiveLayer('satelital');
-              }}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition cursor-pointer ${
-                mapView === 'vectorial'
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Grid className="w-3.5 h-3.5" /> <span>Vectorial</span>
-            </button>
-            <button
-              onClick={() => {
-                setMapView('satelital');
-                setActiveLayer('ndvi');
-              }}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition cursor-pointer ${
-                mapView === 'satelital'
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Compass className="w-3.5 h-3.5" /> <span>Satelital</span>
-            </button>
-          </div>
+        {/* Selector Vectorial / Satelital */}
+        <div className="flex bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-lg p-0.5 shadow-lg text-[11px] pointer-events-auto">
+          <button
+            onClick={() => {
+              setMapView('vectorial');
+              setActiveLayer('satelital');
+            }}
+            className={`px-2 py-1 rounded-md transition cursor-pointer flex items-center gap-1 ${
+              mapView === 'vectorial'
+                ? 'bg-emerald-500/20 text-emerald-400 font-medium'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Grid className="w-3 h-3" /> <span>Vec</span>
+          </button>
+          <button
+            onClick={() => {
+              setMapView('satelital');
+              setActiveLayer('ndvi');
+            }}
+            className={`px-2 py-1 rounded-md transition cursor-pointer flex items-center gap-1 ${
+              mapView === 'satelital'
+                ? 'bg-emerald-500/20 text-emerald-400 font-medium'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Compass className="w-3 h-3" /> <span>Sat</span>
+          </button>
         </div>
 
       </div>
 
-      {/* SELECTOR RÁPIDO DE CUARTELES DE LA FINCA (POSICIONADO DEBAJO EN MÓVIL PARA EVITAR CHOQUES) */}
-      <div className="absolute top-24 sm:top-16 left-3 z-40 flex items-center gap-1.5 pointer-events-auto">
-        <button
-          onClick={() => onSelectLote('ARG-SJ-2026')}
-          className={`px-2.5 py-1 rounded-lg text-xs font-medium shadow-md transition cursor-pointer ${
-            selectedLoteId === 'ARG-SJ-2026'
-              ? 'bg-emerald-500 text-slate-950 font-bold'
-              : 'bg-slate-950/90 text-slate-300 border border-slate-800 hover:bg-slate-800'
-          }`}
-        >
-          Cuartel Principal
-        </button>
-        <button
-          onClick={() => onSelectLote('ARG-SJ-2027')}
-          className={`px-2.5 py-1 rounded-lg text-xs font-medium shadow-md transition cursor-pointer ${
-            selectedLoteId === 'ARG-SJ-2027'
-              ? 'bg-amber-500 text-slate-950 font-bold'
-              : 'bg-slate-950/90 text-slate-300 border border-slate-800 hover:bg-slate-800'
-          }`}
-        >
-          Cuartel Sur
-        </button>
-      </div>
-
-      {/* CONTENEDOR PRINCIPAL CON LEAFLET REAL */}
-      <div className="flex-1 w-full relative z-10 pt-10 sm:pt-0">
+      {/* CONTENEDOR PRINCIPAL CON LEAFLET REAL (Con margen superior para que el mapa respire) */}
+      <div className="flex-1 w-full relative z-10 pt-24 sm:pt-14">
         <ExpoMapCore
           lat={activeCuartel.lat}
           lng={activeCuartel.lng}
@@ -170,39 +171,26 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
       </div>
 
       {/* BARRA INFERIOR DE LEYENDA Y METADATOS */}
-      <div className="absolute bottom-3 left-3 right-3 z-40 flex flex-col sm:flex-row items-center justify-between gap-2 pointer-events-none text-xs">
+      <div className="absolute bottom-3 left-3 right-3 z-40 flex items-center justify-between pointer-events-none text-xs">
         
         {/* LEYENDA */}
-        <div className="pointer-events-auto bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-xl p-2.5 shadow-xl space-y-1 w-full sm:w-auto">
-          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+        <div className="pointer-events-auto bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-xl p-2 shadow-xl space-y-0.5">
+          <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">
             {getLayerTitle()}
           </p>
           <div className="flex items-center gap-2">
-            <div className={`h-2 w-24 sm:w-28 rounded-full ${getLayerGradientClass()}`}></div>
-            <span className="text-[10px] font-mono text-slate-300 font-bold">
+            <div className={`h-2 w-20 rounded-full ${getLayerGradientClass()}`}></div>
+            <span className="text-[9px] font-mono text-slate-300 font-bold">
               {getLayerScaleRange()}
             </span>
           </div>
         </div>
 
-        {/* COORDENADAS */}
-        <div className="pointer-events-auto hidden sm:flex items-center gap-2 bg-slate-950/95 backdrop-blur-md border border-slate-800 px-3 py-1.5 rounded-xl font-mono text-slate-300 shadow-xl">
-          <span className="text-emerald-400 font-bold">LAT:</span> {activeCuartel.lat}
-          <span className="text-slate-600">•</span>
-          <span className="text-emerald-400 font-bold">LNG:</span> {activeCuartel.lng}
-        </div>
-
-        {/* METADATOS ESRI */}
-        <div className="pointer-events-auto hidden md:block bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-xl p-2.5 text-right space-y-0.5 shadow-xl">
-          <p className="text-xs text-slate-300 font-mono">
-            Monitoreo Finca: <span className="text-emerald-400 font-bold">Esri World Imagery</span>
+        {/* METADATOS ESRI (Oculto en móvil muy chico para limpieza) */}
+        <div className="pointer-events-auto hidden sm:block bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-xl p-2 text-right shadow-xl">
+          <p className="text-[10px] text-slate-300 font-mono">
+            Esri World Imagery • <span className="text-emerald-400 font-bold uppercase">{activeLayer}</span>
           </p>
-          <div className="text-slate-400 flex items-center justify-end gap-1.5 text-[10px] font-mono">
-            <span className="text-emerald-400 font-bold uppercase">{activeLayer}</span>
-            <span>•</span>
-            <Compass className="w-3.5 h-3.5 text-emerald-500 inline" />
-            <span>Leaflet GIS</span>
-          </div>
         </div>
 
       </div>
