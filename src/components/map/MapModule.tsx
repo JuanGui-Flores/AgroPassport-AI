@@ -18,7 +18,7 @@ interface MapModuleProps {
 
 type LayerType = 'ndvi' | 'satelital' | 'termico';
 
-// Definición de los cuarteles de la Finca con coordenadas reales separadas para que notes el cambio de posición
+// Definición de los cuarteles que componen la Finca Agrícola global
 const FINCA_CUARTELES: Record<string, { name: string; hectareas: number; score: number; lat: number; lng: number }> = {
   'ARG-SJ-2026': { name: 'Cuartel Principal (Don Juan)', hectareas: 145, score: 92, lat: -31.5373, lng: -68.5364 },
   'ARG-SJ-2027': { name: 'Cuartel Sur (Parcela 12)', hectareas: 88, score: 74, lat: -31.5550, lng: -68.5500 },
@@ -69,7 +69,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
       {/* BARRA SUPERIOR DE CONTROLES */}
       <div className="absolute top-3 left-3 right-3 z-40 flex items-center justify-between gap-2 pointer-events-none">
         
-        {/* FINCA / CUARTEL ACTIVO + CAPA GIS */}
+        {/* CUARTEL DE LA FINCA ACTIVO + CAPA GIS */}
         <div className="flex items-center gap-2 pointer-events-auto">
           <div className="flex items-center gap-1.5 bg-slate-950/90 backdrop-blur-md border border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-lg">
             <span className="relative flex h-2 w-2 shrink-0">
@@ -128,7 +128,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
 
       </div>
 
-      {/* SELECTOR RÁPIDO DE CUARTELES DE LA FINCA (ACTUALIZADO CON IDs CORRECTOS) */}
+      {/* SELECTOR RÁPIDO DE CUARTELES DE LA FINCA */}
       <div className="absolute top-16 left-3 z-40 flex items-center gap-1.5 pointer-events-auto">
         <button
           onClick={() => onSelectLote('ARG-SJ-2026')}
@@ -152,7 +152,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
         </button>
       </div>
 
-      {/* CONTENEDOR PRINCIPAL CON LEAFLET REAL */}
+      {/* CONTENEDOR PRINCIPAL CON LEAFLET REAL (Sin tocar ExpoMapCore) */}
       <div className="flex-1 w-full relative z-10">
         <ExpoMapCore
           lat={activeCuartel.lat}
