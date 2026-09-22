@@ -18,10 +18,10 @@ interface MapModuleProps {
 
 type LayerType = 'ndvi' | 'satelital' | 'termico';
 
-// Definición de los cuarteles que componen la Finca Agrícola global
+// Coordenadas actualizadas a zonas rurales/agrícolas reales (fincas con verde y cultivo en San Juan)
 const FINCA_CUARTELES: Record<string, { name: string; hectareas: number; score: number; lat: number; lng: number }> = {
-  'ARG-SJ-2026': { name: 'Cuartel Principal (Don Juan)', hectareas: 145, score: 92, lat: -31.5373, lng: -68.5364 },
-  'ARG-SJ-2027': { name: 'Cuartel Sur (Parcela 12)', hectareas: 88, score: 74, lat: -31.5550, lng: -68.5500 },
+  'ARG-SJ-2026': { name: 'Cuartel Principal (Don Juan)', hectareas: 145, score: 92, lat: -31.5125, lng: -68.4682 }, // Zona rural este
+  'ARG-SJ-2027': { name: 'Cuartel Sur (Parcela 12)', hectareas: 88, score: 74, lat: -31.5890, lng: -68.5920 }, // Zona agrícola sur
 };
 
 export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLote }) => {
@@ -66,6 +66,13 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
   return (
     <div className="col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden relative flex flex-col h-full min-h-105 shadow-2xl">
       
+      {/* Estilo local para forzar la desaparición de los botones de zoom de Leaflet si venían por defecto */}
+      <style jsx global>{`
+        .leaflet-control-zoom {
+          display: none !important;
+        }
+      `}</style>
+
       {/* BARRA SUPERIOR DE CONTROLES */}
       <div className="absolute top-3 left-3 right-3 z-40 flex items-center justify-between gap-2 pointer-events-none">
         
@@ -152,7 +159,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
         </button>
       </div>
 
-      {/* CONTENEDOR PRINCIPAL CON LEAFLET REAL (Sin tocar ExpoMapCore) */}
+      {/* CONTENEDOR PRINCIPAL CON LEAFLET REAL */}
       <div className="flex-1 w-full relative z-10">
         <ExpoMapCore
           lat={activeCuartel.lat}
