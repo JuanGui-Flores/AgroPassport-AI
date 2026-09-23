@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Calculator, TrendingDown, CheckCircle } from 'lucide-react';
+import { Calculator, TrendingDown, CheckCircle, Loader2 } from 'lucide-react';
 import { EntityOption } from '@/app/data/entities';
+import { toast } from 'sonner';
 
 interface CreditSimulatorProps {
   score: number;
@@ -17,6 +18,8 @@ export const CreditSimulator: React.FC<CreditSimulatorProps> = ({
 }) => {
   const [monto, setMonto] = useState<number>(120000);
   const [plazoMeses, setPlazoMeses] = useState<number>(12);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isRequested, setIsRequested] = useState<boolean>(false);
 
   const entityName = entity?.name || 'Banco San Juan (BSJ)';
   const isBank = entity?.type !== 'insurance';
@@ -40,6 +43,24 @@ export const CreditSimulator: React.FC<CreditSimulatorProps> = ({
     (Math.pow(1 + tasaMensual, plazoMeses) - 1);
 
   const totalIntereses = cuotaEstimada * plazoMeses - monto;
+
+  const handleSolicitarPreAprobacion = () => {
+    if (isRequested || isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    // Simulación fluida de respuesta del banco / aseguradora (1.2 segundos)
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsRequested(true);
+
+      toast.success(isBank ? 'Solicitud Enviada con Éxito' : 'Cotización Generada', {
+        description: `Simulación confirmada con ${entityName}: USD ${monto.toLocaleString()} a ${plazoMeses} meses.`,
+        icon: React.createElement(CheckCircle, { className: 'w-5 h-5 text-emerald-400' }),
+        duration: 5000,
+      });
+    }, 1200);
+  };
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
@@ -132,13 +153,28 @@ export const CreditSimulator: React.FC<CreditSimulatorProps> = ({
           </div>
 
           <button
-            onClick={() =>
-              alert(`Simulación confirmada con ${entityName}: USD ${monto} a ${plazoMeses} meses.`)
-            }
-            className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5"
+            onClick={handleSolicitarPreAprobacion}
+            disabled={isSubmitting || isRequested}
+            className={`w-full font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer shadow-lg ${
+              isRequested
+                ? 'bg-slate-800 text-emerald-400 border border-emerald-500/40 cursor-default'
+                : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/10'
+            }`}
           >
-            <CheckCircle className="w-4 h-4" />
-            {isBank ? `Solicitar Pre-Aprobación (${entityName})` : `Cotizar Póliza (${entityName})`}
+            {isSubmitting ? (
+              <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+            ) : isRequested ? (
+              <CheckCircle className="w-4 h-4 text-emerald-400" />
+            ) : (
+              <CheckCircle className="w-4 h-4" />
+            )}
+            {isRequested
+              ? isBank
+                ? 'Pre-Aprobación Solicitada'
+                : 'Póliza Solicitada'
+              : isBank
+              ? `Solicitar Pre-Aprobación (${entityName})`
+              : `Cotizar Póliza (${entityName})`}
           </button>
         </div>
       </div>
