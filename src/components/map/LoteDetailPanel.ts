@@ -1,8 +1,9 @@
 // src/components/map/LoteDetailPanel.tsx
 'use client';
 
-import React from 'react';
-import { CheckCircle2, ShieldCheck, Download } from 'lucide-react';
+import React, { useState } from 'react';
+import { CheckCircle2, ShieldCheck, Download, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface LoteDetailPanelProps {
   selectedLoteId: string;
@@ -53,7 +54,29 @@ const LOTES_DATA: Record<string, LoteData> = {
 };
 
 export const LoteDetailPanel: React.FC<LoteDetailPanelProps> = ({ selectedLoteId, onExport }) => {
+  const [isApproving, setIsApproving] = useState(false);
+  const [isPreApproved, setIsPreApproved] = useState(false);
+
   const lote = LOTES_DATA[selectedLoteId] || LOTES_DATA['ARG-SJ-2026'];
+
+  // Manejador funcional y animado para el botón de pre-aprobación
+  const handlePreAprobar = () => {
+    if (isPreApproved || isApproving) return;
+
+    setIsApproving(true);
+
+    // Simulación de respuesta bancaria fluida (1.2 segundos)
+    setTimeout(() => {
+      setIsApproving(false);
+      setIsPreApproved(true);
+
+      toast.success('Financiación Pre-Aprobada', {
+        description: `Operación confirmada exitosamente para ${lote.name} con ${lote.bancoSugerido}.`,
+        icon: React.createElement(CheckCircle2, { className: 'w-5 h-5 text-emerald-400' }),
+        duration: 5000,
+      });
+    }, 1200);
+  };
 
   return React.createElement(
     'div',
@@ -151,15 +174,25 @@ export const LoteDetailPanel: React.FC<LoteDetailPanelProps> = ({ selectedLoteId
       { className: 'space-y-2 mt-6' },
       React.createElement(
         'button',
-        { className: 'w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-lg shadow-emerald-500/10' },
-        React.createElement(ShieldCheck, { className: 'w-4 h-4' }),
-        `Pre-Aprobar Financiación (${lote.bancoSugerido})`
+        {
+          onClick: handlePreAprobar,
+          disabled: isApproving || isPreApproved,
+          className: `w-full font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-lg ${
+            isPreApproved
+              ? 'bg-slate-800 text-emerald-400 border border-emerald-500/40 cursor-default'
+              : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/10'
+          }`,
+        },
+        isApproving
+          ? React.createElement(Loader2, { className: 'w-4 h-4 animate-spin text-slate-950' })
+          : React.createElement(ShieldCheck, { className: 'w-4 h-4' }),
+        isPreApproved ? 'Financiación Pre-Aprobada' : `Pre-Aprobar Financiación (${lote.bancoSugerido})`
       ),
       React.createElement(
         'button',
-        { 
+        {
           onClick: onExport,
-          className: 'w-full bg-slate-950/60 hover:bg-slate-800 border border-slate-800 text-slate-300 font-medium py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer' 
+          className: 'w-full bg-slate-950/60 hover:bg-slate-800 border border-slate-800 text-slate-300 font-medium py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer',
         },
         React.createElement(Download, { className: 'w-3.5 h-3.5 text-slate-400' }),
         'Exportar Ficha Técnica (PDF)'
