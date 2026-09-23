@@ -44,6 +44,14 @@ export const CreditSimulator: React.FC<CreditSimulatorProps> = ({
 
   const totalIntereses = cuotaEstimada * plazoMeses - monto;
 
+  // Función auxiliar para evitar ternarios anidados (Regla SonarQube typescript:S3358)
+  const getButtonText = (): string => {
+    if (isRequested) {
+      return isBank ? 'Pre-Aprobación Solicitada' : 'Póliza Solicitada';
+    }
+    return isBank ? `Solicitar Pre-Aprobación (${entityName})` : `Cotizar Póliza (${entityName})`;
+  };
+
   const handleSolicitarPreAprobacion = () => {
     if (isRequested || isSubmitting) return;
 
@@ -163,18 +171,10 @@ export const CreditSimulator: React.FC<CreditSimulatorProps> = ({
           >
             {isSubmitting ? (
               <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
-            ) : isRequested ? (
-              <CheckCircle className="w-4 h-4 text-emerald-400" />
             ) : (
-              <CheckCircle className="w-4 h-4" />
+              <CheckCircle className={`w-4 h-4 ${isRequested ? 'text-emerald-400' : ''}`} />
             )}
-            {isRequested
-              ? isBank
-                ? 'Pre-Aprobación Solicitada'
-                : 'Póliza Solicitada'
-              : isBank
-              ? `Solicitar Pre-Aprobación (${entityName})`
-              : `Cotizar Póliza (${entityName})`}
+            {getButtonText()}
           </button>
         </div>
       </div>
