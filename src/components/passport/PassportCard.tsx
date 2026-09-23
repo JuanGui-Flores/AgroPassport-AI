@@ -45,6 +45,7 @@ export const PassportCard: React.FC<PassportCardProps> = ({
   const [isInsuranceModalOpen, setIsInsuranceModalOpen] = useState(false);
   const [isPreApproved, setIsPreApproved] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isApproving, setIsApproving] = useState(false); // Estado de carga para el botón de pre-aprobar
 
   const isBank = entity?.type !== 'insurance';
   const entityName = entity?.name || 'Banco San Juan (BSJ)';
@@ -54,7 +55,26 @@ export const PassportCard: React.FC<PassportCardProps> = ({
   const estadoTexto = isHighScore ? 'Apto Crédito & Seguro' : 'Requiere Revisión Hídrica';
   const saludNdviTexto = getSaludNdviTexto(ndvi);
 
-  // Manejador de pre-aprobación desde los modales o directo
+  // Manejador de pre-aprobación directa con animación fluida
+  const handleDirectPreApprove = () => {
+    if (isPreApproved || isApproving) return;
+
+    setIsApproving(true);
+
+    // Simulamos la comunicación bancaria por 1.2 segundos con animación suave
+    setTimeout(() => {
+      setIsApproving(false);
+      setIsPreApproved(true);
+
+      toast.success(isBank ? 'Financiación Pre-Aprobada' : 'Póliza de Cosecha Emitida', {
+        description: `Operación confirmada exitosamente para ${nombre} con ${entityName}.`,
+        icon: <CheckCircle2 className="w-5 h-5 text-emerald-400" />,
+        duration: 5000,
+      });
+    }, 1200);
+  };
+
+  // Manejador original de confirmación por si usas los modales en otro flujo
   const handlePreApproveConfirm = () => {
     setIsPreApproved(true);
     setIsCreditModalOpen(false);
@@ -148,39 +168,41 @@ export const PassportCard: React.FC<PassportCardProps> = ({
           </div>
         </div>
 
-        {/* Botones de acción ocultables mediante hideButtons */}
+        {/* Botones de acción directos y funcionales con estado de carga */}
         {!hideButtons && (
           <div className="space-y-2 pt-2 print:hidden">
             {isBank ? (
               <button 
-                onClick={() => {
-                  if (isPreApproved) return;
-                  setIsCreditModalOpen(true);
-                }}
-                disabled={isPreApproved}
+                onClick={handleDirectPreApprove}
+                disabled={isPreApproved || isApproving}
                 className={`w-full font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg cursor-pointer ${
                   isPreApproved
                     ? 'bg-slate-800 text-emerald-400 border border-emerald-500/40 cursor-default'
                     : 'bg-emerald-600 hover:bg-emerald-500 text-slate-950 shadow-emerald-950/50'
                 }`}
               >
-                <ShieldCheck className="w-4 h-4" /> 
+                {isApproving ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                ) : (
+                  <ShieldCheck className="w-4 h-4" />
+                )}
                 {isPreApproved ? 'Financiación Pre-Aprobada' : `Pre-Aprobar Financiación (${entityName})`}
               </button>
             ) : (
               <button 
-                onClick={() => {
-                  if (isPreApproved) return;
-                  setIsInsuranceModalOpen(true);
-                }}
-                disabled={isPreApproved}
+                onClick={handleDirectPreApprove}
+                disabled={isPreApproved || isApproving}
                 className={`w-full font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg cursor-pointer ${
                   isPreApproved
                     ? 'bg-slate-800 text-emerald-400 border border-emerald-500/40 cursor-default'
                     : 'bg-emerald-600 hover:bg-emerald-500 text-slate-950 shadow-emerald-950/50'
                 }`}
               >
-                <ShieldAlert className="w-4 h-4" /> 
+                {isApproving ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                ) : (
+                  <ShieldAlert className="w-4 h-4" />
+                )}
                 {isPreApproved ? 'Póliza Emitida' : `Emitir Póliza de Cosecha (${entityName})`}
               </button>
             )}
@@ -201,6 +223,7 @@ export const PassportCard: React.FC<PassportCardProps> = ({
         )}
       </div>
 
+      {/* Modales preservados por si se requieren en otros flujos */}
       {!hideButtons && (
         <>
           <CreditModal

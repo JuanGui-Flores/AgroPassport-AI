@@ -71,7 +71,7 @@ export default function Home() {
 
         {/* Módulo Central: Mapa (7-8 col) y Ficha (4-5 col) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch">
-<div className="lg:col-span-7 xl:col-span-8 w-full overflow-hidden rounded-2xl border border-slate-800/80 shadow-2xl flex flex-col min-h-95 sm:min-h-112.5 lg:min-h-130">            <MapModule 
+            <div className="lg:col-span-7 xl:col-span-8 w-full overflow-hidden rounded-2xl border border-slate-800/80 shadow-2xl flex flex-col min-h-95 sm:min-h-112.5 lg:min-h-130">            <MapModule 
               selectedLoteId={selectedLoteId} 
               onSelectLote={(id) => setSelectedLoteId(id)} 
             />
