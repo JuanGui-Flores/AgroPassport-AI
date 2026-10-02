@@ -3,20 +3,17 @@
 export interface EntityOption {
   id: string;
   name: string;
-  type: "bank" | "insurance";
-  defaultTasa?: number;
+  type: "branch" | "partner"; // Sucursal propia vs Aliado estratégico
+  status?: "active" | "syncing" | "idle";
 }
 
 export const INITIAL_BANKS: EntityOption[] = [
-  { id: "bsj", name: "Banco San Juan (BSJ)", type: "bank", defaultTasa: 14.5 },
-  { id: "galicia", name: "Banco Galicia", type: "bank", defaultTasa: 15.0 },
-  { id: "nacion", name: "Banco Nación", type: "bank", defaultTasa: 13.8 },
-  { id: "macro", name: "Banco Macro", type: "bank", defaultTasa: 14.2 },
+  { id: "b-1", name: "Casa Matriz / Central", type: "branch", status: "active" },
+  { id: "b-2", name: "Sucursal Zona Norte", type: "branch", status: "active" },
+  { id: "b-3", name: "Centro de Distribución Sur", type: "branch", status: "idle" },
 ];
 
 export const INITIAL_INSURANCES: EntityOption[] = [
-  { id: "lasegunda", name: "La Segunda Seguros", type: "insurance" },
-  { id: "sancor", name: "Sancor Seguros", type: "insurance" },
-  { id: "sancristobal", name: "San Cristóbal Seguros", type: "insurance" },
-  { id: "allianz", name: "Allianz", type: "insurance" },
+  { id: "p-1", name: "AgroInsumos Cuyo S.A.", type: "partner", status: "active" },
+  { id: "p-2", name: "Cooperativa Agrícola Regional", type: "partner", status: "active" },
 ];
