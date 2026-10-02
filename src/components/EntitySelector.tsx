@@ -1,7 +1,7 @@
 // src/components/EntitySelector.tsx
 'use client';
 
-import React, { useState, useSyncExternalStore, useEffect } from 'react';
+import React, { useState, useSyncExternalStore, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Building2, ChevronDown, Plus, Sparkles, AlertCircle, CheckCircle2, X, Sprout } from 'lucide-react';
 import { EntityOption, INITIAL_BANKS, INITIAL_INSURANCES } from '@/app/data/entities';
@@ -39,9 +39,25 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
   const [newName, setNewName] = useState('');
   const [newType, setNewType] = useState<'bank' | 'insurance'>('bank');
   
+  // Referencia y coordenadas para alinear el popover de forma dinámica
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [coords, setCoords] = useState<{ top: number; left: number; width: number } | null>(null);
+
   // Estado para validaciones y notificaciones Toast
   const [errorText, setErrorText] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  const handleToggle = () => {
+    if (!isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom + window.scrollY + 6, // 6px de separación
+        left: rect.left + window.scrollX,
+        width: Math.max(rect.width, 260), // Ancho mínimo de despliegue
+      });
+    }
+    setIsOpen(!isOpen);
+  };
 
   // Auto-ocultar toast a los 3 segundos
   useEffect(() => {
@@ -117,8 +133,9 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
     <div className="relative inline-block text-left w-full min-w-0">
       {/* Botón Principal Optimizado para Mobile */}
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggle}
         className="group w-full flex items-center justify-between gap-1 sm:gap-2 bg-slate-900/90 hover:bg-slate-800/90 text-slate-100 border border-slate-700/60 hover:border-emerald-500/50 px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-medium transition-all shadow-lg shadow-black/20 cursor-pointer min-w-0"
       >
         <div className={`p-1 rounded-lg shrink-0 ${selectedEntity.type === 'bank' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'}`}>
@@ -141,21 +158,28 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
         <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-emerald-400' : ''}`} />
       </button>
 
-      {/* Menú Desplegable Renderizado con Portal */}
+      {/* Menú Desplegable Renderizado con Portal y Posicionamiento Dinámico */}
       {isOpen &&
+        coords &&
         createPortal(
-          <div className="fixed inset-0 z-9990 flex items-start sm:items-none justify-center sm:justify-start">
+          <div className="absolute inset-0 z-50 pointer-events-none">
             {/* Backdrop interactivo */}
             <button
               type="button"
               onClick={handleClose}
-              className="fixed inset-0 bg-slate-950/60 z-9990 cursor-default border-none w-full h-full text-left p-0"
-              aria-label="Cerrar modal"
+              className="fixed inset-0 bg-slate-950/40 z-40 pointer-events-auto cursor-default border-none w-full h-full text-left p-0"
+              aria-label="Cerrar menú"
             />
 
-            {/* Modal / Popover flotante */}
-            <div className="relative z-9991 mt-16 sm:mt-14 sm:ml-20 w-[90vw] max-w-72 sm:w-64 rounded-2xl bg-card border border-border shadow-2xl shadow-black/80 p-3 space-y-3 animate-in fade-in zoom-in-95 duration-150">
-              
+            {/* Modal / Popover flotante posicionado exactamente debajo del botón */}
+            <div 
+              style={{
+                top: `${coords.top}px`,
+                left: `${coords.left}px`,
+                width: `${coords.width}px`,
+              }}
+              className="absolute z-50 pointer-events-auto rounded-2xl bg-card border border-border shadow-2xl shadow-black/80 p-3 space-y-3 animate-in fade-in zoom-in-95 duration-150"
+            >
               <div className="flex items-center justify-between sm:hidden pb-1 border-b border-slate-800">
                 <span className="text-xs font-bold text-slate-200">Seleccionar Entidad</span>
                 <button 
@@ -256,7 +280,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
       {/* Modal Flotante para Agregar Entidad */}
       {isAddModalOpen &&
         createPortal(
-          <div className="fixed inset-0 z-9999 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 overflow-y-auto">
             <div className="bg-card border border-border rounded-2xl w-full max-w-sm p-6 space-y-5 shadow-2xl shadow-black/90 my-auto animate-in fade-in zoom-in-95 duration-150">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
@@ -338,7 +362,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
       {/* Toast Flotante de Notificación */}
       {toast &&
         createPortal(
-          <div className="fixed bottom-6 right-6 z-9999 flex items-center gap-3 bg-card border border-emerald-500/30 text-slate-100 px-4 py-3 rounded-2xl shadow-2xl shadow-black/80 animate-in slide-in-from-bottom-5 duration-200">
+          <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-card border border-emerald-500/30 text-slate-100 px-4 py-3 rounded-2xl shadow-2xl shadow-black/80 animate-in slide-in-from-bottom-5 duration-200">
             <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-400">
               <CheckCircle2 className="w-5 h-5" />
             </div>
