@@ -2,9 +2,8 @@
 'use client';
 
 import React, { useState, useSyncExternalStore } from 'react';
-import { X, FileSpreadsheet } from 'lucide-react';
+import { X, FileSpreadsheet, Activity, CheckCircle2, AlertTriangle, Info, ArrowUpRight } from 'lucide-react';
 import { Navbar } from '@/components/navbar/Navbar';
-import { KpiHeader } from '@/components/dashboard/KpiHeader';
 import { MapModule } from '@/components/map/MapModule';
 import { PassportCard } from '@/components/passport/PassportCard';
 import { TelemetryModule } from '@/components/telemetry/TelemetryModule';
@@ -41,6 +40,20 @@ export default function Home() {
     );
   }
 
+  // Datos de métricas simulados por entidad para enriquecer las tarjetas superiores
+  const entityMetrics = selectedEntity.metrics || {
+    score: 86.4,
+    scoreTrend: '+4.2% vs mes ant.',
+    canje: 85,
+    canjeTrend: '18 Lotes activos',
+    alerts: 12,
+    alertsStatus: '2 críticas pendientes'
+  };
+
+  const entityActivities = selectedEntity.recentActivity || [
+    { id: '1', text: 'Sincronización satelital y de nodos completada', time: 'Hace 15 min', type: 'success' as const }
+  ];
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500/30 overflow-x-hidden">
       {/* Navbar principal */}
@@ -49,7 +62,7 @@ export default function Home() {
         onSelectEntity={(entity) => setSelectedEntity(entity)} 
       />
 
-      {/* Contenedor adaptativo: max-w-[1920px] para TVs/UltraWide y padding fluido */}
+      {/* Contenedor adaptativo */}
       <main className="p-3 sm:p-5 md:p-6 lg:p-8 xl:p-10 space-y-4 sm:space-y-6 lg:space-y-8 flex-1 max-w-[1920px] mx-auto w-full">
         
         {/* Encabezado Principal */}
@@ -59,13 +72,115 @@ export default function Home() {
               Evaluación de Riesgo & Scoring Agrícola
             </h1>
             <p className="text-[11px] sm:text-xs md:text-sm text-slate-400 mt-0.5">
-              Monitoreo satelital y scoring crediticio consolidado
+              Monitoreo satelital y scoring crediticio consolidado para <span className="text-emerald-400 font-semibold">{selectedEntity.name}</span>
             </p>
           </div>
         </div>
 
-        {/* KPIs */}
-        <KpiHeader />
+        {/* KPIs Mejorados con tendencias y barras de progreso */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Tarjeta 1 */}
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Passport Score</span>
+              <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                {entityMetrics.scoreTrend}
+              </span>
+            </div>
+            <div className="text-3xl font-extrabold text-white tracking-tight mb-3">
+              {entityMetrics.score}
+            </div>
+            <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+              <div 
+                className="bg-linear-to-r from-emerald-500 to-emerald-300 h-full rounded-full transition-all duration-500"
+                style={{ width: `${entityMetrics.score}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Tarjeta 2 */}
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Canje de Insumos</span>
+              <span className="text-[10px] font-semibold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/20">
+                {entityMetrics.canjeTrend}
+              </span>
+            </div>
+            <div className="text-3xl font-extrabold text-white tracking-tight mb-3">
+              {entityMetrics.canje}%
+            </div>
+            <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+              <div 
+                className="bg-linear-to-r from-blue-500 to-blue-300 h-full rounded-full transition-all duration-500"
+                style={{ width: `${entityMetrics.canje}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Tarjeta 3 */}
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Alertas IoT</span>
+              <span className="text-[10px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                {entityMetrics.alertsStatus}
+              </span>
+            </div>
+            <div className="text-3xl font-extrabold text-white tracking-tight mb-3">
+              {entityMetrics.alerts}
+            </div>
+            <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+              <div 
+                className="bg-linear-to-r from-amber-500 to-amber-300 h-full rounded-full transition-all duration-500"
+                style={{ width: '45%' }}
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Feed de Actividad Dinámica en Tiempo Real */}
+        <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+          <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+                <Activity className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-slate-100 tracking-wide uppercase">
+                  Actividad en Tiempo Real — {selectedEntity.name}
+                </h4>
+                <p className="text-[11px] text-slate-400">Monitoreo de eventos y flujos operativos de la entidad</p>
+              </div>
+            </div>
+            <p className="text-[11px] sm:text-xs md:text-sm text-slate-400 mt-0.5">
+               Monitoreo satelital y scoring crediticio consolidado para{" "}
+              <span className="text-emerald-400 font-semibold">{selectedEntity.name}</span>
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {entityActivities.map((act) => (
+              <div 
+                key={act.id} 
+                className="flex items-start justify-between gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/60 hover:border-slate-700 transition-all group"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 shrink-0">
+                    {act.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+                    {act.type === 'warning' && <AlertTriangle className="w-4 h-4 text-amber-400" />}
+                    {act.type === 'info' && <Info className="w-4 h-4 text-blue-400" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-200 group-hover:text-white transition-colors">
+                      {act.text}
+                    </p>
+                    <span className="text-[10px] text-slate-500">{act.time}</span>
+                  </div>
+                </div>
+                <ArrowUpRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-emerald-400 transition-colors shrink-0 mt-1" />
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Módulo Central: Mapa */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch">
