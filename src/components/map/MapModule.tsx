@@ -64,7 +64,7 @@ export const MapModule: React.FC<MapModuleProps> = ({ selectedLoteId, onSelectLo
   };
 
   return (
-    <div className="col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden relative flex flex-col h-full min-h-130 shadow-2xl">
+    <div className="col-span-2 bg-card border border-border rounded-2xl overflow-hidden relative flex flex-col h-full min-h-130 shadow-2xl">
       
       {/* Estilo local para forzar la desaparición de los botones de zoom de Leaflet */}
       <style jsx global>{`

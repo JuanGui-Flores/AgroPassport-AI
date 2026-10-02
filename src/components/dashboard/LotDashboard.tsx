@@ -1,32 +1,47 @@
 // src/components/dashboard/LotDashboard.tsx
 import React from 'react';
 import { Can } from '../common/Can';
+import { Sprout } from 'lucide-react';
 
 export function LotDashboard() {
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Panel de AgroPassport</h1>
+    <div className="p-4 sm:p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Panel de Operaciones Agrícolas</h1>
+          <p className="text-xs text-slate-400 mt-1">Gestión de lotes, trazabilidad satelital y canje de insumos</p>
+        </div>
+
+        {/* El botón de registrar lote lo ve el productor o admin */}
+        <Can I="lotes:create">
+          <button className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2.5 rounded-xl transition text-xs flex items-center gap-2 shadow-lg shadow-emerald-950/50 cursor-pointer">
+            + Registrar Nuevo Lote
+          </button>
+        </Can>
+      </div>
       
-      {/* Esta sección la ven todos los que puedan leer lotes */}
+      {/* Listado de Lotes Agrícolas */}
       <Can I="lotes:read">
-        <div className="mt-4 p-4 bg-white shadow rounded">
-          <h2 className="text-lg font-semibold">Listado de Lotes Agrícolas</h2>
-          {/* Tabla de lotes... */}
+        <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
+          <h2 className="text-sm font-bold text-white uppercase tracking-wider mb-3">Listado de Lotes Agrícolas</h2>
+          <div className="text-xs text-slate-400 py-8 text-center border border-dashed border-slate-800 rounded-xl">
+            Tabla de lotes y monitoreo NDVI activo...
+          </div>
         </div>
       </Can>
 
-      {/* Este botón SOLO lo ve el PRODUCER o ADMIN, ocultándose automáticamente para un Banco */}
+      {/* Panel de Validación para Canje de Insumos (Reemplazo del Panel Financiero) */}
       <Can I="lotes:create">
-        <button className="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-          + Registrar Nuevo Lote
-        </button>
-      </Can>
-
-      {/* Sección exclusiva para entidades financieras o admins */}
-      <Can I="financial:query">
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded">
-          <h3 className="text-md font-bold text-blue-800">Panel de Consulta Financiera</h3>
-          <p>Módulos de validación de CUITs y estados crediticios habilitados.</p>
+        <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 flex items-start gap-4">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0 text-emerald-400">
+            <Sprout className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-white">Módulo de Canje de Insumos</h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Validación de rendimientos estimados y métricas satelitales para la aprobación directa con cooperativas y distribuidores.
+            </p>
+          </div>
         </div>
       </Can>
     </div>

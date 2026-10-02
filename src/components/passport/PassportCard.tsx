@@ -3,9 +3,7 @@
 
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import { ShieldCheck, FileDown, ShieldAlert, Loader2, CheckCircle2 } from 'lucide-react';
-import { CreditModal } from './CreditModal';
-import { InsuranceModal } from './InsuranceModal';
+import { FileDown, Loader2, CheckCircle2, Sprout } from 'lucide-react';
 import { EntityOption } from '@/app/data/entities';
 import { generatePassportPDF } from '@/utils/generatePdf';
 
@@ -41,27 +39,22 @@ export const PassportCard: React.FC<PassportCardProps> = ({
   entity,
   hideButtons = false,
 }) => {
-  const [isCreditModalOpen, setIsCreditModalOpen] = useState(false);
-  const [isInsuranceModalOpen, setIsInsuranceModalOpen] = useState(false);
-  const [isPreApproved, setIsPreApproved] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  const isBank = entity?.type !== 'insurance';
-  const entityName = entity?.name || 'Banco San Juan (BSJ)';
+  const entityName = entity?.name || 'Cooperativa Agrícola Regional';
 
   // Evaluación dinámica según el score
   const isHighScore = score >= 80;
-  const estadoTexto = isHighScore ? 'Apto Crédito & Seguro' : 'Requiere Revisión Hídrica';
+  const estadoTexto = isHighScore ? 'Certificado para Canje' : 'Revisión Agronómica Requerida';
   const saludNdviTexto = getSaludNdviTexto(ndvi);
 
-  // Manejador de pre-aprobación desde los modales o directo
-  const handlePreApproveConfirm = () => {
-    setIsPreApproved(true);
-    setIsCreditModalOpen(false);
-    setIsInsuranceModalOpen(false);
+  // Manejador de validación / confirmación operativa
+  const handleConfirmOperation = () => {
+    setIsConfirmed(true);
     
-    toast.success(isBank ? 'Financiación Pre-Aprobada' : 'Póliza de Cosecha Emitida', {
-      description: `Operación confirmada exitosamente para ${nombre} con ${entityName}.`,
+    toast.success('Operación Validada', {
+      description: `Lote ${nombre} verificado exitosamente para canje de insumos con ${entityName}.`,
       icon: <CheckCircle2 className="w-5 h-5 text-emerald-400" />,
       duration: 5000,
     });
@@ -72,7 +65,7 @@ export const PassportCard: React.FC<PassportCardProps> = ({
     try {
       setIsExporting(true);
       toast.info('Generando Ficha Técnica...', {
-        description: 'Maquetando informe ejecutivo para evaluación de riesgo.',
+        description: 'Maquetando informe ejecutivo de trazabilidad agronómica.',
       });
 
       await generatePassportPDF({
@@ -101,127 +94,82 @@ export const PassportCard: React.FC<PassportCardProps> = ({
   };
 
   return (
-    <>
-      <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-5 flex flex-col justify-between print:border-none print:shadow-none print:bg-white print:text-black">
-        <div>
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950 border border-emerald-800 px-2.5 py-0.5 rounded-full uppercase tracking-wider print:border-slate-300 print:text-black print:bg-slate-100">
-              ● Verificado
-            </span>
-            <span className="text-xs text-slate-500 font-mono print:text-slate-600">ID: {loteId}</span>
-          </div>
+    <div className="bg-card border border-border rounded-2xl p-5 flex flex-col justify-between print:border-none print:shadow-none print:bg-white print:text-black">
+      <div>
+        <div className="flex justify-between items-center mb-3">
+          <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950 border border-emerald-800 px-2.5 py-0.5 rounded-full uppercase tracking-wider print:border-slate-300 print:text-black print:bg-slate-100">
+            ● Verificado Satelital
+          </span>
+          <span className="text-xs text-slate-500 font-mono print:text-slate-600">ID: {loteId}</span>
+        </div>
 
-          <h3 className="text-lg font-bold text-white leading-snug print:text-black">{nombre}</h3>
-          <p className="text-xs text-slate-400 mb-4 print:text-slate-600">
-            San Juan, Argentina • {hectareas} Hectáreas
-          </p>
+        <h3 className="text-lg font-bold text-white leading-snug print:text-black">{nombre}</h3>
+        <p className="text-xs text-slate-400 mb-4 print:text-slate-600">
+          San Juan, Argentina • {hectareas} Hectáreas
+        </p>
 
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 flex items-center justify-between mb-4 print:bg-slate-100 print:border-slate-300">
-            <div>
-              <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider print:text-slate-600">
-                Passport Score
-              </p>
-              <div className="flex items-baseline gap-1">
-                <span className={`text-3xl font-black ${isHighScore ? 'text-emerald-400' : 'text-amber-400'} print:text-black`}>
-                  {score}
-                </span>
-                <span className="text-slate-600 text-xs font-bold">/100</span>
-              </div>
-              <span className={`text-[11px] font-semibold ${isHighScore ? 'text-emerald-400' : 'text-amber-400'} print:text-slate-800`}>
-                {estadoTexto}
+        <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 flex items-center justify-between mb-4 print:bg-slate-100 print:border-slate-300">
+          <div>
+            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider print:text-slate-600">
+              Passport Score
+            </p>
+            <div className="flex items-baseline gap-1">
+              <span className={`text-3xl font-black ${isHighScore ? 'text-emerald-400' : 'text-amber-400'} print:text-black`}>
+                {score}
               </span>
+              <span className="text-slate-600 text-xs font-bold">/100</span>
             </div>
-            <div className={`w-14 h-14 rounded-full border-4 ${isHighScore ? 'border-emerald-500 text-emerald-400' : 'border-amber-500 text-amber-400'} border-t-transparent flex items-center justify-center text-[10px] font-bold print:border-slate-800 print:text-black`}>
-              {score}%
-            </div>
+            <span className={`text-[11px] font-semibold ${isHighScore ? 'text-emerald-400' : 'text-amber-400'} print:text-slate-800`}>
+              {estadoTexto}
+            </span>
           </div>
-
-          <div className="space-y-2 mb-4">
-            <div className="flex justify-between text-xs py-1.5 border-b border-slate-800/60 print:border-slate-300">
-              <span className="text-slate-400 print:text-slate-600">Salud Vegetal (NDVI)</span>
-              <span className="font-semibold text-slate-200 print:text-black">{ndvi} ({saludNdviTexto})</span>
-            </div>
-            <div className="flex justify-between text-xs py-1.5 border-b border-slate-800/60 print:border-slate-300">
-              <span className="text-slate-400 print:text-slate-600">Rinde Estimado</span>
-              <span className="font-semibold text-slate-200 print:text-black">{rindeEst}</span>
-            </div>
+          <div className={`w-14 h-14 rounded-full border-4 ${isHighScore ? 'border-emerald-500 text-emerald-400' : 'border-amber-500 text-amber-400'} border-t-transparent flex items-center justify-center text-[10px] font-bold print:border-slate-800 print:text-black`}>
+            {score}%
           </div>
         </div>
 
-        {/* Botones de acción ocultables mediante hideButtons */}
-        {!hideButtons && (
-          <div className="space-y-2 pt-2 print:hidden">
-            {isBank ? (
-              <button 
-                onClick={() => {
-                  if (isPreApproved) return;
-                  setIsCreditModalOpen(true);
-                }}
-                disabled={isPreApproved}
-                className={`w-full font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg cursor-pointer ${
-                  isPreApproved
-                    ? 'bg-slate-800 text-emerald-400 border border-emerald-500/40 cursor-default'
-                    : 'bg-emerald-600 hover:bg-emerald-500 text-slate-950 shadow-emerald-950/50'
-                }`}
-              >
-                <ShieldCheck className="w-4 h-4" /> 
-                {isPreApproved ? 'Financiación Pre-Aprobada' : `Pre-Aprobar Financiación (${entityName})`}
-              </button>
-            ) : (
-              <button 
-                onClick={() => {
-                  if (isPreApproved) return;
-                  setIsInsuranceModalOpen(true);
-                }}
-                disabled={isPreApproved}
-                className={`w-full font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg cursor-pointer ${
-                  isPreApproved
-                    ? 'bg-slate-800 text-emerald-400 border border-emerald-500/40 cursor-default'
-                    : 'bg-emerald-600 hover:bg-emerald-500 text-slate-950 shadow-emerald-950/50'
-                }`}
-              >
-                <ShieldAlert className="w-4 h-4" /> 
-                {isPreApproved ? 'Póliza Emitida' : `Emitir Póliza de Cosecha (${entityName})`}
-              </button>
-            )}
-
-            <button
-              onClick={handleExportPdf}
-              disabled={isExporting}
-              className="w-full bg-transparent hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 font-medium py-2 rounded-xl flex items-center justify-center gap-2 transition text-xs border border-dashed border-slate-700/60 cursor-pointer disabled:opacity-50"
-            >
-              {isExporting ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
-              ) : (
-                <FileDown className="w-3.5 h-3.5" />
-              )}
-              <span>Exportar Ficha Técnica (PDF)</span>
-            </button>
+        <div className="space-y-2 mb-4">
+          <div className="flex justify-between text-xs py-1.5 border-b border-slate-800/60 print:border-slate-300">
+            <span className="text-slate-400 print:text-slate-600">Salud Vegetal (NDVI)</span>
+            <span className="font-semibold text-slate-200 print:text-black">{ndvi} ({saludNdviTexto})</span>
           </div>
-        )}
+          <div className="flex justify-between text-xs py-1.5 border-b border-slate-800/60 print:border-slate-300">
+            <span className="text-slate-400 print:text-slate-600">Rinde Estimado</span>
+            <span className="font-semibold text-slate-200 print:text-black">{rindeEst}</span>
+          </div>
+        </div>
       </div>
 
+      {/* Botones de acción ocultables mediante hideButtons */}
       {!hideButtons && (
-        <>
-          <CreditModal
-            isOpen={isCreditModalOpen}
-            onClose={() => setIsCreditModalOpen(false)}
-            onConfirm={handlePreApproveConfirm}
-            loteNombre={nombre}
-            score={score}
-            entity={entity}
-          />
+        <div className="space-y-2 pt-2 print:hidden">
+          <button 
+            onClick={handleConfirmOperation}
+            disabled={isConfirmed}
+            className={`w-full font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg cursor-pointer ${
+              isConfirmed
+                ? 'bg-slate-800 text-emerald-400 border border-emerald-500/40 cursor-default'
+                : 'bg-emerald-600 hover:bg-emerald-500 text-slate-950 shadow-emerald-950/50'
+            }`}
+          >
+            <Sprout className="w-4 h-4" /> 
+            {isConfirmed ? 'Lote Validado para Canje' : `Validar Lote (${entityName})`}
+          </button>
 
-          <InsuranceModal
-            isOpen={isInsuranceModalOpen}
-            onClose={() => setIsInsuranceModalOpen(false)}
-            onConfirm={handlePreApproveConfirm}
-            loteNombre={nombre}
-            hectareas={hectareas}
-            ndvi={ndvi}
-          />
-        </>
+          <button
+            onClick={handleExportPdf}
+            disabled={isExporting}
+            className="w-full bg-transparent hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 font-medium py-2 rounded-xl flex items-center justify-center gap-2 transition text-xs border border-dashed border-slate-700/60 cursor-pointer disabled:opacity-50"
+          >
+            {isExporting ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
+            ) : (
+              <FileDown className="w-3.5 h-3.5" />
+            )}
+            <span>Exportar Ficha Técnica (PDF)</span>
+          </button>
+        </div>
       )}
-    </>
+    </div>
   );
 };

@@ -1,30 +1,31 @@
+// src/components/IntegrationDashboard.tsx
 'use client';
 
 import React, { useState } from 'react';
-import { Server, RefreshCw, Clock, Shield, Building2, Zap, Search, CheckCircle2 } from 'lucide-react';
+import { Server, RefreshCw, Clock, Shield, Zap, Search, CheckCircle2, Sprout } from 'lucide-react';
 import { IntegrationEndpoint, FinancialCreditCheck, InsurancePolicyCheck } from '@/types/integration';
 import { IntegrationMiddlewareService } from '@/services/integrationMiddleware';
 
 const INITIAL_ENDPOINTS: IntegrationEndpoint[] = [
   {
-    id: 'bank-galicia',
-    name: 'Banco Galicia (Agro API)',
-    type: 'bank',
+    id: 'coop-federada',
+    name: 'Cooperativa Federada (Canje API)',
+    type: 'bank', // Mantenemos el tipo interno por compatibilidad con la interfaz
     status: 'connected',
     latencyMs: 145,
     lastSync: new Date().toISOString(),
     version: 'v2.4-rest',
-    endpointUrl: 'https://api.galicia.ar/agro/v2',
+    endpointUrl: 'https://api.coopfederada.ar/agro/v2',
   },
   {
-    id: 'bank-macro',
-    name: 'Banco Macro (AgroFin)',
+    id: 'coop-acsofar',
+    name: 'ACSOFAR AgroFin',
     type: 'bank',
     status: 'connected',
     latencyMs: 210,
     lastSync: new Date().toISOString(),
     version: 'v1.8-rest',
-    endpointUrl: 'https://api.macro.com.ar/v1/scoring',
+    endpointUrl: 'https://api.acsofar.com.ar/v1/scoring',
   },
   {
     id: 'ins-sancor',
@@ -54,7 +55,7 @@ export const IntegrationDashboard: React.FC = () => {
   const [isLoadingList, setIsLoadingList] = useState(false);
 
   // Estados para el Simulador de Consultas en Vivo
-  const [selectedEntityForTest, setSelectedEntityForTest] = useState<string>('bank-galicia');
+  const [selectedEntityForTest, setSelectedEntityForTest] = useState<string>('coop-federada');
   const [testCuit, setTestCuit] = useState('20-35489123-4');
   const [testLotId, setTestLotId] = useState('LOT-104');
   const [isTesting, setIsTesting] = useState(false);
@@ -115,7 +116,7 @@ export const IntegrationDashboard: React.FC = () => {
           </div>
           <div>
             <h2 className="text-lg font-bold text-white tracking-tight">Middleware & Conectividad API</h2>
-            <p className="text-xs text-slate-400">Monitoreo y pasarela de integración con entidades financieras y aseguradoras</p>
+            <p className="text-xs text-slate-400">Monitoreo y pasarela de integración con cooperativas de canje y distribuidores</p>
           </div>
         </div>
         <button
@@ -132,7 +133,7 @@ export const IntegrationDashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {endpoints.map((ep) => {
           const isSyncing = loadingId === ep.id;
-          const isBank = ep.type === 'bank';
+          const isCoop = ep.type === 'bank';
 
           return (
             <div
@@ -141,8 +142,8 @@ export const IntegrationDashboard: React.FC = () => {
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2.5 rounded-xl ${isBank ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}`}>
-                    {isBank ? <Building2 className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
+                  <div className={`p-2.5 rounded-xl ${isCoop ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}`}>
+                    {isCoop ? <Sprout className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-slate-100">{ep.name}</h3>
@@ -212,11 +213,11 @@ export const IntegrationDashboard: React.FC = () => {
               id="entity-select"
               value={selectedEntityForTest}
               onChange={(e) => setSelectedEntityForTest(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+              className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 cursor-pointer"
             >
               {endpoints.map((ep) => (
                 <option key={ep.id} value={ep.id}>
-                  {ep.name} ({ep.type.toUpperCase()})
+                  {ep.name} ({ep.type === 'bank' ? 'COOPERATIVA' : 'SEGUROS'})
                 </option>
               ))}
             </select>

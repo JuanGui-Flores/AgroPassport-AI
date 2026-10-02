@@ -3,7 +3,7 @@
 
 import React, { useState, useSyncExternalStore, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Building2, ChevronDown, Plus, ShieldCheck, Sparkles, AlertCircle, CheckCircle2, X } from 'lucide-react';
+import { Building2, ChevronDown, Plus, Sparkles, AlertCircle, CheckCircle2, X, Sprout } from 'lucide-react';
 import { EntityOption, INITIAL_BANKS, INITIAL_INSURANCES } from '@/app/data/entities';
 
 // Hook para detectar el montaje sin violar las reglas de React Hooks
@@ -70,13 +70,13 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
       return;
     }
 
-    // Verificar si ya existe en bancos o aseguradoras (case-insensitive)
+    // Verificar si ya existe (case-insensitive)
     const exists = [...banks, ...insurances].some(
       (item) => item.name.toLowerCase() === trimmedName.toLowerCase() && item.type === newType
     );
 
     if (exists) {
-      setErrorText(`Ya existe un/a ${newType === 'bank' ? 'banco' : 'aseguradora'} con ese nombre.`);
+      setErrorText(`Ya existe una entidad con ese nombre en esta categoría.`);
       return;
     }
 
@@ -123,15 +123,15 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
       >
         <div className={`p-1 rounded-lg shrink-0 ${selectedEntity.type === 'bank' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'}`}>
           {selectedEntity.type === 'bank' ? (
-            <Building2 className="w-3.5 h-3.5" />
+            <Sprout className="w-3.5 h-3.5" />
           ) : (
-            <ShieldCheck className="w-3.5 h-3.5" />
+            <Building2 className="w-3.5 h-3.5" />
           )}
         </div>
         
         <div className="flex flex-col text-left min-w-0 flex-1 px-0.5">
           <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider leading-none hidden sm:block">
-            {selectedEntity.type === 'bank' ? 'Entidad Financiera' : 'Aseguradora'}
+            {selectedEntity.type === 'bank' ? 'Cooperativa / Canje' : 'Distribuidor / Aliado'}
           </span>
           <span className="font-semibold text-slate-200 tracking-tight truncate leading-tight text-[11px] sm:text-xs">
             {selectedEntity.name}
@@ -145,7 +145,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
       {isOpen &&
         createPortal(
           <div className="fixed inset-0 z-9990 flex items-start sm:items-none justify-center sm:justify-start">
-            {/* Backdrop interactivo compatible con accesibilidad */}
+            {/* Backdrop interactivo */}
             <button
               type="button"
               onClick={handleClose}
@@ -154,23 +154,23 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
             />
 
             {/* Modal / Popover flotante */}
-            <div className="relative z-9991 mt-16 sm:mt-14 sm:ml-20 w-[90vw] max-w-72 sm:w-64 rounded-2xl bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 shadow-2xl shadow-black/80 p-3 space-y-3 animate-in fade-in zoom-in-95 duration-150">
+            <div className="relative z-9991 mt-16 sm:mt-14 sm:ml-20 w-[90vw] max-w-72 sm:w-64 rounded-2xl bg-card border border-border shadow-2xl shadow-black/80 p-3 space-y-3 animate-in fade-in zoom-in-95 duration-150">
               
               <div className="flex items-center justify-between sm:hidden pb-1 border-b border-slate-800">
                 <span className="text-xs font-bold text-slate-200">Seleccionar Entidad</span>
                 <button 
                   onClick={() => setIsOpen(false)}
-                  className="p-1 text-slate-400 hover:text-white rounded-lg"
+                  className="p-1 text-slate-400 hover:text-white rounded-lg cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Sección Bancos */}
+              {/* Sección Cooperativas / Canje */}
               <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
                 <div className="px-2 py-1 flex items-center justify-between">
                   <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <Building2 className="w-3 h-3" /> Bancos / Crédito
+                    <Sprout className="w-3 h-3" /> Cooperativas / Canje
                   </span>
                   <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-md font-mono">{banks.length}</span>
                 </div>
@@ -188,7 +188,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
-                      <Building2 className={`w-3.5 h-3.5 shrink-0 ${selectedEntity.id === b.id ? 'text-emerald-400' : 'text-slate-400'}`} />
+                      <Sprout className={`w-3.5 h-3.5 shrink-0 ${selectedEntity.id === b.id ? 'text-emerald-400' : 'text-slate-400'}`} />
                       <span className="truncate">{b.name}</span>
                     </div>
                     {selectedEntity.id === b.id && (
@@ -200,11 +200,11 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
 
               <div className="border-t border-slate-800 my-1"></div>
 
-              {/* Sección Aseguradoras */}
+              {/* Sección Distribuidores */}
               <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
                 <div className="px-2 py-1 flex items-center justify-between">
                   <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <ShieldCheck className="w-3 h-3" /> Aseguradoras
+                    <Building2 className="w-3 h-3" /> Distribuidores
                   </span>
                   <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-md font-mono">{insurances.length}</span>
                 </div>
@@ -222,7 +222,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
-                      <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${selectedEntity.id === ins.id ? 'text-blue-400' : 'text-slate-400'}`} />
+                      <Building2 className={`w-3.5 h-3.5 shrink-0 ${selectedEntity.id === ins.id ? 'text-blue-400' : 'text-slate-400'}`} />
                       <span className="truncate">{ins.name}</span>
                     </div>
                     {selectedEntity.id === ins.id && (
@@ -253,18 +253,18 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
           document.body
         )}
 
-      {/* Modal Flotante con Portal */}
+      {/* Modal Flotante para Agregar Entidad */}
       {isAddModalOpen &&
         createPortal(
           <div className="fixed inset-0 z-9999 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 overflow-y-auto">
-            <div className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-sm p-6 space-y-5 shadow-2xl shadow-black/90 my-auto animate-in fade-in zoom-in-95 duration-150">
+            <div className="bg-card border border-border rounded-2xl w-full max-w-sm p-6 space-y-5 shadow-2xl shadow-black/90 my-auto animate-in fade-in zoom-in-95 duration-150">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-white">Registrar Nueva Entidad</h3>
-                  <p className="text-[11px] text-slate-400">Integra un nuevo banco o aseguradora al sistema</p>
+                  <p className="text-[11px] text-slate-400">Integra una cooperativa o distribuidor al sistema</p>
                 </div>
               </div>
 
@@ -281,7 +281,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                       setNewName(e.target.value);
                       if (errorText) setErrorText(null);
                     }}
-                    placeholder="Ej. Banco Galicia / Sancor Seguros"
+                    placeholder="Ej. Cooperativa Agrícola / AgroInsumos Cuyo"
                     className={`w-full bg-slate-950 border rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none transition-all ${
                       errorText
                         ? 'border-rose-500 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
@@ -304,10 +304,10 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                     id="entity-type"
                     value={newType}
                     onChange={(e) => setNewType(e.target.value as 'bank' | 'insurance')}
-                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all cursor-pointer"
                   >
-                    <option value="bank">Banco / Entidad Financiera</option>
-                    <option value="insurance">Aseguradora</option>
+                    <option value="bank">Cooperativa / Canje</option>
+                    <option value="insurance">Distribuidor / Aliado</option>
                   </select>
                 </div>
 
@@ -338,7 +338,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
       {/* Toast Flotante de Notificación */}
       {toast &&
         createPortal(
-          <div className="fixed bottom-6 right-6 z-9999 flex items-center gap-3 bg-slate-900/95 backdrop-blur-xl border border-emerald-500/30 text-slate-100 px-4 py-3 rounded-2xl shadow-2xl shadow-black/80 animate-in slide-in-from-bottom-5 duration-200">
+          <div className="fixed bottom-6 right-6 z-9999 flex items-center gap-3 bg-card border border-emerald-500/30 text-slate-100 px-4 py-3 rounded-2xl shadow-2xl shadow-black/80 animate-in slide-in-from-bottom-5 duration-200">
             <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-400">
               <CheckCircle2 className="w-5 h-5" />
             </div>
