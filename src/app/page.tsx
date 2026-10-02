@@ -6,9 +6,7 @@ import { X, FileSpreadsheet } from 'lucide-react';
 import { Navbar } from '@/components/navbar/Navbar';
 import { KpiHeader } from '@/components/dashboard/KpiHeader';
 import { MapModule } from '@/components/map/MapModule';
-import { LoteDetailPanel } from '@/components/map/LoteDetailPanel';
 import { PassportCard } from '@/components/passport/PassportCard';
-import { CreditSimulator } from '@/components/passport/CreditSimulator';
 import { TelemetryModule } from '@/components/telemetry/TelemetryModule';
 import { IntegrationDashboard } from '@/components/IntegrationDashboard';
 import { Can } from '@/components/security/Can';
@@ -66,35 +64,18 @@ export default function Home() {
           </div>
         </div>
 
-        {/* KPIs (Conserva la grilla adaptativa 2x2 en mobile, 4x1 en TV/Desktop) */}
+        {/* KPIs */}
         <KpiHeader />
 
-        {/* Módulo Central: Mapa (7-8 col) y Ficha (4-5 col) */}
+        {/* Módulo Central: Mapa */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch">
-            <div className="lg:col-span-7 xl:col-span-8 w-full overflow-hidden rounded-2xl border border-slate-800/80 shadow-2xl flex flex-col min-h-95 sm:min-h-112.5 lg:min-h-130">            <MapModule 
+          <div className="lg:col-span-12 w-full overflow-hidden rounded-2xl border border-slate-800/80 shadow-2xl flex flex-col min-h-95 sm:min-h-112.5 lg:min-h-130">
+            <MapModule 
               selectedLoteId={selectedLoteId} 
               onSelectLote={(id) => setSelectedLoteId(id)} 
             />
           </div>
-          
-          <div className="lg:col-span-5 xl:col-span-4 w-full flex flex-col justify-between">
-            <LoteDetailPanel 
-              selectedLoteId={selectedLoteId} 
-              onExport={() => setIsModalOpen(true)}
-            />
-          </div>
         </div>
-
-        {/* Simulador de Crédito */}
-        <Can I="financial:evaluate">
-          <div className="transition-all duration-300">
-            <CreditSimulator 
-              score={loteActivo.score} 
-              loteNombre={loteActivo.nombre}
-              entity={selectedEntity} 
-            />
-          </div>
-        </Can>
 
         {/* Telemetría IoT */}
         <Can I="producer:manage">
