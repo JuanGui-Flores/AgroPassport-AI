@@ -8,6 +8,13 @@ import { EntitySelector } from '@/components/EntitySelector';
 import { EntityOption } from '@/app/data/entities';
 import { useAuth } from '@/context/AuthContext';
 import { Role } from '@/services/security/rbac';
+import { Syne } from 'next/font/google';
+
+// Inicialización de la fuente fuera del componente
+const syne = Syne({
+  subsets: ['latin'],
+  weight: ['700', '800'],
+});
 
 interface NavbarProps {
   selectedEntity: EntityOption;
@@ -47,11 +54,8 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="hidden min-[420px]:flex flex-col">
-              <span className="text-xs sm:text-sm font-bold tracking-tight text-white flex items-center gap-1">
-                AgroPassport <span className="text-emerald-400 font-mono text-xs font-semibold">AI</span>
-              </span>
-              <span className="text-[9px] text-slate-400 font-medium tracking-wide uppercase">
-                Risk Suite
+              <span className={`${syne.className} text-xs sm:text-sm font-bold tracking-tight text-white flex items-center gap-1`}>
+                AgroPassport <span className="text-emerald-400 font-mono text-xs font-semibold tracking-normal">AI</span>
               </span>
             </div>
           </div>
