@@ -2,12 +2,26 @@
 'use client';
 
 import React, { useState, useSyncExternalStore } from 'react';
-import { X, FileSpreadsheet, Activity, CheckCircle2, AlertTriangle, Info, ArrowUpRight } from 'lucide-react';
+import { 
+  X, 
+  FileSpreadsheet, 
+  Activity, 
+  CheckCircle2, 
+  AlertTriangle, 
+  Info, 
+  ArrowUpRight,
+  ShieldCheck,
+  History,
+  AlertOctagon,
+  Sparkles
+} from 'lucide-react';
 import { Navbar } from '@/components/navbar/Navbar';
 import { MapModule } from '@/components/map/MapModule';
 import { PassportCard } from '@/components/passport/PassportCard';
 import { TelemetryModule } from '@/components/telemetry/TelemetryModule';
 import { IntegrationDashboard } from '@/components/IntegrationDashboard';
+import { InsumosSimulator } from '@/components/InsumosSimulator';
+import { DigitalSignatureCard } from '@/components/DigitalSignatureCard';
 import { Can } from '@/components/security/Can';
 import { LOTES_DATA, Lote } from '@/app/data/lotes';
 import { INITIAL_BANKS, EntityOption } from '@/app/data/entities';
@@ -27,20 +41,24 @@ export default function Home() {
   const [selectedEntity, setSelectedEntity] = useState<EntityOption>(INITIAL_BANKS[0]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  // Mapeo dinámico del lote activo para PassportCard y componentes secundarios
+  // Estados para funcionalidades instantáneas: Comparativa Temporal y Alertas
+  const [compareYear, setCompareYear] = useState<'2025' | '2026'>('2026');
+  const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
+
+  // Mapeo dinámico del lote activo
   const loteActivo: Lote = Array.isArray(LOTES_DATA)
     ? LOTES_DATA.find((l) => l.id === selectedLoteId) || LOTES_DATA[0]
     : (LOTES_DATA as Record<string, Lote>)[selectedLoteId] || Object.values(LOTES_DATA)[0];
 
   if (!isMounted) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-xs sm:text-sm">
+      <div className="min-h-screen bg-[#080C14] flex items-center justify-center text-slate-400 text-xs sm:text-sm">
         Cargando AgroPassport AI...
       </div>
     );
   }
 
-  // Datos de métricas simulados por entidad para enriquecer las tarjetas superiores
+  // Métricas y actividad dinámicas de la entidad
   const entityMetrics = selectedEntity.metrics || {
     score: 86.4,
     scoreTrend: '+4.2% vs mes ant.',
@@ -54,36 +72,108 @@ export default function Home() {
     { id: '1', text: 'Sincronización satelital y de nodos completada', time: 'Hace 15 min', type: 'success' as const }
   ];
 
+  // Feed de Alertas de Anomalías Satelitales (IA)
+  const anomalies = [
+    {
+      id: 'ano-1',
+      lote: 'Lote Norte - Cuartel 3',
+      type: 'Estrés Hídrico',
+      detail: 'Variación de NDVI -18% detectada en las últimas 72hs.',
+      severity: 'high'
+    },
+    {
+      id: 'ano-2',
+      lote: 'Lote Sur - Pivot 1',
+      type: 'Anomalía Térmica',
+      detail: 'Temperatura foliar +3.2°C por encima de la media histórica.',
+      severity: 'medium'
+    }
+  ].filter((a) => !dismissedAlerts.includes(a.id));
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#080C14] text-slate-100 flex flex-col selection:bg-emerald-500/30 overflow-x-hidden">
       {/* Navbar principal */}
       <Navbar 
         selectedEntity={selectedEntity} 
         onSelectEntity={(entity) => setSelectedEntity(entity)} 
       />
 
-      {/* Contenedor adaptativo */}
       <main className="p-3 sm:p-5 md:p-6 lg:p-8 xl:p-10 space-y-4 sm:space-y-6 lg:space-y-8 flex-1 max-w-[1920px] mx-auto w-full">
         
-        {/* Encabezado Principal */}
-        <div className="border-b border-slate-800/80 pb-3 sm:pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4">
+        {/* Encabezado Principal + Accesos de Simplicidad Instantánea */}
+        <div className="border-b border-slate-800/80 pb-3 sm:pb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-white tracking-tight leading-snug">
-              Evaluación de Riesgo & Scoring Agrícola
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-white tracking-tight leading-snug">
+                Evaluación de Riesgo & Scoring Agrícola
+              </h1>
+              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold bg-[#00E699]/10 text-[#00E699] border border-[#00E699]/30 px-2 py-0.5 rounded-full">
+                <Sparkles className="w-3 h-3" /> Control 5s
+              </span>
+            </div>
             <p className="text-[11px] sm:text-xs md:text-sm text-slate-400 mt-0.5">
-              Monitoreo satelital y scoring crediticio consolidado para <span className="text-emerald-400 font-semibold">{selectedEntity.name}</span>
+              Monitoreo satelital y scoring crediticio consolidado para{" "}
+              <span className="text-[#00E699] font-semibold">{selectedEntity.name}</span>
             </p>
           </div>
+
+          {/* Generador Rápido de Ficha / Firma */}
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="self-start md:self-auto bg-[#00E699] hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition active:scale-95 shadow-lg shadow-[#00E699]/10 cursor-pointer"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>Generar Ficha Oficial (Firma Digital)</span>
+          </button>
         </div>
 
-        {/* KPIs Mejorados con tendencias y barras de progreso */}
+        {/* Banner de Alertas de Anomalías Satelitales (IA) */}
+        {anomalies.length > 0 && (
+          <div className="space-y-2">
+            {anomalies.map((ano) => (
+              <div 
+                key={ano.id}
+                className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 backdrop-blur-md"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg shrink-0 mt-0.5">
+                    <AlertOctagon className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-amber-300 uppercase tracking-wide">
+                        {ano.type}
+                      </span>
+                      <span className="text-[10px] font-mono text-slate-400">| {ano.lote}</span>
+                    </div>
+                    <p className="text-xs text-slate-300 mt-0.5">{ano.detail}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 self-end sm:self-auto">
+                  <button 
+                    onClick={() => alert(`Orden de Visita Agronómica creada para ${ano.lote}`)}
+                    className="text-[11px] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-semibold px-3 py-1.5 rounded-lg border border-amber-500/40 transition cursor-pointer"
+                  >
+                    Crear Orden de Visita
+                  </button>
+                  <button 
+                    onClick={() => setDismissedAlerts((prev) => [...prev, ano.id])}
+                    className="text-slate-500 hover:text-slate-300 text-xs p-1 cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* KPIs Principales */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Tarjeta 1 */}
-          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+          <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
             <div className="flex justify-between items-start mb-2">
               <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Passport Score</span>
-              <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+              <span className="text-[10px] font-semibold text-[#00E699] bg-emerald-500/10 px-2 py-0.5 rounded-md border border-[#00E699]/20">
                 {entityMetrics.scoreTrend}
               </span>
             </div>
@@ -92,14 +182,13 @@ export default function Home() {
             </div>
             <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
               <div 
-                className="bg-linear-to-r from-emerald-500 to-emerald-300 h-full rounded-full transition-all duration-500"
+                className="bg-linear-to-r from-emerald-500 to-[#00E699] h-full rounded-full transition-all duration-500"
                 style={{ width: `${entityMetrics.score}%` }}
               ></div>
             </div>
           </div>
 
-          {/* Tarjeta 2 */}
-          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+          <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
             <div className="flex justify-between items-start mb-2">
               <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Canje de Insumos</span>
               <span className="text-[10px] font-semibold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/20">
@@ -117,8 +206,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Tarjeta 3 */}
-          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+          <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
             <div className="flex justify-between items-start mb-2">
               <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Alertas IoT</span>
               <span className="text-[10px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
@@ -137,24 +225,30 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Feed de Actividad Dinámica en Tiempo Real */}
-        <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+        {/* Simulador de Canje e Insumos */}
+        <InsumosSimulator 
+          entity={selectedEntity} 
+          onExportPDF={() => setIsModalOpen(true)} 
+        />
+
+        {/* Feed de Actividad en Tiempo Real */}
+        <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
           <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-[#00E699]">
                 <Activity className="w-4 h-4" />
               </div>
               <div>
                 <h4 className="text-xs font-bold text-slate-100 tracking-wide uppercase">
-                  Actividad en Tiempo Real — {selectedEntity.name}
+                  Actividad en Tiempo Real — <span className="text-[#00E699]">{selectedEntity.name}</span>
                 </h4>
                 <p className="text-[11px] text-slate-400">Monitoreo de eventos y flujos operativos de la entidad</p>
               </div>
             </div>
-            <p className="text-[11px] sm:text-xs md:text-sm text-slate-400 mt-0.5">
-               Monitoreo satelital y scoring crediticio consolidado para{" "}
-              <span className="text-emerald-400 font-semibold">{selectedEntity.name}</span>
-            </p>
+            <span className="text-[10px] font-mono px-2 py-1 rounded-lg bg-emerald-500/10 text-[#00E699] border border-[#00E699]/20 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00E699] animate-pulse"></span>
+              <span>Sincronizado</span>
+            </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -165,7 +259,7 @@ export default function Home() {
               >
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 shrink-0">
-                    {act.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+                    {act.type === 'success' && <CheckCircle2 className="w-4 h-4 text-[#00E699]" />}
                     {act.type === 'warning' && <AlertTriangle className="w-4 h-4 text-amber-400" />}
                     {act.type === 'info' && <Info className="w-4 h-4 text-blue-400" />}
                   </div>
@@ -176,15 +270,49 @@ export default function Home() {
                     <span className="text-[10px] text-slate-500">{act.time}</span>
                   </div>
                 </div>
-                <ArrowUpRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-emerald-400 transition-colors shrink-0 mt-1" />
+                <ArrowUpRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-[#00E699] transition-colors shrink-0 mt-1" />
               </div>
             ))}
           </div>
         </div>
 
-        {/* Módulo Central: Mapa */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch">
-          <div className="lg:col-span-12 w-full overflow-hidden rounded-2xl border border-slate-800/80 shadow-2xl flex flex-col min-h-95 sm:min-h-112.5 lg:min-h-130">
+        {/* Mapa Central con Selector de Comparativa Temporal ("Time-Machine") */}
+        <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-4 shadow-2xl space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div className="flex items-center gap-2">
+              <History className="w-4 h-4 text-[#00E699]" />
+              <span className="text-xs font-bold text-white uppercase tracking-wider">
+                Mapa Satelital & Comparativa Temporal de Lote
+              </span>
+            </div>
+
+            {/* Selector Time-Machine */}
+            <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+              <span className="text-[10px] text-slate-400 px-2 font-medium">Comparar Campaña:</span>
+              <button
+                onClick={() => setCompareYear('2025')}
+                className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
+                  compareYear === '2025'
+                    ? 'bg-[#00E699]/20 text-[#00E699] border border-[#00E699]/40'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Octubre 2025
+              </button>
+              <button
+                onClick={() => setCompareYear('2026')}
+                className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
+                  compareYear === '2026'
+                    ? 'bg-[#00E699] text-slate-950 shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Octubre 2026 (Actual)
+              </button>
+            </div>
+          </div>
+
+          <div className="w-full overflow-hidden rounded-xl border border-slate-800 flex flex-col min-h-95 sm:min-h-112.5 lg:min-h-130">
             <MapModule 
               selectedLoteId={selectedLoteId} 
               onSelectLote={(id) => setSelectedLoteId(id)} 
@@ -209,15 +337,15 @@ export default function Home() {
         </Can>
       </main>
 
-      {/* MODAL RESPONSIVE: VISTA PREVIA Y EXPORTACIÓN */}
+      {/* MODAL RESPONSIVE: VISTA PREVIA DE FICHA OFICIAL + FIRMA DIGITAL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 max-w-md w-full relative shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3 sticky top-0 bg-slate-900/90 backdrop-blur-sm z-10 -mt-1 pt-1">
+          <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-4 sm:p-6 max-w-lg w-full relative shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3 sticky top-0 bg-[#0F172A]/90 backdrop-blur-sm z-10 -mt-1 pt-1">
               <div className="flex items-center gap-2">
-                <FileSpreadsheet className="w-4 h-4 text-emerald-400 shrink-0" />
+                <FileSpreadsheet className="w-4 h-4 text-[#00E699] shrink-0" />
                 <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-slate-300 truncate">
-                  Vista Previa del Informe
+                  Generador de Ficha Operativa
                 </h3>
               </div>
               <button 
@@ -229,7 +357,10 @@ export default function Home() {
               </button>
             </div>
 
-            {/* PassportCard vista previa */}
+            {/* Componente de Firma Digital */}
+            <DigitalSignatureCard entity={selectedEntity} lote={loteActivo} />
+
+            {/* Vista Previa de la Ficha del Lote */}
             <div className="w-full">
               <PassportCard
                 loteId={loteActivo.id}
@@ -245,12 +376,12 @@ export default function Home() {
 
             <button
               onClick={() => {
-                alert(`Generando documento PDF oficial para ${loteActivo.nombre}...`);
+                alert(`Generando documento PDF oficial firmado digitalmente para ${loteActivo.nombre}...`);
                 setIsModalOpen(false);
               }}
-              className="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-slate-950 font-bold py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition cursor-pointer shadow-lg shadow-emerald-500/10"
+              className="w-full bg-[#00E699] hover:bg-emerald-400 active:scale-[0.98] text-slate-950 font-bold py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition cursor-pointer shadow-lg shadow-[#00E699]/10"
             >
-              Confirmar y Descargar PDF
+              Confirmar e Imprimir / Descargar PDF
             </button>
           </div>
         </div>
