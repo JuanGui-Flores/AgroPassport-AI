@@ -13,7 +13,8 @@ import {
   ShieldCheck,
   History,
   AlertOctagon,
-  Sparkles
+  Sparkles,
+  ClipboardList
 } from 'lucide-react';
 import { Navbar } from '@/components/navbar/Navbar';
 import { MapModule } from '@/components/map/MapModule';
@@ -25,6 +26,13 @@ import { DigitalSignatureCard } from '@/components/DigitalSignatureCard';
 import { Can } from '@/components/security/Can';
 import { LOTES_DATA, Lote } from '@/app/data/lotes';
 import { INITIAL_BANKS, EntityOption } from '@/app/data/entities';
+
+// Función auxiliar criptográficamente segura para generar el ID numérico
+const generateSecureId = (): number => {
+  const array = new Uint32Array(1);
+  crypto.getRandomValues(array);
+  return 1000 + (array[0] % 9000);
+};
 
 const subscribe = () => () => {};
 const useIsMounted = () => {
@@ -40,6 +48,10 @@ export default function Home() {
   const [selectedLoteId, setSelectedLoteId] = useState<string>('ARG-SJ-2026');
   const [selectedEntity, setSelectedEntity] = useState<EntityOption>(INITIAL_BANKS[0]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  // Estados para modales estilizados
+  const [activeVisita, setActiveVisita] = useState<{ lote: string; id: number } | null>(null);
+  const [pdfGeneratedLote, setPdfGeneratedLote] = useState<string | null>(null);
 
   // Estados para funcionalidades instantáneas: Comparativa Temporal y Alertas
   const [compareYear, setCompareYear] = useState<'2025' | '2026'>('2026');
@@ -151,7 +163,10 @@ export default function Home() {
                 </div>
                 <div className="flex items-center gap-2 self-end sm:self-auto">
                   <button 
-                    onClick={() => alert(`Orden de Visita Agronómica creada para ${ano.lote}`)}
+                    onClick={() => setActiveVisita({
+                      lote: ano.lote,
+                      id: generateSecureId()
+                    })}
                     className="text-[11px] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-semibold px-3 py-1.5 rounded-lg border border-amber-500/40 transition cursor-pointer"
                   >
                     Crear Orden de Visita
@@ -337,6 +352,98 @@ export default function Home() {
         </Can>
       </main>
 
+      {/* MODAL 1: ORDEN DE VISITA AGRONÓMICA */}
+      {activeVisita && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-[#0F172A] border border-amber-500/30 rounded-2xl p-6 max-w-md w-full relative shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg">
+                  <ClipboardList className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                    Orden de Visita Creada
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-mono">ID: ORD-{activeVisita.id}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setActiveVisita(null)}
+                className="text-slate-400 hover:text-white transition p-1.5 rounded-lg hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-2">
+              <p className="text-xs text-slate-300">
+                Se ha generado con éxito la orden técnica de inspección para:
+              </p>
+              <div className="text-sm font-bold text-amber-400 bg-amber-500/10 px-3 py-2 rounded-lg border border-amber-500/20">
+                {activeVisita.lote}
+              </div>
+              <p className="text-[11px] text-slate-400 pt-1">
+                El agrónomo asignado recibirá la geolocalización e indicadores del lote en su aplicación móvil.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setActiveVisita(null)}
+              className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer shadow-lg shadow-amber-500/10"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: CONFIRMACIÓN Y DESCARGA DE PDF */}
+      {pdfGeneratedLote && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-[#0F172A] border border-[#00E699]/30 rounded-2xl p-6 max-w-md w-full relative shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-[#00E699]/20 text-[#00E699] rounded-lg">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                    Documento Listo
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-mono">Firma Digital Verificada</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setPdfGeneratedLote(null)}
+                className="text-slate-400 hover:text-white transition p-1.5 rounded-lg hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-2">
+              <p className="text-xs text-slate-300">
+                Se generó correctamente el reporte oficial PDF para:
+              </p>
+              <div className="text-sm font-bold text-[#00E699] bg-[#00E699]/10 px-3 py-2 rounded-lg border border-[#00E699]/20">
+                {pdfGeneratedLote}
+              </div>
+              <p className="text-[11px] text-slate-400 pt-1">
+                El documento incluye la trazabilidad satelital, scoring de la entidad y sello criptográfico oficial.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setPdfGeneratedLote(null)}
+              className="w-full bg-[#00E699] hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer shadow-lg shadow-[#00E699]/10"
+            >
+              Aceptar
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* MODAL RESPONSIVE: VISTA PREVIA DE FICHA OFICIAL + FIRMA DIGITAL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
@@ -376,7 +483,7 @@ export default function Home() {
 
             <button
               onClick={() => {
-                alert(`Generando documento PDF oficial firmado digitalmente para ${loteActivo.nombre}...`);
+                setPdfGeneratedLote(loteActivo.nombre);
                 setIsModalOpen(false);
               }}
               className="w-full bg-[#00E699] hover:bg-emerald-400 active:scale-[0.98] text-slate-950 font-bold py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition cursor-pointer shadow-lg shadow-[#00E699]/10"
