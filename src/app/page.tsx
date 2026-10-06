@@ -669,7 +669,7 @@ export default function Home() {
               </Can>
             )}
 
-          {{/* Módulo de Maquinaria y Parque Automotor */}
+          {/* Módulo de Maquinaria y Parque Automotor */}
 {selectedEntity && (
   <Can I="producer:manage">
     <div className="transition-all duration-300">
