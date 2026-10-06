@@ -24,16 +24,16 @@ model User {
 }
 
 model Entity {
-  id           String   @id @default(uuid())
-  cuit         String   @unique
+  id           String         @id @default(uuid())
   businessName String
+  cuit         String         @unique
   code         String?
-  type         String?  @default("partner")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
+  type         String?        @default("partner")
   members      EntityMember[]
   lotes        Lote[]
+  maquinarias  Maquinaria[]   // 👈 Añadir esta relación inversa
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 }
 
 model EntityMember {
@@ -52,22 +52,22 @@ model EntityMember {
 // ====================================================
 
 model Lote {
-  id          String   @id @default(uuid())
-  code        String   @unique // Identificador de Lote (ej: "ARG-SJ-2026")
-  nombre      String           // Nombre descriptivo (ej: "Lote Norte - Cuartel 3")
-  hectareas   Float
-  cultivo     String?          // Tipo de cultivo (ej: "Soja 1ra")
-  score       Float            // Passport Score agrícola
-  ndvi        Float            // Índice de vegetación
-  rindeEst    Float            // Rendimiento estimado (Tn/Ha)
-  latitud     Float?
-  longitud    Float?
-  entityId    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  entity      Entity      @relation(fields: [entityId], references: [id], onDelete: Cascade)
-  telemetrias Telemetry[]
+  id           String         @id @default(uuid())
+  code         String         @unique
+  nombre       String
+  hectareas    Float
+  cultivo      String?
+  score        Float          @default(85.0)
+  ndvi         Float          @default(0.70)
+  rindeEst     Float          @default(4.0)
+  latitud      Float?
+  longitud     Float?
+  entityId     String
+  entity       Entity         @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  telemetrias  Telemetry[]
+  maquinarias  Maquinaria[]   // 👈 Añadir esta relación inversa
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 }
 
 model Telemetry {
@@ -79,4 +79,19 @@ model Telemetry {
   timestamp         DateTime @default(now())
 
   lote              Lote     @relation(fields: [loteId], references: [id], onDelete: Cascade)
+}
+
+model Maquinaria {
+  id           String   @id @default(uuid())
+  codigo       String   @unique
+  nombre       String   // Ej: Tractor John Deere 8R, Cosechadora S780, Drone DJI Agras
+  tipo         String   // Tractor, Cosechadora, Pulverizadora, Drone
+  horasUso     Float    @default(0.0)
+  estado       String   @default("Operativo") // Operativo, En Mantenimiento, En Lote
+  entityId     String
+  entity       Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  loteId       String?
+  lote         Lote?    @relation(fields: [loteId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

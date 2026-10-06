@@ -29,6 +29,7 @@ import { DigitalSignatureCard } from '@/components/DigitalSignatureCard';
 import { Can } from '@/components/security/Can';
 import { Lote } from '@/app/data/lotes';
 import { EntityOption } from '@/app/data/entities';
+import { MachineryModule } from '@/components/machinery/MachineryModule';
 
 interface DbEntity {
   id: string;
@@ -409,4 +410,518 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 flex-
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => setIsAddEntityModalOpen(true)}
+              className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-3 py-2.5 rounded-xl text-xs flex items-center gap-2 transition cursor-pointer border border-slate-700"
+            >
+              <Building2 className="w-4 h-4 text-[#00E699]" />
+              <span>+ Nueva Sucursal</span>
+            </button>
+
+            <button
+              onClick={() => setIsAddLoteModalOpen(true)}
+              className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-3 py-2.5 rounded-xl text-xs flex items-center gap-2 transition cursor-pointer border border-slate-700"
+            >
+              <MapPin className="w-4 h-4 text-[#00E699]" />
+              <span>+ Agregar Terreno / Lote</span>
+            </button>
+
+            {lotesList.length > 0 && (
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-[#00E699] hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition active:scale-95 shadow-lg shadow-[#00E699]/10 cursor-pointer"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>Generar Ficha Oficial</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Banner de Alertas */}
+        {anomalies.length > 0 && lotesList.length > 0 && (
+          <div className="space-y-2">
+            {anomalies.map((ano) => (
+              <div 
+                key={ano.id}
+                className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 backdrop-blur-md"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg shrink-0 mt-0.5">
+                    <AlertOctagon className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-amber-300 uppercase tracking-wide">
+                        {ano.type}
+                      </span>
+                      <span className="text-[10px] font-mono text-slate-400">| {ano.lote}</span>
+                    </div>
+                    <p className="text-xs text-slate-300 mt-0.5">{ano.detail}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 self-end sm:self-auto">
+                  <button 
+                    onClick={() => setActiveVisita({
+                      lote: ano.lote,
+                      id: generateSecureId()
+                    })}
+                    className="text-[11px] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-semibold px-3 py-1.5 rounded-lg border border-amber-500/40 transition cursor-pointer"
+                  >
+                    Crear Orden de Visita
+                  </button>
+                  <button 
+                    onClick={() => setDismissedAlerts((prev) => [...prev, ano.id])}
+                    className="text-slate-500 hover:text-slate-300 text-xs p-1 cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 🗺️ PANTALLA INICIAL LIMPIA: Si la entidad no tiene lotes registrados */}
+        {lotesList.length === 0 ? (
+          <div className="bg-[#0F172A] border border-slate-800/80 rounded-3xl p-12 text-center space-y-4 shadow-xl">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-[#00E699] flex items-center justify-center mx-auto border border-emerald-500/20">
+              <MapPin className="w-7 h-7" />
+            </div>
+            <div className="max-w-md mx-auto">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">No hay lotes ni terrenos registrados</h3>
+              <p className="text-xs text-slate-400 mt-1">
+                La entidad <span className="text-[#00E699] font-semibold">{selectedEntity?.name}</span> aún no posee cuarteles o lotes agrícolas asociados en la base de datos.
+              </p>
+            </div>
+            <button
+              onClick={() => setIsAddLoteModalOpen(true)}
+              className="bg-[#00E699] hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs transition cursor-pointer shadow-lg shadow-[#00E699]/10 inline-flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Agregar Primer Lote / Terreno</span>
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* KPIs Principales */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Passport Score</span>
+                  <span className="text-[10px] font-semibold text-[#00E699] bg-emerald-500/10 px-2 py-0.5 rounded-md border border-[#00E699]/20">
+                    {entityMetrics.scoreTrend}
+                  </span>
+                </div>
+                <div className="text-3xl font-extrabold text-white tracking-tight mb-3">
+                  {entityMetrics.score}
+                </div>
+                <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                  <div 
+                    className="bg-linear-to-r from-emerald-500 to-[#00E699] h-full rounded-full transition-all duration-500"
+                    style={{ width: `${entityMetrics.score}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Canje de Insumos</span>
+                  <span className="text-[10px] font-semibold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/20">
+                    {entityMetrics.canjeTrend}
+                  </span>
+                </div>
+                <div className="text-3xl font-extrabold text-white tracking-tight mb-3">
+                  {entityMetrics.canje}%
+                </div>
+                <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                  <div 
+                    className="bg-linear-to-r from-blue-500 to-blue-300 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${entityMetrics.canje}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Alertas IoT</span>
+                  <span className="text-[10px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                    {entityMetrics.alertsStatus}
+                  </span>
+                </div>
+                <div className="text-3xl font-extrabold text-white tracking-tight mb-3">
+                  {entityMetrics.alerts}
+                </div>
+                <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                  <div 
+                    className="bg-linear-to-r from-amber-500 to-amber-300 h-full rounded-full transition-all duration-500"
+                    style={{ width: '45%' }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Simulador de Insumos */}
+            {selectedEntity && (
+              <InsumosSimulator 
+                entity={selectedEntity} 
+                onExportPDF={() => setIsModalOpen(true)} 
+              />
+            )}
+
+            {/* Feed de Actividad */}
+            <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-emerald-500/10 text-[#00E699]">
+                    <Activity className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-100 tracking-wide uppercase">
+                      Actividad en Tiempo Real — <span className="text-[#00E699]">{selectedEntity?.name}</span>
+                    </h4>
+                    <p className="text-[11px] text-slate-400">Monitoreo de eventos y flujos operativos de la entidad</p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-1 rounded-lg bg-emerald-500/10 text-[#00E699] border border-[#00E699]/20 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#00E699] animate-pulse"></span>
+                  <span>Sincronizado</span>
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {entityActivities.map((act) => (
+                  <div 
+                    key={act.id} 
+                    className="flex items-start justify-between gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/60 hover:border-slate-700 transition-all group"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 shrink-0">
+                        {act.type === 'success' && <CheckCircle2 className="w-4 h-4 text-[#00E699]" />}
+                        {act.type === 'warning' && <AlertTriangle className="w-4 h-4 text-amber-400" />}
+                        {act.type === 'info' && <Info className="w-4 h-4 text-blue-400" />}
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-slate-200 group-hover:text-white transition-colors">
+                          {act.text}
+                        </p>
+                        <span className="text-[10px] text-slate-500">{act.time}</span>
+                      </div>
+                    </div>
+                    <ArrowUpRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-[#00E699] transition-colors shrink-0 mt-1" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mapa Central */}
+            <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-4 shadow-2xl space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <History className="w-4 h-4 text-[#00E699]" />
+                  <span className="text-xs font-bold text-white uppercase tracking-wider">
+                    Mapa Satelital & Comparativa Temporal de Lote
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                  <span className="text-[10px] text-slate-400 px-2 font-medium">Comparar Campaña:</span>
+                  <button
+                    onClick={() => setCompareYear('2025')}
+                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
+                      compareYear === '2025'
+                        ? 'bg-[#00E699]/20 text-[#00E699] border border-[#00E699]/40'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Octubre 2025
+                  </button>
+                  <button
+                    onClick={() => setCompareYear('2026')}
+                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
+                      compareYear === '2026'
+                        ? 'bg-[#00E699] text-slate-950 shadow-md'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Octubre 2026 (Actual)
+                  </button>
+                </div>
+              </div>
+
+              <div className="w-full overflow-hidden rounded-xl border border-slate-800 flex flex-col min-h-95 sm:min-h-112.5 lg:min-h-130">
+                <MapModule 
+                  selectedLoteId={selectedLoteId} 
+                  onSelectLote={(id) => setSelectedLoteId(id)} 
+                />
+              </div>
+            </div>
+
+            {/* Telemetría */}
+            {loteActivo && (
+              <Can I="producer:manage">
+                <div className="transition-all duration-300">
+                  <TelemetryModule 
+                    loteNombre={loteActivo.nombre} 
+                  />
+                </div>
+              </Can>
+            )}
+
+            {/* Módulo de Maquinaria y Parque Automotor */}
+            {selectedEntity && (
+              <Can I="producer:manage">
+                <div className="transition-all duration-300">
+                  <MachineryModule 
+                    entity={selectedEntity} 
+                    lotesList={lotesList} 
+                  />
+                </div>
+              </Can>
+            )}
+
+            {/* Dashboard de Auditoría */}
+            <Can I="audit:view">
+              <div className="pt-4 sm:pt-6 border-t border-slate-800/80 transition-all duration-300">
+                <IntegrationDashboard />
+              </div>
+            </Can>
+          </>
+        )}
+      </main>
+
+      {/* 🏢 MODAL: Registrar Nueva Sucursal / Entidad */}
+      {isAddEntityModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-6 max-w-md w-full relative shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-emerald-500/20 text-[#00E699] rounded-lg">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                  Registrar Sucursal / Entidad
+                </h3>
+              </div>
+              <button 
+                onClick={() => setIsAddEntityModalOpen(false)}
+                className="text-slate-400 hover:text-white transition p-1.5 rounded-lg hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateEntity} className="space-y-3">
+              <div>
+                <label className="text-[11px] text-slate-400 font-medium">Razón Social / Nombre</label>
+                <input name="businessName" required placeholder="Ej: Agropecuaria El Hornero S.R.L." className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none" />
+              </div>
+              <div>
+                <label className="text-[11px] text-slate-400 font-medium">CUIT</label>
+                <input name="cuit" required placeholder="Ej: 30-88765432-1" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none" />
+              </div>
+              <div>
+                <label className="text-[11px] text-slate-400 font-medium">Código Interno</label>
+                <input name="code" placeholder="Ej: AP-102" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none" />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-[#00E699] hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer shadow-lg shadow-[#00E699]/10 mt-2"
+              >
+                Guardar en PostgreSQL
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 📍 MODAL: Registrar Nuevo Lote / Terreno */}
+      {isAddLoteModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-6 max-w-md w-full relative shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-emerald-500/20 text-[#00E699] rounded-lg">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                  Registrar Lote / Cuartel
+                </h3>
+              </div>
+              <button 
+                onClick={() => setIsAddLoteModalOpen(false)}
+                className="text-slate-400 hover:text-white transition p-1.5 rounded-lg hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateLote} className="space-y-3">
+              <div>
+                <label className="text-[11px] text-slate-400 font-medium">Código de Lote</label>
+                <input name="code" required placeholder="Ej: ARG-SJ-2026" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none" />
+              </div>
+              <div>
+                <label className="text-[11px] text-slate-400 font-medium">Nombre del Lote</label>
+                <input name="nombre" required placeholder="Ej: Lote Norte - Cuartel 3" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none" />
+              </div>
+              <div>
+                <label className="text-[11px] text-slate-400 font-medium">Hectáreas</label>
+                <input name="hectareas" type="number" step="0.1" required placeholder="Ej: 145.0" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none" />
+              </div>
+              <div>
+                <label className="text-[11px] text-slate-400 font-medium">Cultivo</label>
+                <input name="cultivo" defaultValue="Soja 1ra" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none" />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-[#00E699] hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer shadow-lg shadow-[#00E699]/10 mt-2"
+              >
+                Registrar Lote en Base de Datos
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODALES: Órdenes de Visita & Ficha Oficial */}
+      {activeVisita && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-[#0F172A] border border-amber-500/30 rounded-2xl p-6 max-w-md w-full relative shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg">
+                  <ClipboardList className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                    Orden de Visita Creada
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-mono">ID: ORD-{activeVisita.id}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setActiveVisita(null)}
+                className="text-slate-400 hover:text-white transition p-1.5 rounded-lg hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-2">
+              <p className="text-xs text-slate-300">
+                Se ha generado con éxito la orden técnica de inspección para:
+              </p>
+              <div className="text-sm font-bold text-amber-400 bg-amber-500/10 px-3 py-2 rounded-lg border border-amber-500/20">
+                {activeVisita.lote}
+              </div>
+              <p className="text-[11px] text-slate-400 pt-1">
+                El agrónomo asignado recibirá la geolocalización e indicadores del lote en su aplicación móvil.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setActiveVisita(null)}
+              className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer shadow-lg shadow-amber-500/10"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
+
+      {pdfGeneratedLote && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-[#0F172A] border border-[#00E699]/30 rounded-2xl p-6 max-w-md w-full relative shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-[#00E699]/20 text-[#00E699] rounded-lg">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                    Documento Listo
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-mono">Firma Digital Verificada</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setPdfGeneratedLote(null)}
+                className="text-slate-400 hover:text-white transition p-1.5 rounded-lg hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-2">
+              <p className="text-xs text-slate-300">
+                Se generó correctamente el reporte oficial PDF para:
+              </p>
+              <div className="text-sm font-bold text-[#00E699] bg-[#00E699]/10 px-3 py-2 rounded-lg border border-[#00E699]/20">
+                {pdfGeneratedLote}
+              </div>
+              <p className="text-[11px] text-slate-400 pt-1">
+                El documento incluye la trazabilidad satelital, scoring de la entidad y sello criptográfico oficial.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setPdfGeneratedLote(null)}
+              className="w-full bg-[#00E699] hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer shadow-lg shadow-[#00E699]/10"
+            >
+              Aceptar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isModalOpen && selectedEntity && loteActivo && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-4 sm:p-6 max-w-lg w-full relative shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3 sticky top-0 bg-[#0F172A]/90 backdrop-blur-sm z-10 -mt-1 pt-1">
+              <div className="flex items-center gap-2">
+                <FileSpreadsheet className="w-4 h-4 text-[#00E699] shrink-0" />
+                <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-slate-300 truncate">
+                  Generador de Ficha Operativa
+                </h3>
+              </div>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="text-slate-400 hover:text-white transition p-1.5 rounded-lg hover:bg-slate-800 cursor-pointer"
+                aria-label="Cerrar modal"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <DigitalSignatureCard entity={selectedEntity} lote={loteActivo} />
+
+            <div className="w-full">
+              <PassportCard
+                loteId={loteActivo.id}
+                nombre={loteActivo.nombre}
+                hectareas={loteActivo.hectareas}
+                score={loteActivo.score}
+                ndvi={loteActivo.ndvi}
+                rindeEst={loteActivo.rindeEst}
+                entity={selectedEntity}
+                hideButtons={true}
+              />
+            </div>
+
+            <button
+              onClick={() => {
+                setPdfGeneratedLote(loteActivo.nombre);
+                setIsModalOpen(false);
+              }}
+              className="w-full bg-[#00E699] hover:bg-emerald-400 active:scale-[0.98] text-slate-950 font-bold py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition cursor-pointer shadow-lg shadow-[#00E699]/10"
+            >
+              Confirmar e Imprimir / Descargar PDF
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
