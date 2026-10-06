@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { toast } from "sonner";
 import { FileDown, Loader2, CheckCircle2, Sprout } from "lucide-react";
 import { EntityOption } from "@/app/data/entities";
-import { generatePassportPDF } from "@/utils/generatePdf";
+import jsPDF from 'jspdf';
 
 interface PassportCardProps {
   loteId: string;
