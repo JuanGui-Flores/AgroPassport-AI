@@ -1,7 +1,7 @@
 // src/app/page.tsx
 'use client';
 
-import React, { useState, useSyncExternalStore } from 'react';
+import React, { useState, useEffect, useSyncExternalStore } from 'react';
 import { 
   X, 
   FileSpreadsheet, 
@@ -27,7 +27,35 @@ import { Can } from '@/components/security/Can';
 import { LOTES_DATA, Lote } from '@/app/data/lotes';
 import { INITIAL_BANKS, EntityOption } from '@/app/data/entities';
 
-// Función auxiliar criptográficamente segura para generar el ID numérico
+interface DbEntity {
+  id: string;
+  businessName: string;
+  cuit: string;
+  code?: string;
+  type?: 'branch' | 'partner';
+}
+
+interface DbLote {
+  id: string;
+  code: string;
+  nombre: string;
+  hectareas: number;
+  cultivo?: string;
+  score: number;
+  ndvi: number;
+  rindeEst: number;
+  latitud?: number;
+  longitud?: number;
+  entityId: string;
+  telemetrias?: Array<{
+    id: string;
+    humedadSuelo: number;
+    temperaturaFoliar: number;
+    bateriaNodo: number;
+    timestamp: string;
+  }>;
+}
+
 const generateSecureId = (): number => {
   const array = new Uint32Array(1);
   crypto.getRandomValues(array);
@@ -46,21 +74,118 @@ const useIsMounted = () => {
 export default function Home() {
   const isMounted = useIsMounted();
   const [selectedLoteId, setSelectedLoteId] = useState<string>('ARG-SJ-2026');
-  const [selectedEntity, setSelectedEntity] = useState<EntityOption>(INITIAL_BANKS[0]);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  
+  // Estado para la entidad activa e integración desde PostgreSQL
+  const [entitiesList, setEntitiesList] = useState<EntityOption[]>(INITIAL_BANKS);
+  const [selectedEntity, setSelectedEntity] = useState<EntityOption>(entitiesList[0] ?? INITIAL_BANKS[0]);
+  const [loadingEntities, setLoadingEntities] = useState<boolean>(true);
 
-  // Estados para modales estilizados
+  // Estado para Lotes dinámicos traídos desde PostgreSQL
+  const [lotesList, setLotesList] = useState<Lote[]>([]);
+  const [loadingLotes, setLoadingLotes] = useState<boolean>(true);
+
+  // Modales
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [activeVisita, setActiveVisita] = useState<{ lote: string; id: number } | null>(null);
   const [pdfGeneratedLote, setPdfGeneratedLote] = useState<string | null>(null);
 
-  // Estados para funcionalidades instantáneas: Comparativa Temporal y Alertas
   const [compareYear, setCompareYear] = useState<'2025' | '2026'>('2026');
   const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
 
-  // Mapeo dinámico del lote activo
-  const loteActivo: Lote = Array.isArray(LOTES_DATA)
-    ? LOTES_DATA.find((l) => l.id === selectedLoteId) || LOTES_DATA[0]
-    : (LOTES_DATA as Record<string, Lote>)[selectedLoteId] || Object.values(LOTES_DATA)[0];
+  // 🔄 Carga de entidades desde PostgreSQL
+  useEffect(() => {
+    const fetchEntities = async () => {
+      try {
+        const response = await fetch('/api/entities');
+        if (!response.ok) throw new Error('Error al consultar entidades');
+        const dbEntities: DbEntity[] = await response.json();
+
+        if (Array.isArray(dbEntities) && dbEntities.length > 0) {
+          const formattedEntities: EntityOption[] = dbEntities.map((ent) => ({
+            id: ent.id,
+            name: ent.businessName,
+            cuit: ent.cuit,
+            code: ent.code || 'AP-GEN',
+            type: ent.type || 'partner',
+            metrics: {
+              score: 88.2,
+              scoreTrend: '+3.5% vs mes ant.',
+              canje: 90,
+              canjeTrend: '15 Lotes activos',
+              alerts: 5,
+              alertsStatus: 'Sin alertas críticas'
+            },
+            recentActivity: [
+              {
+                id: `act-${ent.id}`,
+                text: `Conexión verificada para ${ent.businessName}`,
+                time: 'Hace un momento',
+                type: 'success'
+              }
+            ]
+          }));
+
+          setEntitiesList(formattedEntities);
+          setSelectedEntity(formattedEntities[0]);
+        }
+      } catch (error) {
+        console.warn('Usando entidades de respaldo debido a:', error);
+      } finally {
+        setLoadingEntities(false);
+      }
+    };
+
+    void fetchEntities();
+  }, []);
+
+  const getLoteEstado = (score: number): string => {
+    if (score >= 80) return 'Óptimo';
+    if (score >= 70) return 'Atención Requerida';
+    return 'Bajo';
+  };
+
+  // 🔄 Carga de Lotes desde PostgreSQL (/api/lotes)
+  useEffect(() => {
+    const fetchLotes = async () => {
+      try {
+        setLoadingLotes(true);
+        const response = await fetch(`/api/lotes?entityId=${selectedEntity.id}`);
+        if (!response.ok) throw new Error('Error al obtener lotes');
+        const dbLotes: DbLote[] = await response.json();
+
+        if (Array.isArray(dbLotes) && dbLotes.length > 0) {
+          const formattedLotes: Lote[] = dbLotes.map((l) => ({
+            id: l.code || l.id,
+            nombre: l.nombre,
+            hectareas: l.hectareas,
+            score: l.score,
+            ndvi: l.ndvi,
+            rindeEst: typeof l.rindeEst === 'number' ? `${l.rindeEst.toFixed(1)} Tn / Ha` : String(l.rindeEst),
+            estado: getLoteEstado(l.score),
+          }));
+
+          setLotesList(formattedLotes);
+          if (formattedLotes[0]) {
+            setSelectedLoteId(formattedLotes[0].id);
+          }
+        } else {
+          setLotesList(Array.isArray(LOTES_DATA) ? LOTES_DATA : Object.values(LOTES_DATA));
+        }
+      } catch (error) {
+        console.warn('Usando lotes estáticos de respaldo debido a:', error);
+        setLotesList(Array.isArray(LOTES_DATA) ? LOTES_DATA : Object.values(LOTES_DATA));
+      } finally {
+        setLoadingLotes(false);
+      }
+    };
+
+    void fetchLotes();
+  }, [selectedEntity]);
+
+  const fallbackLotes = Array.isArray(LOTES_DATA) ? LOTES_DATA : Object.values(LOTES_DATA);
+  const activeLotesPool = lotesList.length > 0 ? lotesList : fallbackLotes;
+
+  const loteActivo: Lote = activeLotesPool.find((l) => l.id === selectedLoteId) || activeLotesPool[0];
 
   if (!isMounted) {
     return (
@@ -70,7 +195,6 @@ export default function Home() {
     );
   }
 
-  // Métricas y actividad dinámicas de la entidad
   const entityMetrics = selectedEntity.metrics || {
     score: 86.4,
     scoreTrend: '+4.2% vs mes ant.',
@@ -84,7 +208,6 @@ export default function Home() {
     { id: '1', text: 'Sincronización satelital y de nodos completada', time: 'Hace 15 min', type: 'success' as const }
   ];
 
-  // Feed de Alertas de Anomalías Satelitales (IA)
   const anomalies = [
     {
       id: 'ano-1',
@@ -104,7 +227,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#080C14] text-slate-100 flex flex-col selection:bg-emerald-500/30 overflow-x-hidden">
-      {/* Navbar principal */}
       <Navbar 
         selectedEntity={selectedEntity} 
         onSelectEntity={(entity) => setSelectedEntity(entity)} 
@@ -112,7 +234,7 @@ export default function Home() {
 
       <main className="p-3 sm:p-5 md:p-6 lg:p-8 xl:p-10 space-y-4 sm:space-y-6 lg:space-y-8 flex-1 max-w-[1920px] mx-auto w-full">
         
-        {/* Encabezado Principal + Accesos de Simplicidad Instantánea */}
+        {/* Encabezado Principal */}
         <div className="border-b border-slate-800/80 pb-3 sm:pb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
@@ -122,6 +244,11 @@ export default function Home() {
               <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold bg-[#00E699]/10 text-[#00E699] border border-[#00E699]/30 px-2 py-0.5 rounded-full">
                 <Sparkles className="w-3 h-3" /> Control 5s
               </span>
+              {(loadingEntities || loadingLotes) && (
+                <span className="text-[10px] text-amber-400 font-mono animate-pulse">
+                  (Sincronizando PostgreSQL...)
+                </span>
+              )}
             </div>
             <p className="text-[11px] sm:text-xs md:text-sm text-slate-400 mt-0.5">
               Monitoreo satelital y scoring crediticio consolidado para{" "}
@@ -129,7 +256,6 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Generador Rápido de Ficha / Firma */}
           <button
             onClick={() => setIsModalOpen(true)}
             className="self-start md:self-auto bg-[#00E699] hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition active:scale-95 shadow-lg shadow-[#00E699]/10 cursor-pointer"
@@ -139,7 +265,7 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Banner de Alertas de Anomalías Satelitales (IA) */}
+        {/* Banner de Alertas */}
         {anomalies.length > 0 && (
           <div className="space-y-2">
             {anomalies.map((ano) => (
@@ -240,13 +366,13 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Simulador de Canje e Insumos */}
+        {/* Simulador de Insumos */}
         <InsumosSimulator 
           entity={selectedEntity} 
           onExportPDF={() => setIsModalOpen(true)} 
         />
 
-        {/* Feed de Actividad en Tiempo Real */}
+        {/* Feed de Actividad */}
         <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
           <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
             <div className="flex items-center gap-2.5">
@@ -291,7 +417,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Mapa Central con Selector de Comparativa Temporal ("Time-Machine") */}
+        {/* Mapa Central */}
         <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-4 shadow-2xl space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
             <div className="flex items-center gap-2">
@@ -301,7 +427,6 @@ export default function Home() {
               </span>
             </div>
 
-            {/* Selector Time-Machine */}
             <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
               <span className="text-[10px] text-slate-400 px-2 font-medium">Comparar Campaña:</span>
               <button
@@ -335,7 +460,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Telemetría IoT */}
+        {/* Telemetría */}
         <Can I="producer:manage">
           <div className="transition-all duration-300">
             <TelemetryModule 
@@ -344,7 +469,7 @@ export default function Home() {
           </div>
         </Can>
 
-        {/* Dashboard de Integración / Auditoría */}
+        {/* Dashboard de Auditoría */}
         <Can I="audit:view">
           <div className="pt-4 sm:pt-6 border-t border-slate-800/80 transition-all duration-300">
             <IntegrationDashboard />
@@ -352,7 +477,7 @@ export default function Home() {
         </Can>
       </main>
 
-      {/* MODAL 1: ORDEN DE VISITA AGRONÓMICA */}
+      {/* MODALES */}
       {activeVisita && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-[#0F172A] border border-amber-500/30 rounded-2xl p-6 max-w-md w-full relative shadow-2xl space-y-4">
@@ -398,7 +523,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL 2: CONFIRMACIÓN Y DESCARGA DE PDF */}
       {pdfGeneratedLote && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-[#0F172A] border border-[#00E699]/30 rounded-2xl p-6 max-w-md w-full relative shadow-2xl space-y-4">
@@ -444,7 +568,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL RESPONSIVE: VISTA PREVIA DE FICHA OFICIAL + FIRMA DIGITAL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
           <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-4 sm:p-6 max-w-lg w-full relative shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -464,10 +587,8 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Componente de Firma Digital */}
             <DigitalSignatureCard entity={selectedEntity} lote={loteActivo} />
 
-            {/* Vista Previa de la Ficha del Lote */}
             <div className="w-full">
               <PassportCard
                 loteId={loteActivo.id}
