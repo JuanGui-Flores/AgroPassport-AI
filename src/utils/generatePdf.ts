@@ -1,10 +1,14 @@
-import { EntityOption } from '@/types';
+export interface EntityOption {
+  id: string;
+  label: string;
+  [key: string]: any;
+}
 
-export const generateOperationalPassportPDF = async (entity: EntityOption, lotesCount: number) => {
+export const generateOperationalPassportPDF = async (entity: EntityOption, lotesCount: number = 0) => {
   // Asegurar que solo se ejecute en el navegador cliente
   if (typeof window === 'undefined') return;
 
-  // Importación dinámica para evitar que Node.js intente cargarlo en el servidor
+  // Importación dinámica para evitar problemas de SSR en Vercel
   const jsPDFModule = await import('jspdf');
   const jsPDF = jsPDFModule.default;
 
@@ -58,3 +62,6 @@ export const generateOperationalPassportPDF = async (entity: EntityOption, lotes
   // Descarga automática del archivo en el navegador del usuario
   doc.save(`Ficha_Operativa_${entity.label.replace(/\s+/g, '_')}.pdf`);
 };
+
+// Alias para mantener compatibilidad si en PassportCard lo llamas así
+export const generatePassportPDF = generateOperationalPassportPDF;
