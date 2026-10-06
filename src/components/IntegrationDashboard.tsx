@@ -23,7 +23,7 @@ const INITIAL_ENDPOINTS: IntegrationEndpoint[] = [
   {
     id: "coop-federada",
     name: "Cooperativa Federada (Canje API)",
-    type: "bank", // Mantenemos el tipo interno por compatibilidad con la interfaz
+    type: "bank",
     status: "connected",
     latencyMs: 145,
     lastSync: new Date().toISOString(),
@@ -63,28 +63,31 @@ const INITIAL_ENDPOINTS: IntegrationEndpoint[] = [
 ];
 
 export const IntegrationDashboard: React.FC = () => {
-  const [endpoints, setEndpoints] =
-    useState<IntegrationEndpoint[]>(INITIAL_ENDPOINTS);
+  const [endpoints, setEndpoints] = useState<IntegrationEndpoint[]>(INITIAL_ENDPOINTS);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [isLoadingList, setIsLoadingList] = useState(false);
 
   // Estados para el Simulador de Consultas en Vivo
-  const [selectedEntityForTest, setSelectedEntityForTest] =
-    useState<string>("coop-federada");
+  const [selectedEntityForTest, setSelectedEntityForTest] = useState<string>("coop-federada");
   const [testCuit, setTestCuit] = useState("20-35489123-4");
   const [testLotId, setTestLotId] = useState("LOT-104");
   const [isTesting, setIsTesting] = useState(false);
-  const [testResult, setTestResult] = useState<
-    FinancialCreditCheck | InsurancePolicyCheck | null
-  >(null);
+  const [testResult, setTestResult] = useState<FinancialCreditCheck | InsurancePolicyCheck | null>(null);
+
+  const safeEndpoints = Array.isArray(endpoints) ? endpoints : INITIAL_ENDPOINTS;
 
   const loadEndpoints = async () => {
     setIsLoadingList(true);
     try {
       const data = await IntegrationMiddlewareService.getEndpoints();
-      setEndpoints(data);
+      if (Array.isArray(data) && data.length > 0) {
+        setEndpoints(data);
+      } else {
+        setEndpoints(INITIAL_ENDPOINTS);
+      }
     } catch (error) {
       console.error("Error cargando endpoints:", error);
+      setEndpoints(INITIAL_ENDPOINTS);
     } finally {
       setIsLoadingList(false);
     }
@@ -94,7 +97,9 @@ export const IntegrationDashboard: React.FC = () => {
     setLoadingId(id);
     try {
       const updated = await IntegrationMiddlewareService.syncEndpoint(id);
-      setEndpoints((prev) => prev.map((ep) => (ep.id === id ? updated : ep)));
+      if (updated) {
+        setEndpoints((prev) => (Array.isArray(prev) ? prev.map((ep) => (ep?.id === id ? updated : ep)) : INITIAL_ENDPOINTS));
+      }
     } catch (error) {
       console.error("Error sincronizando endpoint:", error);
     } finally {
@@ -102,27 +107,26 @@ export const IntegrationDashboard: React.FC = () => {
     }
   };
 
+  const currentEndpoint = safeEndpoints.find((ep) => ep?.id === selectedEntityForTest);
+
   const handleRunLiveTest = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setIsTesting(true);
     setTestResult(null);
 
     try {
-      const currentEndpoint = endpoints.find(
-        (ep) => ep.id === selectedEntityForTest,
-      );
       if (currentEndpoint?.type === "bank") {
         const res = await IntegrationMiddlewareService.fetchCreditEvaluation(
           selectedEntityForTest,
-          testCuit,
+          testCuit
         );
-        setTestResult(res);
+        setTestResult(res || null);
       } else {
         const res = await IntegrationMiddlewareService.fetchInsuranceValidation(
           selectedEntityForTest,
-          testLotId,
+          testLotId
         );
-        setTestResult(res);
+        setTestResult(res || null);
       }
     } catch (error) {
       console.error("Error en prueba en vivo:", error);
@@ -144,8 +148,7 @@ export const IntegrationDashboard: React.FC = () => {
               Middleware & Conectividad API
             </h2>
             <p className="text-xs text-slate-400">
-              Monitoreo y pasarela de integración con cooperativas de canje y
-              distribuidores
+              Monitoreo y pasarela de integración con cooperativas de canje y distribuidores
             </p>
           </div>
         </div>
@@ -154,18 +157,17 @@ export const IntegrationDashboard: React.FC = () => {
           disabled={isLoadingList}
           className="self-start sm:self-auto flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border border-slate-700/60"
         >
-          <RefreshCw
-            className={`w-3.5 h-3.5 ${isLoadingList ? "animate-spin" : ""}`}
-          />
+          <RefreshCw className={`w-3.5 h-3.5 ${isLoadingList ? "animate-spin" : ""}`} />
           <span>Actualizar Estado</span>
         </button>
       </div>
 
       {/* Grid de Conectores */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {endpoints.map((ep) => {
+        {safeEndpoints.map((ep) => {
+          if (!ep) return null;
           const isSyncing = loadingId === ep.id;
-          const isCoop = ep.type === "bank";
+          const isCoop = ep?.type === "bank";
 
           return (
             <div
@@ -177,18 +179,14 @@ export const IntegrationDashboard: React.FC = () => {
                   <div
                     className={`p-2.5 rounded-xl ${isCoop ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-blue-500/10 text-blue-400 border border-blue-500/20"}`}
                   >
-                    {isCoop ? (
-                      <Sprout className="w-5 h-5" />
-                    ) : (
-                      <Shield className="w-5 h-5" />
-                    )}
+                    {isCoop ? <Sprout className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-slate-100">
-                      {ep.name}
+                      {ep.name || 'Conector'}
                     </h3>
                     <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800">
-                      {ep.version}
+                      {ep.version || 'v1.0'}
                     </span>
                   </div>
                 </div>
@@ -197,57 +195,47 @@ export const IntegrationDashboard: React.FC = () => {
                   <span
                     className={`w-2 h-2 rounded-full ${ep.status === "connected" ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" : "bg-amber-400"}`}
                   ></span>
-                  <span className="text-slate-300 capitalize">{ep.status}</span>
+                  <span className="text-slate-300 capitalize">{ep.status || 'desconocido'}</span>
                 </div>
               </div>
 
               <div className="bg-slate-950/60 rounded-xl p-3 grid grid-cols-3 gap-2 text-center border border-slate-800/50">
                 <div>
-                  <span className="text-[10px] text-slate-500 block">
-                    Latencia
-                  </span>
+                  <span className="text-[10px] text-slate-500 block">Latencia</span>
                   <span className="text-xs font-mono font-bold text-slate-200 flex items-center justify-center gap-1">
-                    <Zap className="w-3 h-3 text-amber-400" /> {ep.latencyMs} ms
+                    <Zap className="w-3 h-3 text-amber-400" /> {ep.latencyMs ?? 0} ms
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-500 block">
-                    Protocolo
-                  </span>
+                  <span className="text-[10px] text-slate-500 block">Protocolo</span>
                   <span className="text-xs font-mono font-semibold text-slate-300">
                     REST / JSON
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-500 block">
-                    Sincronización
-                  </span>
+                  <span className="text-[10px] text-slate-500 block">Sincronización</span>
                   <span className="text-[11px] font-mono text-slate-400 flex items-center justify-center gap-1">
                     <Clock className="w-3 h-3 text-slate-500" />{" "}
-                    {new Date(ep.lastSync).toLocaleTimeString([], {
+                    {ep.lastSync ? new Date(ep.lastSync).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
                       second: "2-digit",
-                    })}
+                    }) : "--:--"}
                   </span>
                 </div>
               </div>
 
               <div className="flex items-center justify-between pt-1">
                 <span className="text-[11px] text-slate-500 truncate max-w-50 font-mono">
-                  {ep.endpointUrl}
+                  {ep.endpointUrl || ''}
                 </span>
                 <button
                   onClick={() => handleSync(ep.id)}
                   disabled={isSyncing}
                   className="flex items-center gap-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer"
                 >
-                  <RefreshCw
-                    className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin" : ""}`}
-                  />
-                  <span>
-                    {isSyncing ? "Sincronizando..." : "Probar Conexión"}
-                  </span>
+                  <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin" : ""}`} />
+                  <span>{isSyncing ? "Sincronizando..." : "Probar Conexión"}</span>
                 </button>
               </div>
             </div>
@@ -255,7 +243,7 @@ export const IntegrationDashboard: React.FC = () => {
         })}
       </div>
 
-      {/* Sección de Prueba en Vivo (Simulador de Consulta Middleware) */}
+      {/* Sección de Prueba en Vivo */}
       <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-6 space-y-5 backdrop-blur-xl shadow-xl">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
@@ -266,21 +254,14 @@ export const IntegrationDashboard: React.FC = () => {
               Banco de Pruebas Middleware (Simulador API)
             </h3>
             <p className="text-xs text-slate-400">
-              Ejecuta consultas normalizadas en tiempo real contra los
-              conectores externos
+              Ejecuta consultas normalizadas en tiempo real contra los conectores externos
             </p>
           </div>
         </div>
 
-        <form
-          onSubmit={handleRunLiveTest}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"
-        >
+        <form onSubmit={handleRunLiveTest} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           <div>
-            <label
-              htmlFor="entity-select"
-              className="text-[11px] font-medium text-slate-300 block mb-1.5"
-            >
+            <label htmlFor="entity-select" className="text-[11px] font-medium text-slate-300 block mb-1.5">
               Entidad Destino
             </label>
             <select
@@ -289,39 +270,25 @@ export const IntegrationDashboard: React.FC = () => {
               onChange={(e) => setSelectedEntityForTest(e.target.value)}
               className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 cursor-pointer"
             >
-              {endpoints.map((ep) => (
-                <option key={ep.id} value={ep.id}>
-                  {ep.name} ({ep.type === "bank" ? "COOPERATIVA" : "SEGUROS"})
+              {safeEndpoints.map((ep) => (
+                <option key={ep?.id} value={ep?.id}>
+                  {ep?.name} ({ep?.type === "bank" ? "COOPERATIVA" : "SEGUROS"})
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label
-              htmlFor="test-input"
-              className="text-[11px] font-medium text-slate-300 block mb-1.5"
-            >
-              {endpoints.find((ep) => ep.id === selectedEntityForTest)?.type ===
-              "bank"
-                ? "CUIT del Productor"
-                : "ID del Lote Agropecuario"}
+            <label htmlFor="test-input" className="text-[11px] font-medium text-slate-300 block mb-1.5">
+              {currentEndpoint?.type === "bank" ? "CUIT del Productor" : "ID del Lote Agropecuario"}
             </label>
             <input
               id="test-input"
               type="text"
-              value={
-                endpoints.find((ep) => ep.id === selectedEntityForTest)
-                  ?.type === "bank"
-                  ? testCuit
-                  : testLotId
-              }
+              value={currentEndpoint?.type === "bank" ? testCuit : testLotId}
               onChange={(e) => {
                 const val = e.target.value;
-                if (
-                  endpoints.find((ep) => ep.id === selectedEntityForTest)
-                    ?.type === "bank"
-                ) {
+                if (currentEndpoint?.type === "bank") {
                   setTestCuit(val);
                 } else {
                   setTestLotId(val);
@@ -336,22 +303,16 @@ export const IntegrationDashboard: React.FC = () => {
             disabled={isTesting}
             className="bg-linear-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-slate-950 font-bold text-xs py-2.5 px-4 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer h-10.5"
           >
-            <RefreshCw
-              className={`w-4 h-4 ${isTesting ? "animate-spin" : ""}`}
-            />
-            <span>
-              {isTesting ? "Consultando API..." : "Ejecutar Consulta"}
-            </span>
+            <RefreshCw className={`w-4 h-4 ${isTesting ? "animate-spin" : ""}`} />
+            <span>{isTesting ? "Consultando API..." : "Ejecutar Consulta"}</span>
           </button>
         </form>
 
-        {/* Resultado de la Prueba */}
         {testResult && (
           <div className="bg-slate-950/80 border border-emerald-500/30 rounded-xl p-4 space-y-2 animate-in fade-in">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Respuesta Normalizada
-                por Middleware
+                <CheckCircle2 className="w-3.5 h-3.5" /> Respuesta Normalizada por Middleware
               </span>
               <span className="text-[10px] text-slate-500 font-mono">
                 {new Date().toLocaleTimeString()}
