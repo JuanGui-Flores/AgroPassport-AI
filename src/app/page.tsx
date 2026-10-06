@@ -382,7 +382,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#080C14] text-slate-100 flex flex-col selection:bg-emerald-500/30 overflow-x-hidden">
       <Navbar 
-        selectedEntity={selectedEntity} 
+        selectedEntity={selectedEntity as EntityOption} 
         onSelectEntity={(entity) => setSelectedEntity(entity)} 
       />
 
