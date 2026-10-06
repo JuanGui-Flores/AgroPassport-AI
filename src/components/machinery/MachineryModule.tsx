@@ -17,25 +17,38 @@ interface Machine {
 }
 
 interface MachineryModuleProps {
-  entity: EntityOption;
-  lotesList: Lote[];
+  entity?: EntityOption | null;
+  lotesList?: Lote[];
 }
 
-export function MachineryModule({ entity, lotesList }: MachineryModuleProps) {
+export function MachineryModule({ entity, lotesList = [] }: MachineryModuleProps) {
   const [machines, setMachines] = useState<Machine[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  // Cargar maquinaria vinculada a la entidad actual
+  // Cargar maquinaria vinculada a la entidad actual de forma segura
   const fetchMachinery = async () => {
+    if (!entity?.id) {
+      setMachines([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const res = await fetch(`/api/maquinaria?entityId=${entity.id}`);
       if (!res.ok) throw new Error("Error al cargar maquinaria");
       const data = await res.json();
-      setMachines(data);
+      
+      // Asegurarnos estrictamente de que sea un array
+      if (Array.isArray(data)) {
+        setMachines(data);
+      } else {
+        setMachines([]);
+      }
     } catch (error) {
       console.error(error);
+      setMachines([]);
     } finally {
       setLoading(false);
     }
@@ -44,12 +57,17 @@ export function MachineryModule({ entity, lotesList }: MachineryModuleProps) {
   useEffect(() => {
     if (entity?.id) {
       void fetchMachinery();
+    } else {
+      setMachines([]);
+      setLoading(false);
     }
-  }, [entity]);
+  }, [entity?.id]);
 
   // Manejador para registrar nueva maquinaria
   const handleCreateMachine = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!entity?.id) return;
+
     const formData = new FormData(e.currentTarget);
 
     const payload = {
@@ -79,6 +97,8 @@ export function MachineryModule({ entity, lotesList }: MachineryModuleProps) {
     }
   };
 
+  if (!entity) return null;
+
   return (
     <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl space-y-4">
       {/* Cabecera del Módulo */}
@@ -90,7 +110,7 @@ export function MachineryModule({ entity, lotesList }: MachineryModuleProps) {
           <div>
             <h3 className="text-xs font-bold text-slate-100 tracking-wide uppercase">
               Parque Automotor & Maquinaria —{" "}
-              <span className="text-[#00E699]">{entity.name}</span>
+              <span className="text-[#00E699]">{entity?.name || 'Entidad'}</span>
             </h3>
             <p className="text-[11px] text-slate-400">
               Control de horas, estado operativo y asignación a lotes
@@ -129,39 +149,39 @@ export function MachineryModule({ entity, lotesList }: MachineryModuleProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {machines.map((mach) => (
             <div
-              key={mach.id}
+              key={mach?.id}
               className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 space-y-3 hover:border-slate-700 transition-all"
             >
               <div className="flex items-start justify-between">
                 <div>
                   <span className="text-[10px] font-mono text-[#00E699] bg-[#00E699]/10 px-2 py-0.5 rounded border border-[#00E699]/20">
-                    {mach.codigo}
+                    {mach?.codigo || 'S/C'}
                   </span>
                   <h4 className="text-xs font-bold text-white mt-1.5">
-                    {mach.nombre}
+                    {mach?.nombre || 'Sin Nombre'}
                   </h4>
                   <span className="text-[11px] text-slate-400">
-                    {mach.tipo}
+                    {mach?.tipo || 'Equipo'}
                   </span>
                 </div>
                 <span
                   className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
-                    mach.estado === "Operativo"
+                    mach?.estado === "Operativo"
                       ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                       : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                   }`}
                 >
-                  {mach.estado}
+                  {mach?.estado || 'Desconocido'}
                 </span>
               </div>
 
               <div className="flex items-center justify-between pt-2 border-t border-slate-900 text-[11px] text-slate-400">
                 <div className="flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5 text-slate-500" />
-                  <span>{mach.horasUso} hrs de uso</span>
+                  <span>{mach?.horasUso ?? 0} hrs de uso</span>
                 </div>
                 <div className="font-mono text-slate-300">
-                  {mach.lote
+                  {mach?.lote?.nombre
                     ? `Lote: ${mach.lote.nombre}`
                     : "Sin lote asignado"}
                 </div>
@@ -249,8 +269,8 @@ export function MachineryModule({ entity, lotesList }: MachineryModuleProps) {
                 >
                   <option value="">Sin asignar (Base / Sede)</option>
                   {lotesList.map((lote) => (
-                    <option key={lote.id} value={lote.id}>
-                      {lote.nombre}
+                    <option key={lote?.id} value={lote?.id}>
+                      {lote?.nombre || 'Lote'}
                     </option>
                   ))}
                 </select>

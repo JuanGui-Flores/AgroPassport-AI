@@ -7,37 +7,31 @@ import { FileDown, Loader2, CheckCircle2, Sprout } from "lucide-react";
 import { EntityOption } from "@/app/data/entities";
 import { generateOperationalPassportPDF as generatePassportPDF } from '@/utils/generatePdf';
 
-
 interface PassportCardProps {
-  loteId: string;
-  nombre: string;
-  hectareas: number;
-  score: number;
-  ndvi: number;
-  rindeEst: string;
-  entity?: EntityOption;
+  loteId?: string;
+  nombre?: string;
+  hectareas?: number;
+  score?: number;
+  ndvi?: number;
+  rindeEst?: string;
+  entity?: EntityOption | null;
   hideButtons?: boolean;
 }
 
-// Función auxiliar para evitar ternarios anidados (Regla SonarQube typescript:S3358)
 const getSaludNdviTexto = (ndviValue: number): string => {
-  if (ndviValue >= 0.8) {
-    return "Óptimo";
-  }
-  if (ndviValue >= 0.6) {
-    return "Moderado";
-  }
+  if (ndviValue >= 0.8) return "Óptimo";
+  if (ndviValue >= 0.6) return "Moderado";
   return "Bajo";
 };
 
 export const PassportCard: React.FC<PassportCardProps> = ({
-  loteId,
-  nombre,
-  hectareas,
-  score,
-  ndvi,
-  rindeEst,
-  entity,
+  loteId = "S/N",
+  nombre = "Lote sin nombre",
+  hectareas = 0,
+  score = 0,
+  ndvi = 0,
+  rindeEst = "0 Tn / Ha",
+  entity = null,
   hideButtons = false,
 }) => {
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -45,25 +39,21 @@ export const PassportCard: React.FC<PassportCardProps> = ({
 
   const entityName = entity?.name || "Cooperativa Agrícola Regional";
 
-  // Evaluación dinámica según el score
   const isHighScore = score >= 80;
   const estadoTexto = isHighScore
     ? "Certificado para Canje"
     : "Revisión Agronómica Requerida";
   const saludNdviTexto = getSaludNdviTexto(ndvi);
 
-  // Manejador de validación / confirmación operativa
   const handleConfirmOperation = () => {
     setIsConfirmed(true);
-
     toast.success("Operación Validada", {
-      description: `Lote ${nombre} verificado exitosamente para canje de insumos con ${entityName}.`,
+      description: `Lote ${nombre} verificado exitosamente para canje con ${entityName}.`,
       icon: <CheckCircle2 className="w-5 h-5 text-emerald-400" />,
       duration: 5000,
     });
   };
 
-  // Generador dinámico de PDF directo
   const handleExportPdf = async () => {
     try {
       setIsExporting(true);
@@ -89,8 +79,7 @@ export const PassportCard: React.FC<PassportCardProps> = ({
     } catch (err) {
       console.error("Error generando el PDF:", err);
       toast.error("Error al generar el PDF", {
-        description:
-          "Ocurrió un problema durante la maquetación. Inténtalo de nuevo.",
+        description: "Ocurrió un problema durante la maquetación. Inténtalo de nuevo.",
       });
     } finally {
       setIsExporting(false);
@@ -162,7 +151,6 @@ export const PassportCard: React.FC<PassportCardProps> = ({
         </div>
       </div>
 
-      {/* Botones de acción ocultables mediante hideButtons */}
       {!hideButtons && (
         <div className="space-y-2 pt-2 print:hidden">
           <button
