@@ -1,9 +1,9 @@
 // src/components/InsumosSimulator.tsx
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Calculator, ArrowRight, FileSpreadsheet } from 'lucide-react';
-import { EntityOption } from '@/app/data/entities';
+import React, { useState } from "react";
+import { Calculator, ArrowRight, FileSpreadsheet } from "lucide-react";
+import { EntityOption } from "@/app/data/entities";
 
 interface InsumosSimulatorProps {
   readonly entity: EntityOption;
@@ -13,33 +13,38 @@ interface InsumosSimulatorProps {
 // Helper fuera del componente para evitar ternarias anidadas (S3358)
 const getDescuentoColorClass = (descuento: number): string => {
   if (descuento >= 15) {
-    return 'text-[#00E699]';
+    return "text-[#00E699]";
   }
   if (descuento >= 10) {
-    return 'text-blue-400';
+    return "text-blue-400";
   }
-  return 'text-slate-400';
+  return "text-slate-400";
 };
 
-type TipoInsumo = 'fertilizante' | 'semillas' | 'defensivos';
+type TipoInsumo = "fertilizante" | "semillas" | "defensivos";
 
 const getCostoBasePorHa = (tipoInsumo: TipoInsumo): number => {
-  if (tipoInsumo === 'fertilizante') {
+  if (tipoInsumo === "fertilizante") {
     return 120;
   }
-  if (tipoInsumo === 'semillas') {
+  if (tipoInsumo === "semillas") {
     return 80;
   }
   return 95;
 };
 
-export function InsumosSimulator({ entity, onExportPDF }: Readonly<InsumosSimulatorProps>) {
+export function InsumosSimulator({
+  entity,
+  onExportPDF,
+}: Readonly<InsumosSimulatorProps>) {
   const [hectareas, setHectareas] = useState<number>(100);
-  const [tipoInsumo, setTipoInsumo] = useState<TipoInsumo>('fertilizante');
+  const [tipoInsumo, setTipoInsumo] = useState<TipoInsumo>("fertilizante");
 
   const costoBasePorHa = getCostoBasePorHa(tipoInsumo);
-  const descuentoScore = entity.metrics?.score ? Math.min(Math.floor(entity.metrics.score / 10), 15) : 10;
-  
+  const descuentoScore = entity.metrics?.score
+    ? Math.min(Math.floor(entity.metrics.score / 10), 15)
+    : 10;
+
   const subtotal = hectareas * costoBasePorHa;
   const ahorro = (subtotal * descuentoScore) / 100;
   const total = subtotal - ahorro;
@@ -58,7 +63,8 @@ export function InsumosSimulator({ entity, onExportPDF }: Readonly<InsumosSimula
               Simulador de Canje e Insumos
             </h3>
             <p className="text-[11px] text-slate-400">
-              Estimación de bonificación basada en scoring de <span className="text-[#00E699]">{entity.name}</span>
+              Estimación de bonificación basada en scoring de{" "}
+              <span className="text-[#00E699]">{entity.name}</span>
             </p>
           </div>
         </div>
@@ -67,7 +73,10 @@ export function InsumosSimulator({ entity, onExportPDF }: Readonly<InsumosSimula
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Selector de Superficie */}
         <div>
-          <label htmlFor="input-superficie-hectareas" className="block text-xs font-medium text-slate-400 mb-1.5">
+          <label
+            htmlFor="input-superficie-hectareas"
+            className="block text-xs font-medium text-slate-400 mb-1.5"
+          >
             Superficie (Hectáreas)
           </label>
           <input
@@ -82,13 +91,20 @@ export function InsumosSimulator({ entity, onExportPDF }: Readonly<InsumosSimula
 
         {/* Selector de Insumo */}
         <div>
-          <label htmlFor="select-tipo-insumo-agricola" className="block text-xs font-medium text-slate-400 mb-1.5">
+          <label
+            htmlFor="select-tipo-insumo-agricola"
+            className="block text-xs font-medium text-slate-400 mb-1.5"
+          >
             Tipo de Insumo
           </label>
           <select
             id="select-tipo-insumo-agricola"
             value={tipoInsumo}
-            onChange={(e) => setTipoInsumo(e.target.value as 'fertilizante' | 'semillas' | 'defensivos')}
+            onChange={(e) =>
+              setTipoInsumo(
+                e.target.value as "fertilizante" | "semillas" | "defensivos",
+              )
+            }
             className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00E699] transition"
           >
             <option value="fertilizante">Fertilizantes Nitrogenados</option>
@@ -101,15 +117,21 @@ export function InsumosSimulator({ entity, onExportPDF }: Readonly<InsumosSimula
         <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3 flex flex-col justify-between">
           <div className="flex justify-between items-center text-xs">
             <span className="text-slate-400">Bonificación Score:</span>
-            <span className={`font-bold ${colorDescuentoClass}`}>-{descuentoScore}%</span>
+            <span className={`font-bold ${colorDescuentoClass}`}>
+              -{descuentoScore}%
+            </span>
           </div>
           <div className="flex justify-between items-center text-xs mt-1">
             <span className="text-slate-400">Ahorro Est.:</span>
-            <span className="font-semibold text-emerald-400">USD ${ahorro.toLocaleString()}</span>
+            <span className="font-semibold text-emerald-400">
+              USD ${ahorro.toLocaleString()}
+            </span>
           </div>
           <div className="flex justify-between items-center text-sm font-bold text-white border-t border-slate-800 pt-2 mt-2">
             <span>Total Canje:</span>
-            <span className="text-[#00E699]">USD ${total.toLocaleString()}</span>
+            <span className="text-[#00E699]">
+              USD ${total.toLocaleString()}
+            </span>
           </div>
         </div>
       </div>

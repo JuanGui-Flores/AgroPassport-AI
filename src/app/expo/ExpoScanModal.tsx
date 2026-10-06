@@ -1,9 +1,9 @@
 // src/app/expo/ExpoScanModal.tsx
-'use client';
+"use client";
 
-import React from 'react';
-import { X, ShieldCheck, Database, CheckCircle2 } from 'lucide-react';
-import { ExpoLoteData } from './ExpoMetricsPanel';
+import React from "react";
+import { X, ShieldCheck, Database, CheckCircle2 } from "lucide-react";
+import { ExpoLoteData } from "./ExpoMetricsPanel";
 
 interface ExpoScanModalProps {
   isOpen: boolean;
@@ -11,13 +11,16 @@ interface ExpoScanModalProps {
   lote: ExpoLoteData;
 }
 
-export const ExpoScanModal: React.FC<ExpoScanModalProps> = ({ isOpen, onClose, lote }) => {
+export const ExpoScanModal: React.FC<ExpoScanModalProps> = ({
+  isOpen,
+  onClose,
+  lote,
+}) => {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
-        
         {/* Cabecera del Modal */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/50">
           <div className="flex items-center gap-2.5">
@@ -25,11 +28,15 @@ export const ExpoScanModal: React.FC<ExpoScanModalProps> = ({ isOpen, onClose, l
               <Database className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold font-mono text-white tracking-wide">AGROTETHER SCAN EXPLORER</h3>
-              <p className="text-[10px] font-mono text-emerald-400">Red Principal • Polígono San Juan</p>
+              <h3 className="text-sm font-bold font-mono text-white tracking-wide">
+                AGROTETHER SCAN EXPLORER
+              </h3>
+              <p className="text-[10px] font-mono text-emerald-400">
+                Red Principal • Polígono San Juan
+              </p>
             </div>
           </div>
-          
+
           <button
             type="button"
             onClick={onClose}
@@ -41,14 +48,17 @@ export const ExpoScanModal: React.FC<ExpoScanModalProps> = ({ isOpen, onClose, l
 
         {/* Cuerpo del Modal con los detalles de la transacción */}
         <div className="p-6 space-y-6 font-mono text-xs overflow-y-auto max-h-[75vh]">
-          
           {/* Estado de la Transacción */}
           <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <CheckCircle2 className="w-5 h-5 text-emerald-400" />
               <div>
-                <p className="text-white font-bold">Transacción Exitosa y Verificada</p>
-                <p className="text-[10px] text-slate-400">Bloque #104928 • Consolidado hace 12 segundos</p>
+                <p className="text-white font-bold">
+                  Transacción Exitosa y Verificada
+                </p>
+                <p className="text-[10px] text-slate-400">
+                  Bloque #104928 • Consolidado hace 12 segundos
+                </p>
               </div>
             </div>
             <span className="bg-emerald-500 text-slate-950 px-3 py-1 rounded-full text-[10px] font-bold">
@@ -68,11 +78,15 @@ export const ExpoScanModal: React.FC<ExpoScanModalProps> = ({ isOpen, onClose, l
             </div>
             <div className="flex justify-between py-1.5 border-b border-slate-900">
               <span className="text-slate-500">Ubicación Geográfica:</span>
-              <span className="text-slate-300">{lote.lat}, {lote.lng} (Pocito)</span>
+              <span className="text-slate-300">
+                {lote.lat}, {lote.lng} (Pocito)
+              </span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-slate-900">
               <span className="text-slate-500">Índice Biomasa Registrado:</span>
-              <span className="text-emerald-400 font-bold">{lote.ndvi} NDVI (Óptimo)</span>
+              <span className="text-emerald-400 font-bold">
+                {lote.ndvi} NDVI (Óptimo)
+              </span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-slate-900">
               <span className="text-slate-500">Smart Contract:</span>
@@ -80,7 +94,9 @@ export const ExpoScanModal: React.FC<ExpoScanModalProps> = ({ isOpen, onClose, l
             </div>
             <div className="flex justify-between py-1.5">
               <span className="text-slate-500">Gas Usado / Consenso:</span>
-              <span className="text-slate-300">0.0012 ATHT (PoAV Protocol)</span>
+              <span className="text-slate-300">
+                0.0012 ATHT (PoAV Protocol)
+              </span>
             </div>
           </div>
 
@@ -88,10 +104,10 @@ export const ExpoScanModal: React.FC<ExpoScanModalProps> = ({ isOpen, onClose, l
           <div className="flex items-center gap-3 text-slate-400 bg-slate-900/50 p-3 rounded-xl border border-slate-800 text-[11px]">
             <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
             <span>
-              Este registro criptográfico cuenta con validez legal para auditorías financieras y respaldo de warrants agrícolas.
+              Este registro criptográfico cuenta con validez legal para
+              auditorías financieras y respaldo de warrants agrícolas.
             </span>
           </div>
-
         </div>
 
         {/* Pie del Modal */}
@@ -104,7 +120,6 @@ export const ExpoScanModal: React.FC<ExpoScanModalProps> = ({ isOpen, onClose, l
             <span>Cerrar Explorador</span>
           </button>
         </div>
-
       </div>
     </div>
   );

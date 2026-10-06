@@ -1,6 +1,6 @@
 // src/services/middleware/core/HttpClient.ts
 
-import { TokenManager } from './TokenManager';
+import { TokenManager } from "./TokenManager";
 
 export class HttpClient {
   /**
@@ -13,22 +13,27 @@ export class HttpClient {
 
       // 2. Realizar la petición HTTP con el Bearer Token y configuraciones mTLS
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'X-Request-ID': crypto.randomUUID(), // Trazabilidad bancaria obligatoria
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "X-Request-ID": crypto.randomUUID(), // Trazabilidad bancaria obligatoria
         },
         // Nota: Aquí se configuran los agentes mTLS (certificados .pem / .key) en un entorno Node.js backend
       });
 
       if (!response.ok) {
-        throw new Error(`Error en API externa [${entityId}]: ${response.statusText}`);
+        throw new Error(
+          `Error en API externa [${entityId}]: ${response.statusText}`,
+        );
       }
 
       return (await response.json()) as T;
     } catch (error) {
-      console.error(`[HttpClient Error] Fallo al consultar ${entityId} en ${url}:`, error);
+      console.error(
+        `[HttpClient Error] Fallo al consultar ${entityId} en ${url}:`,
+        error,
+      );
       throw error;
     }
   }

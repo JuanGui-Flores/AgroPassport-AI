@@ -1,7 +1,7 @@
 // src/components/common/Can.tsx
-import React from 'react';
-import { usePermissions } from '../../hooks/usePermissions';
-import { Permission } from '../../services/security/rbac';
+import React from "react";
+import { usePermissions } from "../../hooks/usePermissions";
+import { Permission } from "../../services/security/rbac";
 
 interface CanProps {
   I: Permission;

@@ -1,21 +1,24 @@
 // src/components/DigitalSignatureCard.tsx
-'use client';
+"use client";
 
-import React from 'react';
-import { ShieldCheck, QrCode, CheckCircle2 } from 'lucide-react';
-import { EntityOption } from '@/app/data/entities';
-import { Lote } from '@/app/data/lotes';
+import React from "react";
+import { ShieldCheck, QrCode, CheckCircle2 } from "lucide-react";
+import { EntityOption } from "@/app/data/entities";
+import { Lote } from "@/app/data/lotes";
 
 interface DigitalSignatureCardProps {
   entity: EntityOption;
   lote: Lote;
 }
 
-export const DigitalSignatureCard: React.FC<DigitalSignatureCardProps> = ({ entity, lote }) => {
-  const timeStamp = new Date().toLocaleDateString('es-AR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
+export const DigitalSignatureCard: React.FC<DigitalSignatureCardProps> = ({
+  entity,
+  lote,
+}) => {
+  const timeStamp = new Date().toLocaleDateString("es-AR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
   });
 
   return (
@@ -26,19 +29,29 @@ export const DigitalSignatureCard: React.FC<DigitalSignatureCardProps> = ({ enti
             Ficha Oficial de Validación Operativa
           </span>
           <h4 className="text-sm font-bold text-white">{entity.name}</h4>
-          <p className="text-[11px] text-slate-400">Lote Activo: {lote.nombre} ({lote.hectareas} Ha)</p>
+          <p className="text-[11px] text-slate-400">
+            Lote Activo: {lote.nombre} ({lote.hectareas} Ha)
+          </p>
         </div>
         <QrCode className="w-10 h-10 text-slate-400" />
       </div>
 
       <div className="grid grid-cols-2 gap-3 text-xs">
         <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-          <span className="text-[10px] text-slate-400 block">Passport Score</span>
-          <span className="text-sm font-bold text-[#00E699]">{lote.score} / 100</span>
+          <span className="text-[10px] text-slate-400 block">
+            Passport Score
+          </span>
+          <span className="text-sm font-bold text-[#00E699]">
+            {lote.score} / 100
+          </span>
         </div>
         <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-          <span className="text-[10px] text-slate-400 block">Índice Vegetativo (NDVI)</span>
-          <span className="text-sm font-bold text-blue-400">{lote.ndvi} (Óptimo)</span>
+          <span className="text-[10px] text-slate-400 block">
+            Índice Vegetativo (NDVI)
+          </span>
+          <span className="text-sm font-bold text-blue-400">
+            {lote.ndvi} (Óptimo)
+          </span>
         </div>
       </div>
 

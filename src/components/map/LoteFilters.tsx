@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Filter, RotateCcw } from 'lucide-react';
+import React from "react";
+import { Filter, RotateCcw } from "lucide-react";
 
 interface LoteFiltersProps {
   minScore: number;
@@ -38,7 +38,9 @@ export const LoteFilters: React.FC<LoteFiltersProps> = ({
         <div>
           <div className="flex justify-between text-slate-400 mb-1">
             <span>Score Mínimo:</span>
-            <span className="text-emerald-400 font-bold font-mono">{minScore} pts</span>
+            <span className="text-emerald-400 font-bold font-mono">
+              {minScore} pts
+            </span>
           </div>
           <input
             type="range"
@@ -55,7 +57,9 @@ export const LoteFilters: React.FC<LoteFiltersProps> = ({
         <div>
           <div className="flex justify-between text-slate-400 mb-1">
             <span>NDVI Mínimo:</span>
-            <span className="text-emerald-400 font-bold font-mono">{minNdvi.toFixed(2)}</span>
+            <span className="text-emerald-400 font-bold font-mono">
+              {minNdvi.toFixed(2)}
+            </span>
           </div>
           <input
             type="range"

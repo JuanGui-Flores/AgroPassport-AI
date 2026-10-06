@@ -1,6 +1,6 @@
 // src/components/dashboard/KpiHeader.tsx
-import React from 'react';
-import { ShieldCheck, Layers, Sprout, Wrench } from 'lucide-react';
+import React from "react";
+import { ShieldCheck, Layers, Sprout, Wrench } from "lucide-react";
 
 export const KpiHeader: React.FC = () => {
   return (
@@ -8,48 +8,72 @@ export const KpiHeader: React.FC = () => {
       {/* KPI 1: Passport Score */}
       <div className="bg-card border border-border rounded-xl sm:rounded-2xl p-2.5 sm:p-4 flex flex-col justify-between">
         <div className="flex justify-between items-center text-slate-400 mb-1">
-          <span className="text-[10px] sm:text-xs font-medium truncate">Passport Score</span>
+          <span className="text-[10px] sm:text-xs font-medium truncate">
+            Passport Score
+          </span>
           <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0 ml-1" />
         </div>
         <div className="flex items-baseline justify-between gap-1">
-          <span className="text-base sm:text-2xl font-bold text-white tracking-tight">86.4</span>
-          <span className="text-[9px] sm:text-xs font-medium text-emerald-400 shrink-0">+2.1%</span>
+          <span className="text-base sm:text-2xl font-bold text-white tracking-tight">
+            86.4
+          </span>
+          <span className="text-[9px] sm:text-xs font-medium text-emerald-400 shrink-0">
+            +2.1%
+          </span>
         </div>
       </div>
 
       {/* KPI 2: Hectáreas */}
       <div className="bg-card border border-border rounded-xl sm:rounded-2xl p-2.5 sm:p-4 flex flex-col justify-between">
         <div className="flex justify-between items-center text-slate-400 mb-1">
-          <span className="text-[10px] sm:text-xs font-medium truncate">Hectáreas</span>
+          <span className="text-[10px] sm:text-xs font-medium truncate">
+            Hectáreas
+          </span>
           <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-400 shrink-0 ml-1" />
         </div>
         <div className="flex items-baseline justify-between gap-1">
-          <span className="text-base sm:text-2xl font-bold text-white tracking-tight">142.8k</span>
-          <span className="text-[9px] sm:text-xs font-medium text-slate-500 shrink-0">Ha</span>
+          <span className="text-base sm:text-2xl font-bold text-white tracking-tight">
+            142.8k
+          </span>
+          <span className="text-[9px] sm:text-xs font-medium text-slate-500 shrink-0">
+            Ha
+          </span>
         </div>
       </div>
 
       {/* KPI 3: Insumos / Canjes (Reemplazo de Créditos Bancarios) */}
       <div className="bg-card border border-border rounded-xl sm:rounded-2xl p-2.5 sm:p-4 flex flex-col justify-between">
         <div className="flex justify-between items-center text-slate-400 mb-1">
-          <span className="text-[10px] sm:text-xs font-medium truncate">Canje de Insumos</span>
+          <span className="text-[10px] sm:text-xs font-medium truncate">
+            Canje de Insumos
+          </span>
           <Sprout className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0 ml-1" />
         </div>
         <div className="flex items-baseline justify-between gap-1">
-          <span className="text-base sm:text-2xl font-bold text-white tracking-tight">85%</span>
-          <span className="text-[9px] sm:text-xs font-medium text-emerald-400 shrink-0">18 Lotes</span>
+          <span className="text-base sm:text-2xl font-bold text-white tracking-tight">
+            85%
+          </span>
+          <span className="text-[9px] sm:text-xs font-medium text-emerald-400 shrink-0">
+            18 Lotes
+          </span>
         </div>
       </div>
 
       {/* KPI 4: Alertas IoT / Monitoreo */}
       <div className="bg-card border border-border rounded-xl sm:rounded-2xl p-2.5 sm:p-4 flex flex-col justify-between">
         <div className="flex justify-between items-center text-slate-400 mb-1">
-          <span className="text-[10px] sm:text-xs font-medium truncate">Alertas IoT</span>
+          <span className="text-[10px] sm:text-xs font-medium truncate">
+            Alertas IoT
+          </span>
           <Wrench className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-400 shrink-0 ml-1" />
         </div>
         <div className="flex items-baseline justify-between gap-1">
-          <span className="text-base sm:text-2xl font-bold text-white tracking-tight">12</span>
-          <span className="text-[9px] sm:text-xs font-medium text-rose-400 shrink-0">Próx.</span>
+          <span className="text-base sm:text-2xl font-bold text-white tracking-tight">
+            12
+          </span>
+          <span className="text-[9px] sm:text-xs font-medium text-rose-400 shrink-0">
+            Próx.
+          </span>
         </div>
       </div>
     </div>

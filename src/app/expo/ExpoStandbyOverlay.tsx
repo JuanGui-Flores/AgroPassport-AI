@@ -1,8 +1,8 @@
 // src/app/expo/ExpoStandbyOverlay.tsx
-'use client';
+"use client";
 
-import React from 'react';
-import { Sparkles, Touchpad, ShieldCheck, Cpu, ArrowRight } from 'lucide-react';
+import React from "react";
+import { Sparkles, Touchpad, ShieldCheck, Cpu, ArrowRight } from "lucide-react";
 
 interface ExpoStandbyOverlayProps {
   isActive: boolean;
@@ -37,29 +37,36 @@ export const ExpoStandbyOverlay: React.FC<ExpoStandbyOverlayProps> = ({
             <Cpu className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-wider text-white">AGROPASSPORT AI</h1>
-            <p className="text-xs text-emerald-400 font-mono">DEMO INTERACTIVA • MODO EXPO</p>
+            <h1 className="text-xl font-bold tracking-wider text-white">
+              AGROPASSPORT AI
+            </h1>
+            <p className="text-xs text-emerald-400 font-mono">
+              DEMO INTERACTIVA • MODO EXPO
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-4 py-2 rounded-full text-xs text-slate-300">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-          {'Sistema Inteligente Activo'}
+          {"Sistema Inteligente Activo"}
         </div>
       </div>
 
       {/* Bloque central de llamada a la acción */}
       <div className="flex flex-col items-center text-center my-auto space-y-6 max-w-2xl mx-auto">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold uppercase tracking-widest">
-          <Sparkles className="w-4 h-4 text-emerald-400" /> Scoring Agrícola & Financiero en Tiempo Real
+          <Sparkles className="w-4 h-4 text-emerald-400" /> Scoring Agrícola &
+          Financiero en Tiempo Real
         </div>
 
         <h2 className="text-4xl md:text-6xl font-extrabold text-white leading-tight tracking-tight">
-          El Pasaporte Digital de tu <span className="text-emerald-400">Establecimiento</span>
+          El Pasaporte Digital de tu{" "}
+          <span className="text-emerald-400">Establecimiento</span>
         </h2>
 
         <p className="text-slate-400 text-base md:text-lg max-w-xl">
-          Auditabilidad satelital, scoring de biomasa (NDVI) y simulación instantánea de crédito y pólizas de seguro.
+          Auditabilidad satelital, scoring de biomasa (NDVI) y simulación
+          instantánea de crédito y pólizas de seguro.
         </p>
 
         <div className="pt-4">

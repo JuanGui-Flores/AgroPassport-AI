@@ -1,9 +1,9 @@
 // src/components/security/Can.tsx
-'use client';
+"use client";
 
-import React from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { Permission, hasPermission } from '@/services/security/rbac';
+import React from "react";
+import { useAuth } from "@/context/AuthContext";
+import { Permission, hasPermission } from "@/services/security/rbac";
 
 interface CanProps {
   I: Permission;

@@ -1,6 +1,6 @@
 // src/app/api/entities/route.ts
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
@@ -13,16 +13,16 @@ export async function GET() {
         },
       },
       orderBy: {
-        businessName: 'asc',
+        businessName: "asc",
       },
     });
 
     return NextResponse.json(entities);
   } catch (error) {
-    console.error('Error al obtener entidades:', error);
+    console.error("Error al obtener entidades:", error);
     return NextResponse.json(
-      { error: 'Error al consultar las entidades en la base de datos' },
-      { status: 500 }
+      { error: "Error al consultar las entidades en la base de datos" },
+      { status: 500 },
     );
   }
 }

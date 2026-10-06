@@ -1,6 +1,6 @@
 // src/app/api/telemetry/route.ts
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
@@ -8,7 +8,10 @@ export async function POST(request: Request) {
     const { loteId, humedadSuelo, temperaturaFoliar, bateriaNodo } = body;
 
     if (!loteId) {
-      return NextResponse.json({ error: 'loteId es requerido' }, { status: 400 });
+      return NextResponse.json(
+        { error: "loteId es requerido" },
+        { status: 400 },
+      );
     }
 
     const telemetry = await prisma.telemetry.create({
@@ -22,10 +25,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json(telemetry, { status: 201 });
   } catch (error) {
-    console.error('Error al registrar telemetría:', error);
+    console.error("Error al registrar telemetría:", error);
     return NextResponse.json(
-      { error: 'Error al registrar la telemetría en PostgreSQL' },
-      { status: 400 }
+      { error: "Error al registrar la telemetría en PostgreSQL" },
+      { status: 400 },
     );
   }
 }

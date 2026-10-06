@@ -1,19 +1,26 @@
 // src/components/navbar/Navbar.tsx
-'use client';
+"use client";
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
-import { Search, Bell, Calendar, Shield, Sparkles, ChevronDown } from 'lucide-react';
-import { EntitySelector } from '@/components/EntitySelector';
-import { EntityOption } from '@/app/data/entities';
-import { useAuth } from '@/context/AuthContext';
-import { Role } from '@/services/security/rbac';
-import { Syne } from 'next/font/google';
+import React from "react";
+import { useRouter } from "next/navigation";
+import {
+  Search,
+  Bell,
+  Calendar,
+  Shield,
+  Sparkles,
+  ChevronDown,
+} from "lucide-react";
+import { EntitySelector } from "@/components/EntitySelector";
+import { EntityOption } from "@/app/data/entities";
+import { useAuth } from "@/context/AuthContext";
+import { Role } from "@/services/security/rbac";
+import { Syne } from "next/font/google";
 
 // Inicialización de la fuente fuera del componente
 const syne = Syne({
-  subsets: ['latin'],
-  weight: ['700', '800'],
+  subsets: ["latin"],
+  weight: ["700", "800"],
 });
 
 interface NavbarProps {
@@ -21,16 +28,19 @@ interface NavbarProps {
   onSelectEntity: (entity: EntityOption) => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  selectedEntity,
+  onSelectEntity,
+}) => {
   const { user, login } = useAuth();
   const router = useRouter();
 
   const handleRoleChange = (newRole: Role) => {
-    let name = 'Productor Agropecuario';
-    if (newRole === 'ADMIN') name = 'Administrador General';
+    let name = "Productor Agropecuario";
+    if (newRole === "ADMIN") name = "Administrador General";
 
     login({
-      id: '1',
+      id: "1",
       name: name,
       role: newRole,
     });
@@ -39,14 +49,13 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
   };
 
   const getRoleInitials = (role?: Role) => {
-    if (role === 'ADMIN') return 'AD';
-    return 'PR';
+    if (role === "ADMIN") return "AD";
+    return "PR";
   };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-[#080C14]/90 backdrop-blur-md transition-all">
       <div className="max-w-[1920px] mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-3">
-        
         {/* LADO IZQUIERDO: Branding & Selector de Entidad */}
         <div className="flex items-center gap-3 shrink-0">
           <div className="flex items-center gap-2.5 cursor-pointer group">
@@ -54,8 +63,13 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="hidden min-[420px]:flex flex-col">
-              <span className={`${syne.className} text-xs sm:text-sm font-bold tracking-tight text-white flex items-center gap-1`}>
-                AgroPassport <span className="text-emerald-400 font-mono text-xs font-semibold tracking-normal">AI</span>
+              <span
+                className={`${syne.className} text-xs sm:text-sm font-bold tracking-tight text-white flex items-center gap-1`}
+              >
+                AgroPassport{" "}
+                <span className="text-emerald-400 font-mono text-xs font-semibold tracking-normal">
+                  AI
+                </span>
               </span>
             </div>
           </div>
@@ -89,17 +103,20 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
 
         {/* LADO DERECHO: Selector de Rol, Campaña, Notificaciones y Perfil */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          
           {/* Selector de Rol */}
           <div className="flex items-center gap-1.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 px-2 sm:px-3 py-1.5 rounded-xl text-xs transition relative">
             <Shield className="w-3.5 h-3.5 text-emerald-400 shrink-0 hidden min-[360px]:block" />
             <select
-              value={user?.role || 'PRODUCER'}
+              value={user?.role || "PRODUCER"}
               onChange={(e) => handleRoleChange(e.target.value as Role)}
               className="bg-transparent text-emerald-400 font-semibold focus:outline-none cursor-pointer text-[11px] sm:text-xs pr-4 appearance-none"
             >
-              <option value="PRODUCER" className="bg-slate-950 text-slate-200">Productor</option>
-              <option value="ADMIN" className="bg-slate-950 text-slate-200">Admin</option>
+              <option value="PRODUCER" className="bg-slate-950 text-slate-200">
+                Productor
+              </option>
+              <option value="ADMIN" className="bg-slate-950 text-slate-200">
+                Admin
+              </option>
             </select>
             <ChevronDown className="w-3 h-3 text-emerald-400 absolute right-2 pointer-events-none" />
           </div>
@@ -111,7 +128,7 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
           </div>
 
           {/* Botón Notificaciones */}
-          <button 
+          <button
             aria-label="Notificaciones"
             className="relative p-2 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition hidden sm:block cursor-pointer"
           >
@@ -128,16 +145,14 @@ export const Navbar: React.FC<NavbarProps> = ({ selectedEntity, onSelectEntity }
             </div>
             <div className="hidden md:block text-left">
               <p className="text-xs font-bold text-slate-200 group-hover:text-white transition-colors leading-tight">
-                {user?.name || 'Productor'}
+                {user?.name || "Productor"}
               </p>
               <p className="text-[10px] text-slate-400">
                 Operaciones Agrícolas
               </p>
             </div>
           </div>
-
         </div>
-
       </div>
     </header>
   );

@@ -1,17 +1,37 @@
 // src/components/EntitySelector.tsx
-'use client';
+"use client";
 
-import React, { useState, useSyncExternalStore, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { Network, ChevronDown, Plus, Sparkles, AlertCircle, CheckCircle2, X, Store, Globe, Search } from 'lucide-react';
-import { EntityOption, INITIAL_BANKS, INITIAL_INSURANCES } from '@/app/data/entities';
+import React, {
+  useState,
+  useSyncExternalStore,
+  useEffect,
+  useRef,
+} from "react";
+import { createPortal } from "react-dom";
+import {
+  Network,
+  ChevronDown,
+  Plus,
+  Sparkles,
+  AlertCircle,
+  CheckCircle2,
+  X,
+  Store,
+  Globe,
+  Search,
+} from "lucide-react";
+import {
+  EntityOption,
+  INITIAL_BANKS,
+  INITIAL_INSURANCES,
+} from "@/app/data/entities";
 
 const emptySubscribe = () => () => {};
 const useIsMounted = () => {
   return useSyncExternalStore(
     emptySubscribe,
     () => true,
-    () => false
+    () => false,
   );
 };
 
@@ -21,7 +41,7 @@ interface EntitySelectorProps {
 }
 
 interface ToastMessage {
-  type: 'success' | 'error';
+  type: "success" | "error";
   message: string;
 }
 
@@ -33,14 +53,18 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [branches, setBranches] = useState<EntityOption[]>(INITIAL_BANKS);
   const [partners, setPartners] = useState<EntityOption[]>(INITIAL_INSURANCES);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [newType, setNewType] = useState<'branch' | 'partner'>('branch');
-  
+  const [newName, setNewName] = useState("");
+  const [newType, setNewType] = useState<"branch" | "partner">("branch");
+
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [coords, setCoords] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [coords, setCoords] = useState<{
+    top: number;
+    left: number;
+    width: number;
+  } | null>(null);
 
   const [errorText, setErrorText] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
@@ -55,7 +79,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
       });
     }
     setIsOpen(!isOpen);
-    setSearchQuery('');
+    setSearchQuery("");
   };
 
   useEffect(() => {
@@ -73,16 +97,18 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
 
     const trimmedName = newName.trim();
     if (!trimmedName || trimmedName.length < 3) {
-      setErrorText('El nombre debe tener al menos 3 caracteres.');
+      setErrorText("El nombre debe tener al menos 3 caracteres.");
       return;
     }
 
     const exists = [...branches, ...partners].some(
-      (item) => item.name.toLowerCase() === trimmedName.toLowerCase() && item.type === newType
+      (item) =>
+        item.name.toLowerCase() === trimmedName.toLowerCase() &&
+        item.type === newType,
     );
 
     if (exists) {
-      setErrorText('Ya existe un registro con este nombre en la categoría.');
+      setErrorText("Ya existe un registro con este nombre en la categoría.");
       return;
     }
 
@@ -90,31 +116,31 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
       id: `custom-${crypto.randomUUID()}`,
       name: trimmedName,
       type: newType,
-      status: 'active',
+      status: "active",
     };
 
-    if (newType === 'branch') {
+    if (newType === "branch") {
       setBranches((prev) => [...prev, newEntity]);
     } else {
       setPartners((prev) => [...prev, newEntity]);
     }
 
     onSelectEntity(newEntity);
-    setNewName('');
+    setNewName("");
     setIsAddModalOpen(false);
     setIsOpen(false);
 
     setToast({
-      type: 'success',
+      type: "success",
       message: `¡${trimmedName} vinculado correctamente!`,
     });
   };
 
   const filteredBranches = branches.filter((b) =>
-    b.name.toLowerCase().includes(searchQuery.toLowerCase())
+    b.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
   const filteredPartners = partners.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (!isMounted) {
@@ -133,20 +159,30 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
         onClick={handleToggle}
         className="group w-full flex items-center justify-between gap-2 bg-slate-900/90 hover:bg-slate-800/90 text-slate-100 border border-slate-700/60 hover:border-emerald-500/50 px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all shadow-lg shadow-black/20 cursor-pointer min-w-0"
       >
-        <div className={`p-1.5 rounded-lg shrink-0 ${selectedEntity.type === 'branch' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'}`}>
-          {selectedEntity.type === 'branch' ? <Store className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5" />}
+        <div
+          className={`p-1.5 rounded-lg shrink-0 ${selectedEntity.type === "branch" ? "bg-emerald-500/10 text-emerald-400" : "bg-blue-500/10 text-blue-400"}`}
+        >
+          {selectedEntity.type === "branch" ? (
+            <Store className="w-3.5 h-3.5" />
+          ) : (
+            <Globe className="w-3.5 h-3.5" />
+          )}
         </div>
-        
+
         <div className="flex flex-col text-left min-w-0 flex-1 px-0.5">
           <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider leading-none hidden sm:block">
-            {selectedEntity.type === 'branch' ? 'Sucursal Operativa' : 'Aliado Estratégico'}
+            {selectedEntity.type === "branch"
+              ? "Sucursal Operativa"
+              : "Aliado Estratégico"}
           </span>
           <span className="font-semibold text-slate-200 tracking-tight truncate leading-tight text-xs">
             {selectedEntity.name}
           </span>
         </div>
 
-        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-emerald-400' : ''}`} />
+        <ChevronDown
+          className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180 text-emerald-400" : ""}`}
+        />
       </button>
 
       {isOpen &&
@@ -160,7 +196,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
               aria-label="Cerrar menú"
             />
 
-            <div 
+            <div
               style={{
                 top: `${coords.top}px`,
                 left: `${coords.left}px`,
@@ -171,9 +207,13 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
               <div className="space-y-2">
                 <div className="flex items-center justify-between pb-1 border-b border-slate-800/80">
                   <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                    <Network className="w-3.5 h-3.5 text-emerald-400" /> Selector de Contexto
+                    <Network className="w-3.5 h-3.5 text-emerald-400" />{" "}
+                    Selector de Contexto
                   </span>
-                  <button onClick={() => setIsOpen(false)} className="p-1 text-slate-400 hover:text-white rounded-lg cursor-pointer">
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="p-1 text-slate-400 hover:text-white rounded-lg cursor-pointer"
+                  >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -196,7 +236,9 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                     <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1">
                       <Store className="w-3 h-3" /> Sucursales Propias
                     </span>
-                    <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-md font-mono">{filteredBranches.length}</span>
+                    <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-md font-mono">
+                      {filteredBranches.length}
+                    </span>
                   </div>
                   {filteredBranches.map((b) => (
                     <button
@@ -207,12 +249,14 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                       }}
                       className={`w-full text-left px-2.5 py-2 rounded-xl text-xs flex items-center justify-between transition-all cursor-pointer ${
                         selectedEntity.id === b.id
-                          ? 'bg-emerald-500/15 text-emerald-300 font-semibold border border-emerald-500/30 shadow-inner'
-                          : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                          ? "bg-emerald-500/15 text-emerald-300 font-semibold border border-emerald-500/30 shadow-inner"
+                          : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
                       }`}
                     >
                       <div className="flex items-center gap-2 truncate">
-                        <Store className={`w-3.5 h-3.5 shrink-0 ${selectedEntity.id === b.id ? 'text-emerald-400' : 'text-slate-500'}`} />
+                        <Store
+                          className={`w-3.5 h-3.5 shrink-0 ${selectedEntity.id === b.id ? "text-emerald-400" : "text-slate-500"}`}
+                        />
                         <span className="truncate">{b.name}</span>
                       </div>
                       {selectedEntity.id === b.id && (
@@ -233,7 +277,9 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                     <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest flex items-center gap-1">
                       <Globe className="w-3 h-3" /> Red de Aliados
                     </span>
-                    <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-md font-mono">{filteredPartners.length}</span>
+                    <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-md font-mono">
+                      {filteredPartners.length}
+                    </span>
                   </div>
                   {filteredPartners.map((p) => (
                     <button
@@ -244,12 +290,14 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                       }}
                       className={`w-full text-left px-2.5 py-2 rounded-xl text-xs flex items-center justify-between transition-all cursor-pointer ${
                         selectedEntity.id === p.id
-                          ? 'bg-blue-500/15 text-blue-300 font-semibold border border-blue-500/30 shadow-inner'
-                          : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                          ? "bg-blue-500/15 text-blue-300 font-semibold border border-blue-500/30 shadow-inner"
+                          : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
                       }`}
                     >
                       <div className="flex items-center gap-2 truncate">
-                        <Globe className={`w-3.5 h-3.5 shrink-0 ${selectedEntity.id === p.id ? 'text-blue-400' : 'text-slate-500'}`} />
+                        <Globe
+                          className={`w-3.5 h-3.5 shrink-0 ${selectedEntity.id === p.id ? "text-blue-400" : "text-slate-500"}`}
+                        />
                         <span className="truncate">{p.name}</span>
                       </div>
                       {selectedEntity.id === p.id && (
@@ -265,7 +313,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                   onClick={() => {
                     setIsOpen(false);
                     setErrorText(null);
-                    setNewName('');
+                    setNewName("");
                     setIsAddModalOpen(true);
                   }}
                   className="w-full text-left px-2.5 py-2 rounded-xl text-xs text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-2 font-medium transition-all group cursor-pointer"
@@ -278,7 +326,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
               </div>
             </div>
           </div>,
-          document.body
+          document.body,
         )}
 
       {isAddModalOpen &&
@@ -290,14 +338,21 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Vincular Nueva Entidad</h3>
-                  <p className="text-[11px] text-slate-400">Agrega un nuevo nodo operativo o socio comercial</p>
+                  <h3 className="text-sm font-bold text-white">
+                    Vincular Nueva Entidad
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Agrega un nuevo nodo operativo o socio comercial
+                  </p>
                 </div>
               </div>
 
               <form onSubmit={handleAddEntity} className="space-y-4">
                 <div>
-                  <label htmlFor="new-entity-name" className="text-[11px] font-medium text-slate-300 block mb-1.5">
+                  <label
+                    htmlFor="new-entity-name"
+                    className="text-[11px] font-medium text-slate-300 block mb-1.5"
+                  >
                     Nombre del Registro
                   </label>
                   <input
@@ -311,8 +366,8 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                     placeholder="Ej. Sucursal Este / Distribuidora Global"
                     className={`w-full bg-slate-950 border rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none transition-all ${
                       errorText
-                        ? 'border-rose-500 focus:border-rose-500'
-                        : 'border-slate-800 focus:border-emerald-500'
+                        ? "border-rose-500 focus:border-rose-500"
+                        : "border-slate-800 focus:border-emerald-500"
                     }`}
                   />
                   {errorText && (
@@ -324,13 +379,18 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                 </div>
 
                 <div>
-                  <label htmlFor="new-entity-type" className="text-[11px] font-medium text-slate-300 block mb-1.5">
+                  <label
+                    htmlFor="new-entity-type"
+                    className="text-[11px] font-medium text-slate-300 block mb-1.5"
+                  >
                     Clasificación
                   </label>
                   <select
                     id="new-entity-type"
                     value={newType}
-                    onChange={(e) => setNewType(e.target.value as 'branch' | 'partner')}
+                    onChange={(e) =>
+                      setNewType(e.target.value as "branch" | "partner")
+                    }
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 cursor-pointer"
                   >
                     <option value="branch">Sucursal Operativa</option>
@@ -356,7 +416,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
               </form>
             </div>
           </div>,
-          document.body
+          document.body,
         )}
 
       {toast &&
@@ -370,7 +430,7 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
               <p className="text-slate-300">{toast.message}</p>
             </div>
           </div>,
-          document.body
+          document.body,
         )}
     </div>
   );

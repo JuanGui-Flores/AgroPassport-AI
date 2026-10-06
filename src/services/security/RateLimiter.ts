@@ -15,12 +15,17 @@ export class RateLimiter {
     const record = this.ipRequests.get(clientIp);
 
     if (!record || now > record.resetTime) {
-      this.ipRequests.set(clientIp, { count: 1, resetTime: now + this.WINDOW_MS });
+      this.ipRequests.set(clientIp, {
+        count: 1,
+        resetTime: now + this.WINDOW_MS,
+      });
       return false;
     }
 
     if (record.count >= this.MAX_REQUESTS) {
-      console.warn(`[Security Alert] IP bloqueada temporalmente por exceso de peticiones: ${clientIp}`);
+      console.warn(
+        `[Security Alert] IP bloqueada temporalmente por exceso de peticiones: ${clientIp}`,
+      );
       return true; // Bloqueado
     }
 

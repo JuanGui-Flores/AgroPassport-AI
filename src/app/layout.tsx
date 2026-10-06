@@ -17,7 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "AgroPassport AI — Evaluador de Riesgo & Scoring Agrícola",
-  description: "Plataforma de inteligencia agroindustrial integrada y scoring crediticio.",
+  description:
+    "Plataforma de inteligencia agroindustrial integrada y scoring crediticio.",
 };
 
 export default function RootLayout({
@@ -27,20 +28,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-950 text-slate-100`}>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-950 text-slate-100`}
+      >
+        <AuthProvider>{children}</AuthProvider>
 
         {/* Notificaciones Toast flotantes estilizadas en Slate/Emerald */}
-        <Toaster 
-          theme="dark" 
-          position="bottom-right" 
+        <Toaster
+          theme="dark"
+          position="bottom-right"
           toastOptions={{
             style: {
-              background: '#0f172a',
-              borderColor: '#1e293b',
-              color: '#f8fafc',
+              background: "#0f172a",
+              borderColor: "#1e293b",
+              color: "#f8fafc",
             },
           }}
         />

@@ -1,7 +1,7 @@
 // src/hooks/useInactivityTimer.ts
-'use client';
+"use client";
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from "react";
 
 interface UseInactivityTimerOptions {
   timeoutMs?: number;
@@ -52,7 +52,13 @@ export function useInactivityTimer({
       }
     }, timeoutMs);
 
-    const events = ['pointerdown', 'pointermove', 'keydown', 'touchstart', 'click'];
+    const events = [
+      "pointerdown",
+      "pointermove",
+      "keydown",
+      "touchstart",
+      "click",
+    ];
 
     const handleUserActivity = () => {
       resetTimer();

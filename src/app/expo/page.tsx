@@ -1,69 +1,81 @@
 // src/app/expo/page.tsx
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { CreditCard, Satellite, Database, MonitorPlay, ChevronDown, Cpu, Sparkles, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  CreditCard,
+  Satellite,
+  Database,
+  MonitorPlay,
+  ChevronDown,
+  Cpu,
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
 
-import { ExpoMetricsPanel, ExpoLoteData } from './ExpoMetricsPanel';
-import { ExpoBlockchainPanel } from './ExpoBlockchainPanel';
+import { ExpoMetricsPanel, ExpoLoteData } from "./ExpoMetricsPanel";
+import { ExpoBlockchainPanel } from "./ExpoBlockchainPanel";
 
-type ActiveTab = 'pasaporte' | 'satelital' | 'blockchain';
+type ActiveTab = "pasaporte" | "satelital" | "blockchain";
 
 // Datos Mock para el selector de lotes en la Expo
 const mockLotes: ExpoLoteData[] = [
   {
-    loteId: 'lote-1',
-    nombre: 'Lote Don Guillermo',
+    loteId: "lote-1",
+    nombre: "Lote Don Guillermo",
     hectareas: 450,
     score: 875,
     ndvi: 0.82,
-    riesgo: 'Bajo',
-    rindeEst: '4.2 Tn/Ha',
-    humedad: '34.2 %',
-    tempSuelo: '22.4 °C',
-    viento: '12 km/h SO',
-    hash: '0x8f2a...e91c',
+    riesgo: "Bajo",
+    rindeEst: "4.2 Tn/Ha",
+    humedad: "34.2 %",
+    tempSuelo: "22.4 °C",
+    viento: "12 km/h SO",
+    hash: "0x8f2a...e91c",
     lat: -31.6565,
-    lng: -68.5630,
+    lng: -68.563,
   },
   {
-    loteId: 'lote-2',
-    nombre: 'Finca La Esperanza',
+    loteId: "lote-2",
+    nombre: "Finca La Esperanza",
     hectareas: 280,
     score: 720,
     ndvi: 0.68,
-    riesgo: 'Moderado',
-    rindeEst: '3.1 Tn/Ha',
-    humedad: '28.1 %',
-    tempSuelo: '25.8 °C',
-    viento: '18 km/h O',
-    hash: '0x4b1e...f382',
-    lat: -31.6420,
-    lng: -68.5800,
+    riesgo: "Moderado",
+    rindeEst: "3.1 Tn/Ha",
+    humedad: "28.1 %",
+    tempSuelo: "25.8 °C",
+    viento: "18 km/h O",
+    hash: "0x4b1e...f382",
+    lat: -31.642,
+    lng: -68.58,
   },
   {
-    loteId: 'lote-3',
-    nombre: 'Establecimiento San José',
+    loteId: "lote-3",
+    nombre: "Establecimiento San José",
     hectareas: 620,
     score: 910,
     ndvi: 0.89,
-    riesgo: 'Bajo',
-    rindeEst: '5.0 Tn/Ha',
-    humedad: '38.5 %',
-    tempSuelo: '21.0 °C',
-    viento: '9 km/h S',
-    hash: '0x9d3f...a112',
-    lat: -31.6700,
-    lng: -68.5500,
+    riesgo: "Bajo",
+    rindeEst: "5.0 Tn/Ha",
+    humedad: "38.5 %",
+    tempSuelo: "21.0 °C",
+    viento: "9 km/h S",
+    hash: "0x9d3f...a112",
+    lat: -31.67,
+    lng: -68.55,
   },
 ];
 
 export default function ExpoPage() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('satelital');
-  const [selectedLoteId, setSelectedLoteId] = useState<string>('lote-1');
+  const [activeTab, setActiveTab] = useState<ActiveTab>("satelital");
+  const [selectedLoteId, setSelectedLoteId] = useState<string>("lote-1");
   const [isScreenSaver, setIsScreenSaver] = useState(false);
 
-  const selectedLote = mockLotes.find((l) => l.loteId === selectedLoteId) || mockLotes[0];
+  const selectedLote =
+    mockLotes.find((l) => l.loteId === selectedLoteId) || mockLotes[0];
 
   const handleDismissScreenSaver = () => {
     if (isScreenSaver) {
@@ -73,7 +85,6 @@ export default function ExpoPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-between p-4 sm:p-8 font-sans relative overflow-x-hidden selection:bg-emerald-500 selection:text-slate-950">
-      
       {/* SALVAPANTALLAS ORIGINAL RESTAURADO */}
       {isScreenSaver && (
         <button
@@ -88,8 +99,12 @@ export default function ExpoPage() {
                 <Cpu className="w-5 h-5" />
               </div>
               <div className="text-left font-mono">
-                <h2 className="text-sm font-black tracking-wider text-white">AGROPASSPORT AI</h2>
-                <p className="text-[10px] text-emerald-400 tracking-widest">DEMO INTERACTIVA • MODO EXPO</p>
+                <h2 className="text-sm font-black tracking-wider text-white">
+                  AGROPASSPORT AI
+                </h2>
+                <p className="text-[10px] text-emerald-400 tracking-widest">
+                  DEMO INTERACTIVA • MODO EXPO
+                </p>
               </div>
             </div>
 
@@ -102,7 +117,8 @@ export default function ExpoPage() {
           {/* Contenido Central */}
           <div className="max-w-3xl flex flex-col items-center space-y-6 my-auto">
             <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-1.5 rounded-full text-xs font-mono font-bold tracking-wide">
-              <Sparkles className="w-3.5 h-3.5" /> SCORING AGRÍCOLA & FINANCIERO EN TIEMPO REAL
+              <Sparkles className="w-3.5 h-3.5" /> SCORING AGRÍCOLA & FINANCIERO
+              EN TIEMPO REAL
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-tight">
@@ -112,7 +128,8 @@ export default function ExpoPage() {
             </h1>
 
             <p className="text-sm sm:text-base text-slate-400 max-w-lg leading-relaxed">
-              Auditabilidad satelital, scoring de biomasa (NDVI) y simulación instantánea de crédito y pólizas de seguro.
+              Auditabilidad satelital, scoring de biomasa (NDVI) y simulación
+              instantánea de crédito y pólizas de seguro.
             </p>
 
             <div className="pt-2">
@@ -144,11 +161,10 @@ export default function ExpoPage() {
 
       {/* ENCABEZADO SUPERIOR DEL KIOSCO */}
       <header className="w-full max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-900 z-10">
-        
         {/* Selector de Lotes Mock */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 bg-emerald-950/80 border border-emerald-800 text-emerald-400 px-3 py-1.5 rounded-full text-xs font-mono uppercase font-bold">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />{' '}
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />{" "}
             STAND EXPO
           </div>
 
@@ -172,11 +188,11 @@ export default function ExpoPage() {
         <div className="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 shadow-xl">
           <button
             type="button"
-            onClick={() => setActiveTab('pasaporte')}
+            onClick={() => setActiveTab("pasaporte")}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
-              activeTab === 'pasaporte'
-                ? 'bg-emerald-500 text-slate-950 shadow-md'
-                : 'text-slate-400 hover:text-white'
+              activeTab === "pasaporte"
+                ? "bg-emerald-500 text-slate-950 shadow-md"
+                : "text-slate-400 hover:text-white"
             }`}
           >
             <CreditCard className="w-3.5 h-3.5" />
@@ -185,11 +201,11 @@ export default function ExpoPage() {
 
           <button
             type="button"
-            onClick={() => setActiveTab('satelital')}
+            onClick={() => setActiveTab("satelital")}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
-              activeTab === 'satelital'
-                ? 'bg-emerald-500 text-slate-950 shadow-md'
-                : 'text-slate-400 hover:text-white'
+              activeTab === "satelital"
+                ? "bg-emerald-500 text-slate-950 shadow-md"
+                : "text-slate-400 hover:text-white"
             }`}
           >
             <Satellite className="w-3.5 h-3.5" />
@@ -198,11 +214,11 @@ export default function ExpoPage() {
 
           <button
             type="button"
-            onClick={() => setActiveTab('blockchain')}
+            onClick={() => setActiveTab("blockchain")}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
-              activeTab === 'blockchain'
-                ? 'bg-emerald-500 text-slate-950 shadow-md'
-                : 'text-slate-400 hover:text-white'
+              activeTab === "blockchain"
+                ? "bg-emerald-500 text-slate-950 shadow-md"
+                : "text-slate-400 hover:text-white"
             }`}
           >
             <Database className="w-3.5 h-3.5" />
@@ -224,27 +240,36 @@ export default function ExpoPage() {
 
       {/* CONTENIDO PRINCIPAL SEGÚN PESTAÑA */}
       <main className="w-full flex-1 flex items-center justify-center py-6">
-        {activeTab === 'satelital' && <ExpoMetricsPanel lote={selectedLote} />}
-        
-        {activeTab === 'blockchain' && <ExpoBlockchainPanel lote={selectedLote} />}
+        {activeTab === "satelital" && <ExpoMetricsPanel lote={selectedLote} />}
 
-        {activeTab === 'pasaporte' && (
+        {activeTab === "blockchain" && (
+          <ExpoBlockchainPanel lote={selectedLote} />
+        )}
+
+        {activeTab === "pasaporte" && (
           <div className="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl text-center space-y-4 animate-in fade-in duration-300">
             <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded-full text-xs font-mono">
               {`Score Certificado: ${selectedLote.score} / 1000`}
             </div>
-            <h2 className="text-2xl font-bold text-white">{selectedLote.nombre}</h2>
+            <h2 className="text-2xl font-bold text-white">
+              {selectedLote.nombre}
+            </h2>
             <p className="text-xs text-slate-400">
-              Ficha crediticia lista para respaldar warrants, créditos verdes y financiamiento agropecuario.
+              Ficha crediticia lista para respaldar warrants, créditos verdes y
+              financiamiento agropecuario.
             </p>
             <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-left space-y-2 font-mono text-xs">
               <div className="flex justify-between items-center">
                 <span className="text-slate-500">Rendimiento Estimado:</span>
-                <span className="text-emerald-400 font-bold">{selectedLote.rindeEst}</span>
+                <span className="text-emerald-400 font-bold">
+                  {selectedLote.rindeEst}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-500">Nivel de Riesgo:</span>
-                <span className="text-sky-400 font-bold">{selectedLote.riesgo}</span>
+                <span className="text-sky-400 font-bold">
+                  {selectedLote.riesgo}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-500">Superficie Total:</span>

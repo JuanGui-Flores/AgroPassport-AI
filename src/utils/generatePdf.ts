@@ -13,12 +13,12 @@ export interface PdfDataProps {
 
 export const generatePassportPDF = async (data: PdfDataProps) => {
   // Asegura que solo se ejecute en el navegador
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   // Importación dinámica para evitar que Node.js intente evaluar html2pdf en el servidor
-  const html2pdf = (await import('html2pdf.js')).default;
+  const html2pdf = (await import("html2pdf.js")).default;
 
-  const element = document.createElement('div');
+  const element = document.createElement("div");
   element.innerHTML = `
     <div style="font-family: Arial, sans-serif; padding: 30px; color: #0f172a; background-color: #ffffff;">
       <!-- Header -->
@@ -31,7 +31,7 @@ export const generatePassportPDF = async (data: PdfDataProps) => {
           <span style="font-size: 10px; background-color: #ecfdf5; color: #047857; padding: 4px 8px; border-radius: 6px; font-weight: bold; border: 1px solid #a7f3d0;">
             VERIFICADO POR GIS
           </span>
-          <p style="font-size: 9px; color: #94a3b8; margin-top: 4px;">Fecha: ${new Date().toLocaleDateString('es-AR')}</p>
+          <p style="font-size: 9px; color: #94a3b8; margin-top: 4px;">Fecha: ${new Date().toLocaleDateString("es-AR")}</p>
         </div>
       </div>
 
@@ -67,10 +67,10 @@ export const generatePassportPDF = async (data: PdfDataProps) => {
 
   const opt = {
     margin: 10,
-    filename: `Ficha_Tecnica_${data.loteName.replace(/\s+/g, '_')}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
+    filename: `Ficha_Tecnica_${data.loteName.replace(/\s+/g, "_")}.pdf`,
+    image: { type: "jpeg", quality: 0.98 },
     html2canvas: { scale: 2 },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
   } as const;
 
   await html2pdf().set(opt).from(element).save();
