@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Calculator, Package, CheckCircle2, TrendingDown, RefreshCw, Layers } from "lucide-react";
+import { Calculator, CheckCircle2 } from "lucide-react";
 
 interface InsumoItem {
   id?: string;
@@ -13,8 +13,11 @@ interface InsumoItem {
   recommendedDose?: number;
 }
 
+// 1. Agregamos entity y onExportPDF a la interfaz
 interface InsumosSimulatorProps {
   initialItems?: InsumoItem[];
+  entity?: any; // O el tipo de tu EntityOption si lo tienes importado
+  onExportPDF?: () => void;
   onCalculate?: (result: { itemId: string; totalCost: number; quantity: number }) => void;
 }
 
@@ -25,16 +28,20 @@ const DEFAULT_INSUMOS: InsumoItem[] = [
   { id: "4", name: "Atrazina 50%", type: "herbicida", pricePerUnit: 12.0, unit: "L", recommendedDose: 3.0 },
 ];
 
-export const InsumosSimulator: React.FC<InsumosSimulatorProps> = ({ initialItems, onCalculate }) => {
+// 2. Recibimos entity y onExportPDF en los argumentos del componente
+export const InsumosSimulator: React.FC<InsumosSimulatorProps> = ({
+  initialItems,
+  entity,
+  onExportPDF,
+  onCalculate,
+}) => {
   const safeItems = Array.isArray(initialItems) && initialItems.length > 0 ? initialItems : DEFAULT_INSUMOS;
 
   const [selectedItemId, setSelectedItemId] = useState<string>(safeItems[0]?.id || "1");
   const [hectareas, setHectareas] = useState<number>(100);
 
-  // Búsqueda del ítem con fallback a objeto vacío seguro
   const selectedItem = safeItems.find((item) => item?.id === selectedItemId) || safeItems[0] || {};
 
-  // Extracción segura sin riesgo de TypeError
   const itemType = (selectedItem?.type || "general").toUpperCase();
   const itemName = selectedItem?.name || "Insumo Seleccionado";
   const pricePerUnit = Number(selectedItem?.pricePerUnit) || 0;
@@ -56,7 +63,6 @@ export const InsumosSimulator: React.FC<InsumosSimulatorProps> = ({ initialItems
 
   return (
     <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-6 space-y-6 backdrop-blur-xl shadow-xl">
-      {/* Cabecera del simulador */}
       <div className="flex items-center justify-between border-b border-slate-800 pb-4">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
@@ -67,12 +73,13 @@ export const InsumosSimulator: React.FC<InsumosSimulatorProps> = ({ initialItems
             <p className="text-xs text-slate-400">Simulación de costos operativos y dosis requerida por superficie</p>
           </div>
         </div>
-        <span className="text-[10px] uppercase font-mono px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-          Simulador Pro
-        </span>
+        {entity?.name && (
+          <span className="text-[10px] uppercase font-mono px-2.5 py-1 rounded-full bg-slate-800 text-emerald-400 border border-slate-700">
+            {entity.name}
+          </span>
+        )}
       </div>
 
-      {/* Inputs del Formulario */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="insumo-select" className="text-[11px] font-medium text-slate-300 block mb-1.5">
@@ -114,7 +121,6 @@ export const InsumosSimulator: React.FC<InsumosSimulatorProps> = ({ initialItems
         </div>
       </div>
 
-      {/* Detalles del Insumo Seleccionado */}
       <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 space-y-3">
         <div className="flex items-center justify-between text-xs border-b border-slate-800/50 pb-2">
           <span className="text-slate-400">Insumo:</span>
@@ -130,7 +136,6 @@ export const InsumosSimulator: React.FC<InsumosSimulatorProps> = ({ initialItems
         </div>
       </div>
 
-      {/* Resumen de cálculo */}
       <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
         <div className="p-3 bg-slate-900/50 rounded-lg border border-slate-800/60">
           <span className="text-[10px] text-slate-400 block mb-1">Categoría</span>
@@ -154,8 +159,15 @@ export const InsumosSimulator: React.FC<InsumosSimulatorProps> = ({ initialItems
         </div>
       </div>
 
-      {/* Acción opcional */}
-      <div className="flex justify-end pt-2">
+      <div className="flex justify-end gap-3 pt-2">
+        {onExportPDF && (
+          <button
+            onClick={onExportPDF}
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition-colors border border-slate-700"
+          >
+            Exportar PDF
+          </button>
+        )}
         <button
           onClick={handleApplySimulation}
           className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-medium transition-colors"
