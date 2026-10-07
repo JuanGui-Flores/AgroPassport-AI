@@ -13,10 +13,10 @@ interface InsumoItem {
   recommendedDose?: number;
 }
 
-// 1. Agregamos entity y onExportPDF a la interfaz
 interface InsumosSimulatorProps {
   initialItems?: InsumoItem[];
-  entity?: any; // O el tipo de tu EntityOption si lo tienes importado
+  // Solución 1: Reemplazamos 'any' por una interfaz abierta segura
+  entity?: { name?: string; type?: string; [key: string]: unknown } | null;
   onExportPDF?: () => void;
   onCalculate?: (result: { itemId: string; totalCost: number; quantity: number }) => void;
 }
@@ -28,7 +28,6 @@ const DEFAULT_INSUMOS: InsumoItem[] = [
   { id: "4", name: "Atrazina 50%", type: "herbicida", pricePerUnit: 12.0, unit: "L", recommendedDose: 3.0 },
 ];
 
-// 2. Recibimos entity y onExportPDF en los argumentos del componente
 export const InsumosSimulator: React.FC<InsumosSimulatorProps> = ({
   initialItems,
   entity,
@@ -92,11 +91,12 @@ export const InsumosSimulator: React.FC<InsumosSimulatorProps> = ({
               onChange={(e) => setSelectedItemId(e.target.value)}
               className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 cursor-pointer appearance-none"
             >
-              {safeItems.map((item) => {
+              {/* Solución 2: Usamos index en lugar de Math.random() para mantener el render puro */}
+              {safeItems.map((item, idx) => {
                 if (!item) return null;
                 const labelType = (item?.type || "general").toUpperCase();
                 return (
-                  <option key={item?.id || Math.random()} value={item?.id}>
+                  <option key={item?.id || `insumo-opt-${idx}`} value={item?.id}>
                     {item?.name || "Sin Nombre"} — [{labelType}]
                   </option>
                 );

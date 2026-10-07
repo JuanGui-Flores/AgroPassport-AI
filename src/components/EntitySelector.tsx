@@ -36,7 +36,7 @@ const useIsMounted = () => {
 };
 
 interface EntitySelectorProps {
-  selectedEntity: EntityOption;
+  selectedEntity?: EntityOption | null;
   onSelectEntity: (entity: EntityOption) => void;
 }
 
@@ -103,8 +103,8 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
 
     const exists = [...branches, ...partners].some(
       (item) =>
-        item.name.toLowerCase() === trimmedName.toLowerCase() &&
-        item.type === newType,
+        item?.name?.toLowerCase() === trimmedName.toLowerCase() &&
+        item?.type === newType,
     );
 
     if (exists) {
@@ -137,10 +137,10 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
   };
 
   const filteredBranches = branches.filter((b) =>
-    b.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    b?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
   const filteredPartners = partners.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    p?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (!isMounted) {
@@ -160,9 +160,9 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
         className="group w-full flex items-center justify-between gap-2 bg-slate-900/90 hover:bg-slate-800/90 text-slate-100 border border-slate-700/60 hover:border-emerald-500/50 px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all shadow-lg shadow-black/20 cursor-pointer min-w-0"
       >
         <div
-          className={`p-1.5 rounded-lg shrink-0 ${selectedEntity.type === "branch" ? "bg-emerald-500/10 text-emerald-400" : "bg-blue-500/10 text-blue-400"}`}
+          className={`p-1.5 rounded-lg shrink-0 ${selectedEntity?.type === "branch" ? "bg-emerald-500/10 text-emerald-400" : "bg-blue-500/10 text-blue-400"}`}
         >
-          {selectedEntity.type === "branch" ? (
+          {selectedEntity?.type === "branch" ? (
             <Store className="w-3.5 h-3.5" />
           ) : (
             <Globe className="w-3.5 h-3.5" />
@@ -171,12 +171,12 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
 
         <div className="flex flex-col text-left min-w-0 flex-1 px-0.5">
           <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider leading-none hidden sm:block">
-            {selectedEntity.type === "branch"
+            {selectedEntity?.type === "branch"
               ? "Sucursal Operativa"
               : "Aliado Estratégico"}
           </span>
           <span className="font-semibold text-slate-200 tracking-tight truncate leading-tight text-xs">
-            {selectedEntity.name}
+            {selectedEntity?.name || "Seleccionar Entidad"}
           </span>
         </div>
 
@@ -248,18 +248,18 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                         setIsOpen(false);
                       }}
                       className={`w-full text-left px-2.5 py-2 rounded-xl text-xs flex items-center justify-between transition-all cursor-pointer ${
-                        selectedEntity.id === b.id
+                        selectedEntity?.id === b.id
                           ? "bg-emerald-500/15 text-emerald-300 font-semibold border border-emerald-500/30 shadow-inner"
                           : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
                       }`}
                     >
                       <div className="flex items-center gap-2 truncate">
                         <Store
-                          className={`w-3.5 h-3.5 shrink-0 ${selectedEntity.id === b.id ? "text-emerald-400" : "text-slate-500"}`}
+                          className={`w-3.5 h-3.5 shrink-0 ${selectedEntity?.id === b.id ? "text-emerald-400" : "text-slate-500"}`}
                         />
                         <span className="truncate">{b.name}</span>
                       </div>
-                      {selectedEntity.id === b.id && (
+                      {selectedEntity?.id === b.id && (
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
                       )}
                     </button>
@@ -289,18 +289,18 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
                         setIsOpen(false);
                       }}
                       className={`w-full text-left px-2.5 py-2 rounded-xl text-xs flex items-center justify-between transition-all cursor-pointer ${
-                        selectedEntity.id === p.id
+                        selectedEntity?.id === p.id
                           ? "bg-blue-500/15 text-blue-300 font-semibold border border-blue-500/30 shadow-inner"
                           : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
                       }`}
                     >
                       <div className="flex items-center gap-2 truncate">
                         <Globe
-                          className={`w-3.5 h-3.5 shrink-0 ${selectedEntity.id === p.id ? "text-blue-400" : "text-slate-500"}`}
+                          className={`w-3.5 h-3.5 shrink-0 ${selectedEntity?.id === p.id ? "text-blue-400" : "text-slate-500"}`}
                         />
                         <span className="truncate">{p.name}</span>
                       </div>
-                      {selectedEntity.id === p.id && (
+                      {selectedEntity?.id === p.id && (
                         <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]"></span>
                       )}
                     </button>
