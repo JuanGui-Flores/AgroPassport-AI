@@ -154,6 +154,29 @@ export default function Home() {
     return "Bajo";
   };
 
+  const handleCalculateSimulation = (result: {
+    itemId: string;
+    totalCost: number;
+    quantity: number;
+  }) => {
+    // Registra la simulación en el estado de la entidad seleccionada
+    setSelectedEntity((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        recentActivity: [
+          {
+            id: generateSecureId().toString(),
+            text: `Simulación aplicada: Costo estimado USD ${result.totalCost.toLocaleString("es-AR", { minimumFractionDigits: 2 })}`,
+            time: "Hace un momento",
+            type: "success",
+          },
+          ...(prev.recentActivity || []),
+        ],
+      };
+    });
+  };
+
   // 🔄 Carga de Entidades
   const fetchEntities = useCallback(async () => {
     try {
@@ -597,6 +620,7 @@ export default function Home() {
           <InsumosSimulator
             entity={selectedEntity}
             onExportPDF={() => setIsModalOpen(true)}
+            onCalculate={handleCalculateSimulation}
           />
         )}
 
