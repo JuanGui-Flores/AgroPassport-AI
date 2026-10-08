@@ -16,7 +16,6 @@ import {
   ArrowUpRight,
   ShieldCheck,
   History,
-  AlertOctagon,
   Sparkles,
   ClipboardList,
   Building2,
@@ -479,7 +478,7 @@ export default function Home() {
         </div>
 
         {anomalies.length > 0 && lotesList.length > 0 && (
-          <div className="space-y-3 w-full">
+          <div className="space-y-3 w-full mb-6">
             {anomalies
               ?.filter((ano) => !dismissedAlerts.includes(ano.id || ano.lote))
               .map((ano) => (
@@ -487,24 +486,6 @@ export default function Home() {
                   key={ano.id || ano.lote}
                   className="p-3.5 sm:p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg shrink-0 mt-0.5">
-                      <AlertOctagon className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-amber-300 uppercase tracking-wide">
-                          {ano.type}
-                        </span>
-                        <span className="text-[10px] font-mono text-slate-400">
-                          | {ano.lote}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-300 mt-0.5">
-                        {ano.detail}
-                      </p>
-                    </div>
-                  </div>
                   <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     {/* Sección de Icono + Texto */}
                     <div className="flex items-start gap-3 min-w-0">
