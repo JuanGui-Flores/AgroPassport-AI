@@ -97,20 +97,20 @@ const DEFAULT_LOTES: Lote[] = [
   {
     id: "LOTE-01",
     nombre: "Lote Norte - Cuartel 3",
-    hectareas: 145.0,
-    score: 88,
-    ndvi: 0.78,
-    rindeEst: "4.2 Tn / Ha",
+    hectareas: 145,
+    score: 85,
+    ndvi: 0.75,
+    rindeEst: "4.0 Tn / Ha",
     estado: "Óptimo",
   },
   {
     id: "LOTE-02",
     nombre: "Lote Sur - Pivot 1",
-    hectareas: 98.5,
-    score: 72,
-    ndvi: 0.65,
+    hectareas: 120,
+    score: 82,
+    ndvi: 0.71,
     rindeEst: "3.8 Tn / Ha",
-    estado: "Atención Requerida",
+    estado: "Óptimo",
   },
 ];
 
@@ -715,7 +715,7 @@ export default function Home() {
               </button>
             </div>
           </div>
-{/* Pill Informativo & Botonera Dinámica de Lotes */}
+          {/* Pill Informativo & Botonera Dinámica de Lotes */}
           <div className="p-4 border-b border-slate-800/80 space-y-3">
             {/* Pill del Lote Seleccionado */}
             {(() => {
@@ -725,21 +725,22 @@ export default function Home() {
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[#00E699] text-xs font-medium">
                   <span className="w-2 h-2 rounded-full bg-[#00E699] animate-pulse" />
                   <span>
-                    {currentLote?.nombre || "Lote Seleccionado"} ({currentLote?.hectareas || 0} Ha)
+                    {currentLote?.nombre || "Lote Seleccionado"} (
+                    {currentLote?.hectareas || 0} Ha)
                   </span>
                 </div>
               );
             })()}
 
-            {/* Lista de Botones de Lotes Dinámicos */}
-            <div className="flex items-center gap-2 flex-wrap">
+            {/* Botonera Dinámica con scroll horizontal suave */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-800">
               {lotesList.map((lote) => {
                 const isSelected = selectedLoteId === lote.id;
                 return (
                   <button
                     key={lote.id}
                     onClick={() => setSelectedLoteId(lote.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition cursor-pointer ${
                       isSelected
                         ? "bg-slate-800 text-[#00E699] border border-[#00E699]/40 font-bold shadow-sm"
                         : "bg-slate-950/60 text-slate-400 hover:text-slate-200 border border-slate-800"
@@ -751,7 +752,6 @@ export default function Home() {
               })}
             </div>
           </div>
-
 
           <div className="w-full overflow-hidden rounded-xl border border-slate-800 flex flex-col min-h-95 sm:min-h-112.5 lg:min-h-130">
             <MapModule
