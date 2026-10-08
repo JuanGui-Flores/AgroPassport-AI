@@ -715,6 +715,43 @@ export default function Home() {
               </button>
             </div>
           </div>
+{/* Pill Informativo & Botonera Dinámica de Lotes */}
+          <div className="p-4 border-b border-slate-800/80 space-y-3">
+            {/* Pill del Lote Seleccionado */}
+            {(() => {
+              const currentLote =
+                lotesList.find((l) => l.id === selectedLoteId) || lotesList[0];
+              return (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[#00E699] text-xs font-medium">
+                  <span className="w-2 h-2 rounded-full bg-[#00E699] animate-pulse" />
+                  <span>
+                    {currentLote?.nombre || "Lote Seleccionado"} ({currentLote?.hectareas || 0} Ha)
+                  </span>
+                </div>
+              );
+            })()}
+
+            {/* Lista de Botones de Lotes Dinámicos */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {lotesList.map((lote) => {
+                const isSelected = selectedLoteId === lote.id;
+                return (
+                  <button
+                    key={lote.id}
+                    onClick={() => setSelectedLoteId(lote.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer ${
+                      isSelected
+                        ? "bg-slate-800 text-[#00E699] border border-[#00E699]/40 font-bold shadow-sm"
+                        : "bg-slate-950/60 text-slate-400 hover:text-slate-200 border border-slate-800"
+                    }`}
+                  >
+                    {lote.nombre}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
 
           <div className="w-full overflow-hidden rounded-xl border border-slate-800 flex flex-col min-h-95 sm:min-h-112.5 lg:min-h-130">
             <MapModule
