@@ -17,7 +17,6 @@ import { useAuth } from "@/context/AuthContext";
 import { Role } from "@/services/security/rbac";
 import { Syne } from "next/font/google";
 
-// Inicialización de la fuente fuera del componente
 const syne = Syne({
   subsets: ["latin"],
   weight: ["700", "800"],
@@ -54,37 +53,79 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-[#080C14]/90 backdrop-blur-md transition-all">
-      <div className="max-w-[1920px] mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-3">
-        {/* LADO IZQUIERDO: Branding & Selector de Entidad */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center gap-2.5 cursor-pointer group">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-linear-to-br from-emerald-500/20 to-emerald-950/40 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-md shadow-emerald-500/10 group-hover:border-emerald-400 transition-all shrink-0">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+    <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-[#080C14]/95 backdrop-blur-md transition-all">
+      <div className="max-w-[1920px] mx-auto px-3 sm:px-6 py-2.5 md:py-0 md:h-16 flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-3">
+        
+        {/* RENGLÓN SUPERIOR EN MOBILE / SECCIÓN IZQUIERDA EN DESKTOP */}
+        <div className="flex items-center justify-between md:justify-start gap-3 w-full md:w-auto">
+          {/* Branding Logo */}
+          <div className="flex items-center gap-2 cursor-pointer group shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-linear-to-br from-emerald-500/20 to-emerald-950/40 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-md shadow-emerald-500/10 group-hover:border-emerald-400 transition-all shrink-0">
+              <Sparkles className="w-4 h-4" />
             </div>
-            <div className="hidden min-[420px]:flex flex-col">
-              <span
-                className={`${syne.className} text-xs sm:text-sm font-bold tracking-tight text-white flex items-center gap-1`}
-              >
-                AgroPassport{" "}
-                <span className="text-emerald-400 font-mono text-xs font-semibold tracking-normal">
-                  AI
-                </span>
+            <span
+              className={`${syne.className} text-xs sm:text-sm font-bold tracking-tight text-white flex items-center gap-1`}
+            >
+              AgroPassport{" "}
+              <span className="text-emerald-400 font-mono text-[10px] sm:text-xs font-semibold">
+                AI
               </span>
-            </div>
+            </span>
           </div>
 
           <span className="h-5 w-px bg-slate-800/80 hidden md:block" />
 
-          <div className="flex items-center min-w-0">
+          {/* Selector de Entidad visible en desktop en este bloque */}
+          <div className="hidden md:block min-w-0">
             <EntitySelector
               selectedEntity={selectedEntity}
               onSelectEntity={onSelectEntity}
             />
           </div>
+
+          {/* Perfil rápido para mobile */}
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              aria-label="Notificaciones"
+              className="relative p-1.5 rounded-lg border border-slate-800 bg-slate-900/60 text-slate-400 cursor-pointer"
+            >
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+            </button>
+            <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700/80 flex items-center justify-center font-bold text-emerald-400 text-xs shrink-0">
+              {getRoleInitials(user?.role)}
+            </div>
+          </div>
         </div>
 
-        {/* CENTRO: Buscador Global Enterprise */}
+        {/* RENGLÓN INFERIOR EN MOBILE (Selectores principales) */}
+        <div className="flex items-center justify-between gap-2 w-full md:w-auto md:hidden pt-1 border-t border-slate-800/40">
+          <div className="flex-1 min-w-0">
+            <EntitySelector
+              selectedEntity={selectedEntity}
+              onSelectEntity={onSelectEntity}
+            />
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-slate-900/80 border border-slate-800 px-2 py-1.5 rounded-xl text-xs relative shrink-0">
+            <Shield className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <select
+              value={user?.role || "PRODUCER"}
+              onChange={(e) => handleRoleChange(e.target.value as Role)}
+              className="bg-transparent text-emerald-400 font-semibold focus:outline-none cursor-pointer text-[11px] pr-4 appearance-none"
+            >
+              <option value="PRODUCER" className="bg-slate-950 text-slate-200">
+                Productor
+              </option>
+              <option value="ADMIN" className="bg-slate-950 text-slate-200">
+                Admin
+              </option>
+            </select>
+            <ChevronDown className="w-3 h-3 text-emerald-400 absolute right-1.5 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* CENTRO: Buscador Global (Solo escritorio/tablets) */}
         <div className="hidden md:block flex-1 max-w-xs md:max-w-md mx-2">
           <div className="relative group">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors group-focus-within:text-emerald-400" />
@@ -101,15 +142,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* LADO DERECHO: Selector de Rol, Campaña, Notificaciones y Perfil */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          {/* Selector de Rol */}
-          <div className="flex items-center gap-1.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 px-2 sm:px-3 py-1.5 rounded-xl text-xs transition relative">
-            <Shield className="w-3.5 h-3.5 text-emerald-400 shrink-0 hidden min-[360px]:block" />
+        {/* LADO DERECHO: Controles de Escritorio */}
+        <div className="hidden md:flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-xs transition relative">
+            <Shield className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
             <select
               value={user?.role || "PRODUCER"}
               onChange={(e) => handleRoleChange(e.target.value as Role)}
-              className="bg-transparent text-emerald-400 font-semibold focus:outline-none cursor-pointer text-[11px] sm:text-xs pr-4 appearance-none"
+              className="bg-transparent text-emerald-400 font-semibold focus:outline-none cursor-pointer text-xs pr-4 appearance-none"
             >
               <option value="PRODUCER" className="bg-slate-950 text-slate-200">
                 Productor
@@ -121,29 +161,26 @@ export const Navbar: React.FC<NavbarProps> = ({
             <ChevronDown className="w-3 h-3 text-emerald-400 absolute right-2 pointer-events-none" />
           </div>
 
-          {/* Campaña */}
           <div className="hidden lg:flex items-center gap-2 bg-slate-900/60 border border-slate-800 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300">
             <Calendar className="w-3.5 h-3.5 text-slate-400" />
             <span>Campaña 2025/2026</span>
           </div>
 
-          {/* Botón Notificaciones */}
           <button
             aria-label="Notificaciones"
-            className="relative p-2 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition hidden sm:block cursor-pointer"
+            className="relative p-2 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition cursor-pointer"
           >
             <Bell className="w-4 h-4" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-400 rounded-full ring-2 ring-[#080C14] animate-pulse" />
           </button>
 
-          <span className="h-5 w-px bg-slate-800/80 hidden sm:block" />
+          <span className="h-5 w-px bg-slate-800/80" />
 
-          {/* Perfil del Usuario */}
           <div className="flex items-center gap-2.5 cursor-pointer group">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-800 border border-slate-700/80 group-hover:border-emerald-400/80 flex items-center justify-center font-bold text-emerald-400 text-xs transition-all shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700/80 group-hover:border-emerald-400/80 flex items-center justify-center font-bold text-emerald-400 text-xs transition-all shrink-0">
               {getRoleInitials(user?.role)}
             </div>
-            <div className="hidden md:block text-left">
+            <div className="text-left">
               <p className="text-xs font-bold text-slate-200 group-hover:text-white transition-colors leading-tight">
                 {user?.name || "Productor"}
               </p>
@@ -153,6 +190,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
         </div>
+
       </div>
     </header>
   );
