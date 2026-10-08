@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useSyncExternalStore } from 'react';
-
 import { 
   X, 
   Activity, 
@@ -51,13 +50,6 @@ interface DbLote {
   latitud?: number;
   longitud?: number;
   entityId: string;
-  telemetrias?: Array<{
-    id: string;
-    humedadSuelo: number;
-    temperaturaFoliar: number;
-    bateriaNodo: number;
-    timestamp: string;
-  }>;
 }
 
 const generateSecureId = (): number => {
@@ -75,17 +67,61 @@ const useIsMounted = () => {
   );
 };
 
+const DEFAULT_ENTITY: EntityOption = {
+  id: '1',
+  name: 'Establecimiento Las Marías S.A.',
+  code: 'AP-101',
+  type: 'branch',
+  metrics: {
+    score: 88.2,
+    scoreTrend: '+3.5% vs mes ant.',
+    canje: 90,
+    canjeTrend: 'Activo',
+    alerts: 0,
+    alertsStatus: 'Sin alertas críticas'
+  },
+  recentActivity: [
+    {
+      id: 'act-1',
+      text: 'Conexión satelital y telemetría activas',
+      time: 'Hace un momento',
+      type: 'success'
+    }
+  ]
+};
+
+const DEFAULT_LOTES: Lote[] = [
+  {
+    id: 'LOTE-01',
+    nombre: 'Lote Norte - Cuartel 3',
+    hectareas: 145.0,
+    score: 88,
+    ndvi: 0.78,
+    rindeEst: '4.2 Tn / Ha',
+    estado: 'Óptimo'
+  },
+  {
+    id: 'LOTE-02',
+    nombre: 'Lote Sur - Pivot 1',
+    hectareas: 98.5,
+    score: 72,
+    ndvi: 0.65,
+    rindeEst: '3.8 Tn / Ha',
+    estado: 'Atención Requerida'
+  }
+];
+
 export default function Home() {
   const isMounted = useIsMounted();
-  const [selectedLoteId, setSelectedLoteId] = useState<string>('');
+  const [selectedLoteId, setSelectedLoteId] = useState<string>('LOTE-01');
   
   // Estados iniciales
-  const [entitiesList, setEntitiesList] = useState<EntityOption[]>([]);
-  const [selectedEntity, setSelectedEntity] = useState<EntityOption | null>(null);
-  const [loadingEntities, setLoadingEntities] = useState<boolean>(true);
+  const [entitiesList, setEntitiesList] = useState<EntityOption[]>([DEFAULT_ENTITY]);
+  const [selectedEntity, setSelectedEntity] = useState<EntityOption | null>(DEFAULT_ENTITY);
+  const [loadingEntities, setLoadingEntities] = useState<boolean>(false);
 
   // Lotes dinámicos
-  const [lotesList, setLotesList] = useState<Lote[]>([]);
+  const [lotesList, setLotesList] = useState<Lote[]>(DEFAULT_LOTES);
   const [loadingLotes, setLoadingLotes] = useState<boolean>(false);
 
   // Modales
@@ -104,9 +140,10 @@ export default function Home() {
     return 'Bajo';
   };
 
-  // 🔄 Carga de Entidades con Fallback de Respaldo
+  // 🔄 Carga de Entidades
   const fetchEntities = useCallback(async () => {
     try {
+      setLoadingEntities(true);
       const response = await fetch('/api/entities');
       if (!response.ok) throw new Error('Error al consultar entidades');
       const dbEntities: DbEntity[] = await response.json();
@@ -115,7 +152,6 @@ export default function Home() {
         const formattedEntities: EntityOption[] = dbEntities.map((ent) => ({
           id: ent?.id,
           name: ent?.businessName || 'Sin Nombre',
-          cuit: ent?.cuit || 'Sin CUIT',
           code: ent?.code || 'AP-GEN',
           type: (ent?.type && (ent.type === 'branch' || ent.type === 'partner')) ? ent.type : 'partner',
           metrics: {
@@ -138,43 +174,29 @@ export default function Home() {
 
         setEntitiesList(formattedEntities);
         setSelectedEntity(formattedEntities[0]);
-        return;
       }
-      throw new Error('Sin entidades en BD');
     } catch (error) {
-      console.warn('Cargando entidad demo por defecto:', error);
-      
-      // 💡 Entidad de prueba para mostrar toda la interfaz de la aplicación
-      const fallbackEntity: EntityOption = {
-        id: '1',
-        name: 'Establecimiento Las Marías S.A.',
-        cuit: '30-71234567-8',
-        code: 'AP-101',
-        type: 'branch',
-        metrics: {
-          score: 88.2,
-          scoreTrend: '+3.5% vs mes ant.',
-          canje: 90,
-          canjeTrend: 'Activo',
-          alerts: 0,
-          alertsStatus: 'Sin alertas críticas'
-        },
-        recentActivity: [
-          {
-            id: 'act-1',
-            text: 'Conexión satelital y telemetría activas',
-            time: 'Hace un momento',
-            type: 'success'
-          }
-        ]
-      };
-
-      setEntitiesList([fallbackEntity]);
-      setSelectedEntity(fallbackEntity);
+      console.warn('Servidor sin respuesta de BD, manteniendo fallback local:', error);
     } finally {
       setLoadingEntities(false);
     }
   }, []);
+
+  useEffect(() => {
+    let isSubscribed = true;
+
+    const load = async () => {
+      if (isSubscribed) {
+        await fetchEntities();
+      }
+    };
+
+    void load();
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [fetchEntities]);
 
   // 🔄 Carga de Lotes por Entidad
   useEffect(() => {
@@ -190,30 +212,23 @@ export default function Home() {
         if (!response.ok) throw new Error('Error al obtener lotes');
         const dbLotes: DbLote[] = await response.json();
 
-        if (isSubscribed) {
-          if (Array.isArray(dbLotes) && dbLotes.length > 0) {
-            const formattedLotes: Lote[] = dbLotes.map((l) => ({
-              id: l?.code || l?.id,
-              nombre: l?.nombre || 'Lote sin nombre',
-              hectareas: l?.hectareas || 0,
-              score: l?.score || 0,
-              ndvi: l?.ndvi || 0,
-              rindeEst: typeof l?.rindeEst === 'number' ? `${l.rindeEst.toFixed(1)} Tn / Ha` : String(l?.rindeEst || '0'),
-              estado: getLoteEstado(l?.score || 0),
-            }));
+        if (isSubscribed && Array.isArray(dbLotes) && dbLotes.length > 0) {
+          const formattedLotes: Lote[] = dbLotes.map((l) => ({
+            id: l?.code || l?.id,
+            nombre: l?.nombre || 'Lote sin nombre',
+            hectareas: l?.hectareas || 0,
+            score: l?.score || 0,
+            ndvi: l?.ndvi || 0,
+            rindeEst: typeof l?.rindeEst === 'number' ? `${l.rindeEst.toFixed(1)} Tn / Ha` : String(l?.rindeEst || '0'),
+            estado: getLoteEstado(l?.score || 0),
+          }));
 
-            setLotesList(formattedLotes);
-            setSelectedLoteId(formattedLotes[0]?.id || '');
-          } else {
-            setLotesList([]);
-            setSelectedLoteId('');
-          }
+          setLotesList(formattedLotes);
+          setSelectedLoteId(formattedLotes[0]?.id || '');
         }
       } catch (error) {
         if (isSubscribed) {
-          console.warn('Error al obtener lotes:', error);
-          setLotesList([]);
-          setSelectedLoteId('');
+          console.warn('Error al obtener lotes, usando lote demo:', error);
         }
       } finally {
         if (isSubscribed) {
@@ -229,142 +244,97 @@ export default function Home() {
     };
   }, [selectedEntity]);
 
-const handleCreateEntity = async (e: React.SyntheticEvent<HTMLFormElement>) => {    e.preventDefault();
-    
+  const handleCreateEntity = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const businessName = formData.get('businessName') as string;
-    const cuit = formData.get('cuit') as string;
-    const code = formData.get('code') as string;
+    const businessName = (formData.get('businessName') as string) || 'Nueva Entidad Demo';
+    const code = (formData.get('code') as string) || 'AP-NEW';
 
+    const newEntity: EntityOption = {
+      id: `ent-${Date.now()}`,
+      name: businessName,
+      code,
+      type: 'branch',
+      metrics: {
+        score: 85.0,
+        scoreTrend: '+1.0%',
+        canje: 80,
+        canjeTrend: 'Activo',
+        alerts: 0,
+        alertsStatus: 'Sin alertas'
+      },
+      recentActivity: [
+        {
+          id: `act-${Date.now()}`,
+          text: `Entidad ${businessName} registrada correctamente`,
+          time: 'Hace un momento',
+          type: 'success'
+        }
+      ]
+    };
+
+    // Intentar guardar en backend, de lo contrario agregar localmente
     try {
-      const res = await fetch('/api/entities', {
+      await fetch('/api/entities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessName, cuit, code })
+        body: JSON.stringify({ businessName, code })
       });
-
-      if (res.ok) {
-        setIsAddEntityModalOpen(false);
-        setLoadingEntities(true);
-        await fetchEntities();
-      } else {
-        alert('Error al registrar la entidad.');
-      }
     } catch (err) {
-      console.error(err);
+      console.warn('Guardado en memoria local debido a falta de BD backend:', err);
     }
+
+    setEntitiesList((prev) => [...prev, newEntity]);
+    setSelectedEntity(newEntity);
+    setIsAddEntityModalOpen(false);
   };
 
   const handleCreateLote = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!selectedEntity?.id) return;
-
     const formData = new FormData(e.currentTarget);
-    const code = formData.get('code') as string;
-    const nombre = formData.get('nombre') as string;
-    const hectareas = formData.get('hectareas') as string;
-    const cultivo = formData.get('cultivo') as string;
+    const code = (formData.get('code') as string) || `LOTE-${Date.now()}`;
+    const nombre = (formData.get('nombre') as string) || 'Nuevo Lote';
+    const hectareas = Number.parseFloat((formData.get('hectareas') as string) || '100');
+
+    const newLote: Lote = {
+      id: code,
+      nombre,
+      hectareas,
+      score: 85,
+      ndvi: 0.72,
+      rindeEst: '4.0 Tn / Ha',
+      estado: 'Óptimo'
+    };
 
     try {
-      const res = await fetch('/api/lotes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          code,
-          nombre,
-          hectareas: Number.parseFloat(hectareas),
-          cultivo,
-          score: 88.0,
-          ndvi: 0.75,
-          rindeEst: 4.2,
-          entityId: selectedEntity.id
-        })
-      });
-
-      if (res.ok) {
-        setIsAddLoteModalOpen(false);
-        const response = await fetch(`/api/lotes?entityId=${selectedEntity.id}`);
-        const dbLotes: DbLote[] = await response.json();
-        const formattedLotes: Lote[] = dbLotes.map((l) => ({
-          id: l?.code || l?.id,
-          nombre: l?.nombre || 'Lote',
-          hectareas: l?.hectareas || 0,
-          score: l?.score || 0,
-          ndvi: l?.ndvi || 0,
-          rindeEst: typeof l?.rindeEst === 'number' ? `${l.rindeEst.toFixed(1)} Tn / Ha` : String(l?.rindeEst || '0'),
-          estado: getLoteEstado(l?.score || 0),
-        }));
-        setLotesList(formattedLotes);
-        if (formattedLotes.length > 0) {
-          setSelectedLoteId(formattedLotes.at(-1)?.id || '');
-        }
-      } else {
-        alert('Error al registrar el lote.');
+      if (selectedEntity?.id) {
+        await fetch('/api/lotes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code,
+            nombre,
+            hectareas,
+            score: 85.0,
+            ndvi: 0.72,
+            rindeEst: 4.0,
+            entityId: selectedEntity.id
+          })
+        });
       }
     } catch (err) {
-      console.error(err);
+      console.warn('Lote guardado localmente:', err);
     }
+
+    setLotesList((prev) => [...prev, newLote]);
+    setSelectedLoteId(code);
+    setIsAddLoteModalOpen(false);
   };
 
   if (!isMounted) {
     return (
       <div className="min-h-screen bg-[#080C14] flex items-center justify-center text-slate-400 text-xs sm:text-sm">
         Cargando AgroPassport AI...
-      </div>
-    );
-  }
-
-  if (!loadingEntities && entitiesList.length === 0) {
-    return (
-      <div className="min-h-screen bg-[#080C14] text-slate-100 flex flex-col items-center justify-center p-6">
-        <div className="bg-[#0F172A] border border-slate-800 rounded-3xl p-8 max-w-md w-full text-center space-y-4 shadow-2xl">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-[#00E699] flex items-center justify-center mx-auto border border-emerald-500/20">
-            <Building2 className="w-7 h-7" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-white">No hay entidades registradas</h2>
-            <p className="text-xs text-slate-400 mt-1">
-              Comienza registrando tu primera sucursal, empresa o entidad aliada.
-            </p>
-          </div>
-          <button
-            onClick={() => setIsAddEntityModalOpen(true)}
-            className="w-full bg-[#00E699] hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-xs transition cursor-pointer shadow-lg shadow-[#00E699]/10 flex items-center justify-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Registrar Primera Sucursal / Entidad</span>
-          </button>
-        </div>
-
-        {isAddEntityModalOpen && (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Nueva Sucursal / Entidad</h3>
-                <button onClick={() => setIsAddEntityModalOpen(false)} className="text-slate-400 hover:text-white cursor-pointer">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <form onSubmit={handleCreateEntity} className="space-y-3">
-                <div>
-                  <label htmlFor="initBusinessName" className="text-[11px] text-slate-400 font-medium">Razón Social / Nombre</label>
-                  <input id="initBusinessName" name="businessName" required placeholder="Ej: Establecimiento Las Marías S.A." className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none" />
-                </div>
-                <div>
-                  <label htmlFor="initCuit" className="text-[11px] text-slate-400 font-medium">CUIT</label>
-                  <input id="initCuit" name="cuit" required placeholder="Ej: 30-71234567-8" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none" />
-                </div>
-                <div>
-                  <label htmlFor="initCode" className="text-[11px] text-slate-400 font-medium">Código Interno</label>
-                  <input id="initCode" name="code" placeholder="Ej: AP-101" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none" />
-                </div>
-                <button type="submit" className="w-full bg-[#00E699] hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer mt-2">
-                  Guardar Entidad
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
@@ -502,204 +472,181 @@ const handleCreateEntity = async (e: React.SyntheticEvent<HTMLFormElement>) => {
           </div>
         )}
 
-        {lotesList.length === 0 ? (
-          <div className="bg-[#0F172A] border border-slate-800/80 rounded-3xl p-12 text-center space-y-4 shadow-xl">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-[#00E699] flex items-center justify-center mx-auto border border-emerald-500/20">
-              <MapPin className="w-7 h-7" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Passport Score</span>
+              <span className="text-[10px] font-semibold text-[#00E699] bg-emerald-500/10 px-2 py-0.5 rounded-md border border-[#00E699]/20">
+                {entityMetrics.scoreTrend}
+              </span>
             </div>
-            <div className="max-w-md mx-auto">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">No hay lotes ni terrenos registrados</h3>
-              <p className="text-xs text-slate-400 mt-1">
-                La entidad <span className="text-[#00E699] font-semibold">{selectedEntity?.name}</span> aún no posee cuarteles o lotes agrícolas asociados en la base de datos.
-              </p>
+            <div className="text-3xl font-extrabold text-white tracking-tight mb-3">
+              {entityMetrics.score}
             </div>
-            <button
-              onClick={() => setIsAddLoteModalOpen(true)}
-              className="bg-[#00E699] hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs transition cursor-pointer shadow-lg shadow-[#00E699]/10 inline-flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Agregar Primer Lote / Terreno</span>
-            </button>
+            <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+              <div 
+                className="bg-linear-to-r from-emerald-500 to-[#00E699] h-full rounded-full transition-all duration-500"
+                style={{ width: `${entityMetrics.score}%` }}
+              ></div>
+            </div>
           </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Passport Score</span>
-                  <span className="text-[10px] font-semibold text-[#00E699] bg-emerald-500/10 px-2 py-0.5 rounded-md border border-[#00E699]/20">
-                    {entityMetrics.scoreTrend}
-                  </span>
-                </div>
-                <div className="text-3xl font-extrabold text-white tracking-tight mb-3">
-                  {entityMetrics.score}
-                </div>
-                <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
-                  <div 
-                    className="bg-linear-to-r from-emerald-500 to-[#00E699] h-full rounded-full transition-all duration-500"
-                    style={{ width: `${entityMetrics.score}%` }}
-                  ></div>
-                </div>
-              </div>
 
-              <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Canje de Insumos</span>
-                  <span className="text-[10px] font-semibold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/20">
-                    {entityMetrics.canjeTrend}
-                  </span>
-                </div>
-                <div className="text-3xl font-extrabold text-white tracking-tight mb-3">
-                  {entityMetrics.canje}%
-                </div>
-                <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
-                  <div 
-                    className="bg-linear-to-r from-blue-500 to-blue-300 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${entityMetrics.canje}%` }}
-                  ></div>
-                </div>
-              </div>
+          <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Canje de Insumos</span>
+              <span className="text-[10px] font-semibold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/20">
+                {entityMetrics.canjeTrend}
+              </span>
+            </div>
+            <div className="text-3xl font-extrabold text-white tracking-tight mb-3">
+              {entityMetrics.canje}%
+            </div>
+            <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+              <div 
+                className="bg-linear-to-r from-blue-500 to-blue-300 h-full rounded-full transition-all duration-500"
+                style={{ width: `${entityMetrics.canje}%` }}
+              ></div>
+            </div>
+          </div>
 
-              <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Alertas IoT</span>
-                  <span className="text-[10px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
-                    {entityMetrics.alertsStatus}
-                  </span>
-                </div>
-                <div className="text-3xl font-extrabold text-white tracking-tight mb-3">
-                  {entityMetrics.alerts}
-                </div>
-                <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
-                  <div 
-                    className="bg-linear-to-r from-amber-500 to-amber-300 h-full rounded-full transition-all duration-500"
-                    style={{ width: '45%' }}
-                  ></div>
-                </div>
+          <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Alertas IoT</span>
+              <span className="text-[10px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                {entityMetrics.alertsStatus}
+              </span>
+            </div>
+            <div className="text-3xl font-extrabold text-white tracking-tight mb-3">
+              {entityMetrics.alerts}
+            </div>
+            <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+              <div 
+                className="bg-linear-to-r from-amber-500 to-amber-300 h-full rounded-full transition-all duration-500"
+                style={{ width: '45%' }}
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        {selectedEntity && (
+          <InsumosSimulator 
+            entity={selectedEntity} 
+            onExportPDF={() => setIsModalOpen(true)} 
+          />
+        )}
+
+        <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
+          <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-[#00E699]">
+                <Activity className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-slate-100 tracking-wide uppercase">
+                  Actividad en Tiempo Real — <span className="text-[#00E699]">{selectedEntity?.name}</span>
+                </h4>
+                <p className="text-[11px] text-slate-400">Monitoreo de eventos y flujos operativos de la entidad</p>
               </div>
             </div>
+            <span className="text-[10px] font-mono px-2 py-1 rounded-lg bg-emerald-500/10 text-[#00E699] border border-[#00E699]/20 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00E699] animate-pulse"></span>
+              <span>Sincronizado</span>
+            </span>
+          </div>
 
-            {selectedEntity && (
-              <InsumosSimulator 
-                entity={selectedEntity} 
-                onExportPDF={() => setIsModalOpen(true)} 
-              />
-            )}
-
-            <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-xl">
-              <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-emerald-500/10 text-[#00E699]">
-                    <Activity className="w-4 h-4" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {entityActivities.map((act) => (
+              <div 
+                key={act.id} 
+                className="flex items-start justify-between gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/60 hover:border-slate-700 transition-all group"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 shrink-0">
+                    {act.type === 'success' && <CheckCircle2 className="w-4 h-4 text-[#00E699]" />}
+                    {act.type === 'warning' && <AlertTriangle className="w-4 h-4 text-amber-400" />}
+                    {act.type === 'info' && <Info className="w-4 h-4 text-blue-400" />}
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-100 tracking-wide uppercase">
-                      Actividad en Tiempo Real — <span className="text-[#00E699]">{selectedEntity?.name}</span>
-                    </h4>
-                    <p className="text-[11px] text-slate-400">Monitoreo de eventos y flujos operativos de la entidad</p>
+                    <p className="text-xs font-medium text-slate-200 group-hover:text-white transition-colors">
+                      {act.text}
+                    </p>
+                    <span className="text-[10px] text-slate-500">{act.time}</span>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-1 rounded-lg bg-emerald-500/10 text-[#00E699] border border-[#00E699]/20 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00E699] animate-pulse"></span>
-                  <span>Sincronizado</span>
-                </span>
+                <ArrowUpRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-[#00E699] transition-colors shrink-0 mt-1" />
               </div>
+            ))}
+          </div>
+        </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {entityActivities.map((act) => (
-                  <div 
-                    key={act.id} 
-                    className="flex items-start justify-between gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/60 hover:border-slate-700 transition-all group"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="mt-0.5 shrink-0">
-                        {act.type === 'success' && <CheckCircle2 className="w-4 h-4 text-[#00E699]" />}
-                        {act.type === 'warning' && <AlertTriangle className="w-4 h-4 text-amber-400" />}
-                        {act.type === 'info' && <Info className="w-4 h-4 text-blue-400" />}
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-slate-200 group-hover:text-white transition-colors">
-                          {act.text}
-                        </p>
-                        <span className="text-[10px] text-slate-500">{act.time}</span>
-                      </div>
-                    </div>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-[#00E699] transition-colors shrink-0 mt-1" />
-                  </div>
-                ))}
-              </div>
+        <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-4 shadow-2xl space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div className="flex items-center gap-2">
+              <History className="w-4 h-4 text-[#00E699]" />
+              <span className="text-xs font-bold text-white uppercase tracking-wider">
+                Mapa Satelital & Comparativa Temporal de Lote
+              </span>
             </div>
 
-            <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl p-4 shadow-2xl space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-                <div className="flex items-center gap-2">
-                  <History className="w-4 h-4 text-[#00E699]" />
-                  <span className="text-xs font-bold text-white uppercase tracking-wider">
-                    Mapa Satelital & Comparativa Temporal de Lote
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
-                  <span className="text-[10px] text-slate-400 px-2 font-medium">Comparar Campaña:</span>
-                  <button
-                    onClick={() => setCompareYear('2025')}
-                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
-                      compareYear === '2025'
-                        ? 'bg-[#00E699]/20 text-[#00E699] border border-[#00E699]/40'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    Octubre 2025
-                  </button>
-                  <button
-                    onClick={() => setCompareYear('2026')}
-                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
-                      compareYear === '2026'
-                        ? 'bg-[#00E699] text-slate-950 shadow-md'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    Octubre 2026 (Actual)
-                  </button>
-                </div>
-              </div>
-
-              <div className="w-full overflow-hidden rounded-xl border border-slate-800 flex flex-col min-h-95 sm:min-h-112.5 lg:min-h-130">
-                <MapModule 
-                  selectedLoteId={selectedLoteId} 
-                  onSelectLote={(id) => setSelectedLoteId(id)} 
-                />
-              </div>
+            <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+              <span className="text-[10px] text-slate-400 px-2 font-medium">Comparar Campaña:</span>
+              <button
+                onClick={() => setCompareYear('2025')}
+                className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
+                  compareYear === '2025'
+                    ? 'bg-[#00E699]/20 text-[#00E699] border border-[#00E699]/40'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Octubre 2025
+              </button>
+              <button
+                onClick={() => setCompareYear('2026')}
+                className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
+                  compareYear === '2026'
+                    ? 'bg-[#00E699] text-slate-950 shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Octubre 2026 (Actual)
+              </button>
             </div>
+          </div>
 
-            {loteActivo && (
-              <Can I="producer:manage">
-                <div className="transition-all duration-300">
-                  <TelemetryModule 
-                    loteNombre={loteActivo.nombre} 
-                  />
-                </div>
-              </Can>
-            )}
+          <div className="w-full overflow-hidden rounded-xl border border-slate-800 flex flex-col min-h-95 sm:min-h-112.5 lg:min-h-130">
+            <MapModule 
+              selectedLoteId={selectedLoteId} 
+              onSelectLote={(id) => setSelectedLoteId(id)} 
+            />
+          </div>
+        </div>
 
-            {selectedEntity && (
-              <Can I="producer:manage">
-                <div className="transition-all duration-300">
-                  <MachineryModule 
-                    entity={selectedEntity} 
-                    lotesList={lotesList} 
-                  />
-                </div>
-              </Can>
-            )}
-
-            <Can I="audit:view">
-              <div className="pt-4 sm:pt-6 border-t border-slate-800/80 transition-all duration-300">
-                <IntegrationDashboard />
-              </div>
-            </Can>
-          </>
+        {loteActivo && (
+          <Can I="producer:manage">
+            <div className="transition-all duration-300">
+              <TelemetryModule 
+                loteNombre={loteActivo.nombre} 
+              />
+            </div>
+          </Can>
         )}
+
+        {selectedEntity && (
+          <Can I="producer:manage">
+            <div className="transition-all duration-300">
+              <MachineryModule 
+                entity={selectedEntity} 
+                lotesList={lotesList} 
+              />
+            </div>
+          </Can>
+        )}
+
+        <Can I="audit:view">
+          <div className="pt-4 sm:pt-6 border-t border-slate-800/80 transition-all duration-300">
+            <IntegrationDashboard />
+          </div>
+        </Can>
       </main>
 
       {/* MODAL: Registrar Entidad */}
@@ -815,11 +762,9 @@ const handleCreateEntity = async (e: React.SyntheticEvent<HTMLFormElement>) => {
             </div>
 
             <div className="space-y-6 pt-2">
-              {/* ✅ PassportCard sin prop lote sobrante */}
               <PassportCard 
                 entity={selectedEntity} 
               />
-              {/* ✅ DigitalSignatureCard con prop lote obligatoria */}
               <DigitalSignatureCard 
                 entity={selectedEntity}
                 lote={loteActivo} 
