@@ -396,6 +396,7 @@ export default function Home() {
             <p className="text-[11px] sm:text-xs md:text-sm text-slate-400 mt-0.5">
               Monitoreo satelital y scoring crediticio consolidado para{" "}
               <span className="text-[#00E699] font-semibold">{selectedEntity?.name}</span>
+              {" "}({entitiesList.length} {entitiesList.length === 1 ? 'entidad registrada' : 'entidades registradas'})
             </p>
           </div>
 
