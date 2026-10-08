@@ -16,7 +16,6 @@ import {
   ClipboardList,
   Building2,
   MapPin,
-  Plus
 } from 'lucide-react';
 import { Navbar } from '@/components/navbar/Navbar';
 import { MapModule } from '@/components/map/MapModule';
