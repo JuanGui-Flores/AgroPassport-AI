@@ -3,6 +3,7 @@
 
 import React, { useState } from "react";
 import { Calculator, CheckCircle2 } from "lucide-react";
+import { EntityOption } from "@/app/data/entities";
 
 interface InsumoItem {
   id?: string;
@@ -15,8 +16,7 @@ interface InsumoItem {
 
 interface InsumosSimulatorProps {
   initialItems?: InsumoItem[];
-  // Solución 1: Reemplazamos 'any' por una interfaz abierta segura
-  entity?: { name?: string; type?: string; [key: string]: unknown } | null;
+  entity?: EntityOption | { id?: string; name?: string; type?: string; status?: string } | null;
   onExportPDF?: () => void;
   onCalculate?: (result: { itemId: string; totalCost: number; quantity: number }) => void;
 }
@@ -91,7 +91,6 @@ export const InsumosSimulator: React.FC<InsumosSimulatorProps> = ({
               onChange={(e) => setSelectedItemId(e.target.value)}
               className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 cursor-pointer appearance-none"
             >
-              {/* Solución 2: Usamos index en lugar de Math.random() para mantener el render puro */}
               {safeItems.map((item, idx) => {
                 if (!item) return null;
                 const labelType = (item?.type || "general").toUpperCase();
