@@ -145,9 +145,9 @@ export default function Home() {
 
   const [compareYear, setCompareYear] = useState<"2025" | "2026">("2026");
   const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
-const handleDismissAlert = (alertId: string) => {
-  setDismissedAlerts((prev) => [...prev, alertId]);
-};
+  const handleDismissAlert = (alertId: string) => {
+    setDismissedAlerts((prev) => [...prev, alertId]);
+  };
 
   const getLoteEstado = (score: number): string => {
     if (score >= 80) return "Óptimo";
@@ -479,73 +479,76 @@ const handleDismissAlert = (alertId: string) => {
         </div>
 
         {anomalies.length > 0 && lotesList.length > 0 && (
-          <div className="space-y-2">
-            {anomalies.map((ano) => (
-              <div
-                key={ano.id}
-                className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 backdrop-blur-md"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg shrink-0 mt-0.5">
-                    <AlertOctagon className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-amber-300 uppercase tracking-wide">
-                        {ano.type}
-                      </span>
-                      <span className="text-[10px] font-mono text-slate-400">
-                        | {ano.lote}
-                      </span>
+          <div className="space-y-3 w-full">
+            {anomalies
+              ?.filter((ano) => !dismissedAlerts.includes(ano.id || ano.lote))
+              .map((ano) => (
+                <div
+                  key={ano.id || ano.lote}
+                  className="p-3.5 sm:p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg shrink-0 mt-0.5">
+                      <AlertOctagon className="w-4 h-4" />
                     </div>
-                    <p className="text-xs text-slate-300 mt-0.5">
-                      {ano.detail}
-                    </p>
-                  </div>
-                </div>
-                <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  {/* Sección de Icono + Texto */}
-                  <div className="flex items-start gap-3 min-w-0">
-                    <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 shrink-0 mt-0.5">
-                      <AlertTriangle className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="text-xs font-bold text-amber-400 flex flex-wrap items-center gap-1">
-                        ESTRÉS HÍDRICO{" "}
-                        <span className="text-slate-400 font-normal">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-amber-300 uppercase tracking-wide">
+                          {ano.type}
+                        </span>
+                        <span className="text-[10px] font-mono text-slate-400">
                           | {ano.lote}
                         </span>
-                      </h4>
-                      <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
-                        Variación de NDVI -18% detectada en las últimas 72hs.
+                      </div>
+                      <p className="text-xs text-slate-300 mt-0.5">
+                        {ano.detail}
                       </p>
                     </div>
                   </div>
+                  <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    {/* Sección de Icono + Texto */}
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 shrink-0 mt-0.5">
+                        <AlertTriangle className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-bold text-amber-400 flex flex-wrap items-center gap-1">
+                          {ano.type || "ESTRÉS HÍDRICO"}{" "}
+                          <span className="text-slate-400 font-normal">
+                            | {ano.lote}
+                          </span>
+                        </h4>
+                        <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
+                          {ano.detail ||
+                            "Variación detectada en las últimas 72hs."}
+                        </p>
+                      </div>
+                    </div>
 
-                  {/* Contenedor de Botón de Acción + Descartar */}
-                  <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2 pt-2 sm:pt-0 border-t border-amber-500/10 sm:border-t-0 shrink-0">
-                    <button
-                      onClick={() =>
-                        setActiveVisita({
-                          lote: ano.lote,
-                          id: generateSecureId(),
-                        })
-                      }
-                      className="w-full sm:w-auto text-[11px] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-semibold px-3 py-2 rounded-xl border border-amber-500/40 transition cursor-pointer text-center"
-                    >
-                      Crear Orden de Visita
-                    </button>
-                    <button
-                      onClick={() => handleDismissAlert(ano.id || ano.lote)}
-                      aria-label="Descartar alerta"
-                      className="text-slate-500 hover:text-slate-300 p-2 rounded-lg hover:bg-slate-800/50 cursor-pointer shrink-0 transition"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+                    {/* Contenedor de Botón de Acción + Descartar */}
+                    <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2 pt-2 sm:pt-0 border-t border-amber-500/10 sm:border-t-0 shrink-0">
+                      <button
+                        onClick={() =>
+                          setActiveVisita({
+                            lote: ano.lote,
+                            id: generateSecureId(),
+                          })
+                        }
+                        className="w-full sm:w-auto text-[11px] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-semibold px-3 py-2 rounded-xl border border-amber-500/40 transition cursor-pointer text-center"
+                      >
+                        Crear Orden de Visita
+                      </button>
+                      <button
+                        onClick={() => handleDismissAlert(ano.id || ano.lote)}
+                        aria-label="Descartar alerta"
+                        className="text-slate-500 hover:text-slate-300 p-2 rounded-lg hover:bg-slate-800/50 cursor-pointer shrink-0 transition"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         )}
 
