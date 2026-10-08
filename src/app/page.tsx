@@ -145,6 +145,9 @@ export default function Home() {
 
   const [compareYear, setCompareYear] = useState<"2025" | "2026">("2026");
   const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
+  const handleDismissAlert = (alertId: string) => {
+    setDismissedAlerts((prev) => [...prev, alertId]);
+  };
 
   const getLoteEstado = (score: number): string => {
     if (score >= 80) return "Óptimo";
@@ -532,7 +535,11 @@ export default function Home() {
                     >
                       Crear Orden de Visita
                     </button>
-                    <button className="text-slate-500 hover:text-slate-300 p-2 rounded-lg hover:bg-slate-800/50 cursor-pointer shrink-0">
+                    <button
+                      onClick={() => handleDismissAlert(ano.id || ano.lote)}
+                      aria-label="Descartar alerta"
+                      className="text-slate-500 hover:text-slate-300 p-2 rounded-lg hover:bg-slate-800/50 cursor-pointer shrink-0 transition"
+                    >
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -952,9 +959,8 @@ export default function Home() {
               <p className="text-xs text-slate-400 mt-1">
                 Se ha registrado la inspección técnica para{" "}
                 <span className="text-amber-300 font-semibold">
-                  {activeVisita.lote}
+                  {activeVisita.lote}.
                 </span>
-                .
               </p>
             </div>
             <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 text-left space-y-1">
