@@ -72,7 +72,7 @@ export function MachineryModule({ entity, lotesList = [] }: MachineryModuleProps
 
     try {
       setLoading(true);
-      const res = await fetch(`/api/maquinaria?entityId=${entityId}`);
+      const res = await fetch(`/api/machinery?entityId=${entityId}`);
       if (!res.ok) throw new Error('Error al obtener maquinaria');
       const data: Machine[] = await res.json();
       setMachines(Array.isArray(data) && data.length > 0 ? data : DEFAULT_MACHINERY);
@@ -117,7 +117,7 @@ export function MachineryModule({ entity, lotesList = [] }: MachineryModuleProps
     };
 
     try {
-      const res = await fetch('/api/maquinaria', {
+      const res = await fetch('/api/machinery', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

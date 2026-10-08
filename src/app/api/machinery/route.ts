@@ -11,7 +11,20 @@ export async function GET(request: Request) {
       orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json(machinery);
+    return NextResponse.json(
+      machinery.map((machine) => ({
+        id: machine.id,
+        code: machine.codigo,
+        nombre: machine.nombre,
+        tipo: machine.tipo,
+        estado: machine.estado,
+        horasUso: machine.horasUso,
+        combustiblePct: 100,
+        alertasCount: 0,
+        entityId: machine.entityId,
+        loteAsignadoId: machine.loteId ?? undefined,
+      }))
+    );
   } catch (error) {
     console.error('Error al obtener maquinaria desde la base de datos:', error);
     return NextResponse.json(
@@ -25,21 +38,33 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const newMachine = await prisma.machinery.create({
+    const newMachine = await prisma.maquinaria.create({
       data: {
-        code: body.code,
+        codigo: body.code,
         nombre: body.nombre || body.name,
         tipo: body.tipo || body.type,
         estado: body.estado || 'Operativo',
         horasUso: Number(body.horasUso) || 0,
-        combustiblePct: Number(body.combustiblePct) || 100,
-        alertasCount: Number(body.alertasCount) || 0,
         entityId: body.entityId,
-        loteAsignadoId: body.loteId || body.loteAsignadoId || null,
+        loteId: body.loteId || body.loteAsignadoId || null,
       },
     });
 
-    return NextResponse.json(newMachine, { status: 201 });
+    return NextResponse.json(
+      {
+        id: newMachine.id,
+        code: newMachine.codigo,
+        nombre: newMachine.nombre,
+        tipo: newMachine.tipo,
+        estado: newMachine.estado,
+        horasUso: newMachine.horasUso,
+        combustiblePct: 100,
+        alertasCount: 0,
+        entityId: newMachine.entityId,
+        loteAsignadoId: newMachine.loteId ?? undefined,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error al registrar máquina en la base de datos:', error);
     return NextResponse.json(
