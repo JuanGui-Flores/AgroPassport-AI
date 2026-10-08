@@ -446,9 +446,6 @@ export default function Home() {
               <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-white tracking-tight leading-snug">
                 Evaluación de Riesgo & Scoring Agrícola
               </h1>
-              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold bg-[#00E699]/10 text-[#00E699] border border-[#00E699]/30 px-2 py-0.5 rounded-full">
-                <Sparkles className="w-3 h-3" /> PostgreSQL Activo
-              </span>
               {(loadingEntities || loadingLotes) && (
                 <span className="text-[10px] text-amber-400 font-mono animate-pulse">
                   (Sincronizando...)
@@ -855,100 +852,6 @@ export default function Home() {
                 className="w-full bg-[#00E699] hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer mt-2"
               >
                 Guardar Entidad
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: Agregar Lote */}
-      {isAddLoteModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-6 max-w-md w-full relative shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-emerald-500/20 text-[#00E699] rounded-lg">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-                  Agregar Nuevo Lote / Terreno
-                </h3>
-              </div>
-              <button
-                onClick={() => setIsAddLoteModalOpen(false)}
-                className="text-slate-400 hover:text-white transition p-1.5 rounded-lg hover:bg-slate-800 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateLote} className="space-y-3">
-              <div>
-                <label
-                  htmlFor="loteCode"
-                  className="text-[11px] text-slate-400 font-medium"
-                >
-                  Código del Lote
-                </label>
-                <input
-                  id="loteCode"
-                  name="code"
-                  required
-                  placeholder="Ej: LOTE-01"
-                  className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="loteNombre"
-                  className="text-[11px] text-slate-400 font-medium"
-                >
-                  Nombre / Descripción
-                </label>
-                <input
-                  id="loteNombre"
-                  name="nombre"
-                  required
-                  placeholder="Ej: Campo Norte - Sector A"
-                  className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="loteHectareas"
-                  className="text-[11px] text-slate-400 font-medium"
-                >
-                  Hectáreas
-                </label>
-                <input
-                  id="loteHectareas"
-                  name="hectareas"
-                  type="number"
-                  step="0.1"
-                  required
-                  placeholder="Ej: 150.5"
-                  className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="loteCultivo"
-                  className="text-[11px] text-slate-400 font-medium"
-                >
-                  Cultivo Actual
-                </label>
-                <input
-                  id="loteCultivo"
-                  name="cultivo"
-                  placeholder="Ej: Soja de primera / Maíz"
-                  className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-[#00E699] hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer mt-2"
-              >
-                Guardar Lote
               </button>
             </form>
           </div>
