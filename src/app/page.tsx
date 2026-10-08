@@ -145,9 +145,9 @@ export default function Home() {
 
   const [compareYear, setCompareYear] = useState<"2025" | "2026">("2026");
   const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
-  const handleDismissAlert = (alertId: string) => {
-    setDismissedAlerts((prev) => [...prev, alertId]);
-  };
+const handleDismissAlert = (alertId: string) => {
+  setDismissedAlerts((prev) => [...prev, alertId]);
+};
 
   const getLoteEstado = (score: number): string => {
     if (score >= 80) return "Óptimo";
