@@ -38,6 +38,7 @@ export const InsumosSimulator: React.FC<InsumosSimulatorProps> = ({
 
   const [selectedItemId, setSelectedItemId] = useState<string>(safeItems[0]?.id || "1");
   const [hectareas, setHectareas] = useState<number>(100);
+  const [applied, setApplied] = useState<boolean>(false);
 
   const selectedItem = safeItems.find((item) => item?.id === selectedItemId) || safeItems[0] || {};
 
@@ -51,13 +52,16 @@ export const InsumosSimulator: React.FC<InsumosSimulatorProps> = ({
   const totalCost = totalQuantity * pricePerUnit;
 
   const handleApplySimulation = () => {
-    if (onCalculate && selectedItem?.id) {
+    if (onCalculate) {
       onCalculate({
-        itemId: selectedItem.id,
+        itemId: selectedItem?.id || selectedItemId,
         totalCost,
         quantity: totalQuantity,
       });
     }
+    // Dispara la animación de confirmación visual
+    setApplied(true);
+    setTimeout(() => setApplied(false), 2500);
   };
 
   return (
@@ -162,17 +166,21 @@ export const InsumosSimulator: React.FC<InsumosSimulatorProps> = ({
         {onExportPDF && (
           <button
             onClick={onExportPDF}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition-colors border border-slate-700"
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition-colors border border-slate-700 cursor-pointer"
           >
             Exportar PDF
           </button>
         )}
         <button
           onClick={handleApplySimulation}
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-medium transition-colors"
+          className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer ${
+            applied
+              ? "bg-emerald-500 text-slate-950 border-emerald-400 font-bold shadow-lg shadow-emerald-500/20 scale-105"
+              : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+          }`}
         >
           <CheckCircle2 className="w-4 h-4" />
-          Aplicar Simulación
+          {applied ? "¡Simulación Aplicada!" : "Aplicar Simulación"}
         </button>
       </div>
     </div>

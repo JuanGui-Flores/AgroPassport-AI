@@ -144,6 +144,7 @@ export default function Home() {
 
   const [compareYear, setCompareYear] = useState<"2025" | "2026">("2026");
   const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
+
   const handleDismissAlert = (alertId: string) => {
     setDismissedAlerts((prev) => [...prev, alertId]);
   };
@@ -154,12 +155,12 @@ export default function Home() {
     return "Bajo";
   };
 
+  // --- HANDLER SIMULACIÓN DE INSUMOS ---
   const handleCalculateSimulation = (result: {
     itemId: string;
     totalCost: number;
     quantity: number;
   }) => {
-    // Registra la simulación en el estado de la entidad seleccionada
     setSelectedEntity((prev) => {
       if (!prev) return prev;
       return {
