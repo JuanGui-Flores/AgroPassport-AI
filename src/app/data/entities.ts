@@ -3,6 +3,8 @@
 export interface EntityOption {
   id: string;
   name: string;
+  cuit?: string;
+  code?: string;
   type: "branch" | "partner";
   status?: "active" | "syncing" | "idle";
   metrics?: {
