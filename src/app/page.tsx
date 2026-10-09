@@ -16,11 +16,10 @@ import {
   ArrowUpRight,
   ShieldCheck,
   History,
-  Sparkles,
   ClipboardList,
   Building2,
-  MapPin,
 } from "lucide-react";
+
 import { Navbar } from "@/components/navbar/Navbar";
 import { MapModule } from "@/components/map/MapModule";
 import { PassportCard } from "@/components/passport/PassportCard";
@@ -29,8 +28,8 @@ import { IntegrationDashboard } from "@/components/IntegrationDashboard";
 import { InsumosSimulator } from "@/components/InsumosSimulator";
 import { DigitalSignatureCard } from "@/components/DigitalSignatureCard";
 import { Can } from "@/components/security/Can";
-import { Lote } from "@/app/data/lotes";
-import { EntityOption } from "@/app/data/entities";
+import type { Lote } from "@/app/data/lotes";
+import type { EntityOption } from "@/app/data/entities";
 import { MachineryModule } from "@/components/machinery/MachineryModule";
 
 interface DbEntity {
@@ -132,10 +131,11 @@ export default function Home() {
   const [loadingLotes, setLoadingLotes] = useState<boolean>(false);
 
   // Modales
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditLoteModalOpen, setIsEditLoteModalOpen] = useState(false);
+  const [editingLote, setEditingLote] = useState<Lote | null>(null);
   const [isAddEntityModalOpen, setIsAddEntityModalOpen] =
     useState<boolean>(false);
-  const [isAddLoteModalOpen, setIsAddLoteModalOpen] = useState<boolean>(false);
 
   const [activeVisita, setActiveVisita] = useState<{
     lote: string;
@@ -291,6 +291,8 @@ export default function Home() {
     };
   }, [selectedEntity]);
 
+  
+  // 🟢 1. CREAR ENTIDAD
   const handleCreateEntity = async (
     e: React.SyntheticEvent<HTMLFormElement>,
   ) => {
@@ -323,7 +325,6 @@ export default function Home() {
       ],
     };
 
-    // Intentar guardar en backend, de lo contrario agregar localmente
     try {
       await fetch("/api/entities", {
         method: "POST",
@@ -342,48 +343,30 @@ export default function Home() {
     setIsAddEntityModalOpen(false);
   };
 
-  const handleCreateLote = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  // 🟢 HANDLER DE ACTUALIZACIÓN DE LOTE
+  const handleUpdateLote = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!editingLote) return;
+
     const formData = new FormData(e.currentTarget);
-    const code = (formData.get("code") as string) || `LOTE-${Date.now()}`;
-    const nombre = (formData.get("nombre") as string) || "Nuevo Lote";
-    const hectareas = Number.parseFloat(
-      (formData.get("hectareas") as string) || "100",
+    const nombre = (formData.get("nombre") as string) || editingLote.nombre;
+    const hectareas =
+      Number(formData.get("hectareas")) || editingLote.hectareas;
+
+    setLotesList((prev) =>
+      prev.map((item) =>
+        item.id === editingLote.id
+          ? {
+              ...item,
+              nombre,
+              hectareas,
+            }
+          : item,
+      ),
     );
 
-    const newLote: Lote = {
-      id: code,
-      nombre,
-      hectareas,
-      score: 85,
-      ndvi: 0.72,
-      rindeEst: "4.0 Tn / Ha",
-      estado: "Óptimo",
-    };
-
-    try {
-      if (selectedEntity?.id) {
-        await fetch("/api/lotes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            code,
-            nombre,
-            hectareas,
-            score: 85.0,
-            ndvi: 0.72,
-            rindeEst: 4.0,
-            entityId: selectedEntity.id,
-          }),
-        });
-      }
-    } catch (err) {
-      console.warn("Lote guardado localmente:", err);
-    }
-
-    setLotesList((prev) => [...prev, newLote]);
-    setSelectedLoteId(code);
-    setIsAddLoteModalOpen(false);
+    setIsEditLoteModalOpen(false);
+    setEditingLote(null);
   };
 
   if (!isMounted) {
@@ -474,14 +457,6 @@ export default function Home() {
               >
                 <Building2 className="w-3.5 h-3.5 text-[#00E699] shrink-0" />
                 <span className="truncate">+ Nueva Sucursal</span>
-              </button>
-
-              <button
-                onClick={() => setIsAddLoteModalOpen(true)}
-                className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-3 py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer border border-slate-700 w-full"
-              >
-                <MapPin className="w-3.5 h-3.5 text-[#00E699] shrink-0" />
-                <span className="truncate">+ Agregar Terreno / Lote</span>
               </button>
             </div>
 
@@ -754,6 +729,12 @@ export default function Home() {
             <MapModule
               selectedLoteId={selectedLoteId}
               onSelectLote={(id) => setSelectedLoteId(id)}
+              lotesList={lotesList}
+              onAddLote={() => setIsModalOpen(true)}
+              onEditLote={(lote) => {
+                setEditingLote(lote as Lote);
+                setIsEditLoteModalOpen(true);
+              }}
             />
           </div>
         </div>
@@ -857,6 +838,86 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* MODAL EDITAR LOTE */}
+      {isEditLoteModalOpen && editingLote && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="text-base font-bold text-white">
+                Editar Terreno / Lote
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditLoteModalOpen(false);
+                  setEditingLote(null);
+                }}
+                className="text-slate-400 hover:text-white transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateLote} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="edit-lote-nombre"
+                  className="block text-xs font-medium text-slate-400 mb-1"
+                >
+                  Nombre del Lote
+                </label>
+                <input
+                  id="edit-lote-nombre"
+                  type="text"
+                  name="nombre"
+                  defaultValue={editingLote.nombre}
+                  required
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-[#00E699]"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="edit-lote-hectareas"
+                  className="block text-xs font-medium text-slate-400 mb-1"
+                >
+                  Superficie (Hectáreas)
+                </label>
+                <input
+                  id="edit-lote-hectareas"
+                  type="number"
+                  name="hectareas"
+                  defaultValue={editingLote.hectareas}
+                  required
+                  min="1"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-[#00E699]"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditLoteModalOpen(false);
+                    setEditingLote(null);
+                  }}
+                  className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:bg-slate-800 transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-[#00E699] text-slate-950 hover:bg-[#00E699]/90 transition cursor-pointer"
+                >
+                  Guardar Cambios
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
 
       {/* MODAL: Ficha Oficial & Firma Digital */}
       {isModalOpen && selectedEntity && (
