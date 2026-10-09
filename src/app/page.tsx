@@ -31,6 +31,7 @@ import { Can } from "@/components/security/Can";
 import type { Lote } from "@/app/data/lotes";
 import type { EntityOption } from "@/app/data/entities";
 import { MachineryModule } from "@/components/machinery/MachineryModule";
+import { entitiesService, lotesService, ApiError } from "@/services";
 
 interface DbEntity {
   id: string;
@@ -144,6 +145,37 @@ export default function Home() {
 
   const [compareYear, setCompareYear] = useState<"2025" | "2026">("2026");
   const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchDashboardData() {
+      setLoadingEntities(true);
+      setLoadingLotes(true);
+
+      try {
+        const [entitiesData, lotesData] = await Promise.all([
+          entitiesService.getAll(),
+          lotesService.getAll(),
+        ]);
+
+        if (entitiesData && entitiesData.length > 0) {
+          setEntitiesList(entitiesData);
+          setSelectedEntity(entitiesData[0]);
+        }
+
+        if (lotesData && lotesData.length > 0) {
+          setLotesList(lotesData);
+          setSelectedLoteId(lotesData[0].id);
+        }
+      } catch (error) {
+        console.error("Error al cargar datos desde el backend:", error);
+      } finally {
+        setLoadingEntities(false);
+        setLoadingLotes(false);
+      }
+    }
+
+    void fetchDashboardData();
+  }, []);
 
   const handleDismissAlert = (alertId: string) => {
     setDismissedAlerts((prev) => [...prev, alertId]);
