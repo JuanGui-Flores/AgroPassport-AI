@@ -660,77 +660,55 @@ export default function Home() {
                 Mapa Satelital & Comparativa Temporal de Lote
               </span>
             </div>
-
-            <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
-              <span className="text-[10px] text-slate-400 px-2 font-medium">
-                Comparar Campaña:
-              </span>
-              <button
-                onClick={() => setCompareYear("2025")}
-                className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
-                  compareYear === "2025"
-                    ? "bg-[#00E699]/20 text-[#00E699] border border-[#00E699]/40"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                Octubre 2025
-              </button>
-              <button
-                onClick={() => setCompareYear("2026")}
-                className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
-                  compareYear === "2026"
-                    ? "bg-[#00E699] text-slate-950 shadow-md"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                Octubre 2026 (Actual)
-              </button>
-            </div>
-          </div>
-          {/* Pill Informativo & Botonera Dinámica de Lotes */}
-          <div className="p-4 border-b border-slate-800/80 space-y-3">
-            {/* Pill del Lote Seleccionado */}
-            {(() => {
-              const currentLote =
-                lotesList.find((l) => l.id === selectedLoteId) || lotesList[0];
-              return (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[#00E699] text-xs font-medium">
-                  <span className="w-2 h-2 rounded-full bg-[#00E699] animate-pulse" />
-                  <span>
-                    {currentLote?.nombre || "Lote Seleccionado"} (
-                    {currentLote?.hectareas || 0} Ha)
-                  </span>
-                </div>
-              );
-            })()}
-
-            {/* Botonera Dinámica con scroll horizontal suave */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-800">
-              {lotesList.map((lote) => {
-                const isSelected = selectedLoteId === lote.id;
-                return (
-                  <button
-                    key={lote.id}
-                    onClick={() => setSelectedLoteId(lote.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition cursor-pointer ${
-                      isSelected
-                        ? "bg-slate-800 text-[#00E699] border border-[#00E699]/40 font-bold shadow-sm"
-                        : "bg-slate-950/60 text-slate-400 hover:text-slate-200 border border-slate-800"
-                    }`}
-                  >
-                    {lote.nombre}
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
+          <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+            <span className="text-[10px] text-slate-400 px-2 font-medium">
+              Comparar Campaña:
+            </span>
+            <button
+              onClick={() => setCompareYear("2025")}
+              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
+                compareYear === "2025"
+                  ? "bg-[#00E699]/20 text-[#00E699] border border-[#00E699]/40"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              Octubre 2025
+            </button>
+            <button
+              onClick={() => setCompareYear("2026")}
+              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
+                compareYear === "2026"
+                  ? "bg-[#00E699] text-slate-950 shadow-md"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              Octubre 2026 (Actual)
+            </button>
+          </div>
+        </div>
+        {/* Pill Informativo & Botonera Dinámica de Lotes */}
+        <div className="p-4 border-b border-slate-800/80 space-y-3">
+          {/* Módulo del Mapa con controles integrados */}
           <div className="w-full overflow-hidden rounded-xl border border-slate-800 flex flex-col min-h-95 sm:min-h-112.5 lg:min-h-130">
             <MapModule
               selectedLoteId={selectedLoteId}
               onSelectLote={(id) => setSelectedLoteId(id)}
               lotesList={lotesList}
-              onAddLote={() => setIsModalOpen(true)}
+              onAddLote={() => {
+                const newLote: Lote = {
+                  id: `lote-${Date.now()}`,
+                  nombre: `Nuevo Lote ${lotesList.length + 1}`,
+                  hectareas: 100,
+                  score: 80,
+                  ndvi: 0.65,
+                  rindeEst: "3.2 Tn/Ha",
+                  estado: "Verificado",
+                };
+                setLotesList((prev) => [...prev, newLote]);
+                setSelectedLoteId(newLote.id);
+              }}
               onEditLote={(lote) => {
                 setEditingLote(lote as Lote);
                 setIsEditLoteModalOpen(true);

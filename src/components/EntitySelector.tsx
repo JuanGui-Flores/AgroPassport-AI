@@ -39,7 +39,7 @@ interface EntitySelectorProps {
   selectedEntity?: EntityOption | null;
   onSelectEntity: (entity: EntityOption) => void;
   entities?: EntityOption[];
-  onAddEntity?: () => void;  
+  onAddEntity?: () => void;
 }
 
 interface ToastMessage {
