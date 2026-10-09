@@ -291,8 +291,8 @@ export default function Home() {
     };
   }, [selectedEntity]);
 
-  
   // 🟢 1. CREAR ENTIDAD
+  // 🟢 CREAR ENTIDAD
   const handleCreateEntity = async (
     e: React.SyntheticEvent<HTMLFormElement>,
   ) => {
@@ -301,12 +301,13 @@ export default function Home() {
     const businessName =
       (formData.get("businessName") as string) || "Nueva Entidad Demo";
     const code = (formData.get("code") as string) || "AP-NEW";
+    const type = (formData.get("type") as "branch" | "partner") || "branch"; // 👈 Capturar el tipo del formulario
 
     const newEntity: EntityOption = {
       id: `ent-${Date.now()}`,
       name: businessName,
       code,
-      type: "branch",
+      type, // 👈 Asignar el tipo dinámico ('branch' o 'partner')
       metrics: {
         score: 85.0,
         scoreTrend: "+1.0%",
@@ -329,13 +330,10 @@ export default function Home() {
       await fetch("/api/entities", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ businessName, code }),
+        body: JSON.stringify({ businessName, code, type }),
       });
     } catch (err) {
-      console.warn(
-        "Guardado en memoria local debido a falta de BD backend:",
-        err,
-      );
+      console.warn("Guardado local por falta de BD:", err);
     }
 
     setEntitiesList((prev) => [...prev, newEntity]);
@@ -420,6 +418,8 @@ export default function Home() {
       <Navbar
         selectedEntity={selectedEntity as EntityOption}
         onSelectEntity={(entity) => setSelectedEntity(entity)}
+        entities={entitiesList} // 👈 Pasa la lista completa para que se actualice el desplegable
+        onAddEntity={() => setIsAddEntityModalOpen(true)}
       />
 
       <main className="p-3 sm:p-5 md:p-6 lg:p-8 xl:p-10 space-y-4 sm:space-y-6 lg:space-y-8 flex-1 max-w-[1920px] mx-auto w-full">
@@ -828,6 +828,22 @@ export default function Home() {
                   className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none"
                 />
               </div>
+              <div>
+                <label
+                  htmlFor="modalType"
+                  className="text-[11px] text-slate-400 font-medium"
+                >
+                  Tipo de Entidad
+                </label>
+                <select
+                  id="modalType"
+                  name="type"
+                  className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-[#00E699] outline-none"
+                >
+                  <option value="branch">Sucursal Propia</option>
+                  <option value="partner">Red de Aliados / Productor</option>
+                </select>
+              </div>
               <button
                 type="submit"
                 className="w-full bg-[#00E699] hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer mt-2"
@@ -917,7 +933,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
 
       {/* MODAL: Ficha Oficial & Firma Digital */}
       {isModalOpen && selectedEntity && (

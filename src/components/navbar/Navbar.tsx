@@ -25,11 +25,15 @@ const syne = Syne({
 interface NavbarProps {
   selectedEntity: EntityOption;
   onSelectEntity: (entity: EntityOption) => void;
+  entities?: EntityOption[];
+  onAddEntity?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   selectedEntity,
   onSelectEntity,
+  entities = [],
+  onAddEntity,
 }) => {
   const { user, login } = useAuth();
   const router = useRouter();
@@ -55,7 +59,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-[#080C14]/95 backdrop-blur-md transition-all">
       <div className="max-w-[1920px] mx-auto px-3 sm:px-6 py-2.5 md:py-0 md:h-16 flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-3">
-        
         {/* RENGLÓN SUPERIOR EN MOBILE / SECCIÓN IZQUIERDA EN DESKTOP */}
         <div className="flex items-center justify-between md:justify-start gap-3 w-full md:w-auto">
           {/* Branding Logo */}
@@ -104,6 +107,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             <EntitySelector
               selectedEntity={selectedEntity}
               onSelectEntity={onSelectEntity}
+              entities={entities}
+              onAddEntity={onAddEntity}
             />
           </div>
 
@@ -190,7 +195,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
         </div>
-
       </div>
     </header>
   );

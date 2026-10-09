@@ -38,6 +38,8 @@ const useIsMounted = () => {
 interface EntitySelectorProps {
   selectedEntity?: EntityOption | null;
   onSelectEntity: (entity: EntityOption) => void;
+  entities?: EntityOption[];
+  onAddEntity?: () => void;  
 }
 
 interface ToastMessage {
@@ -48,6 +50,8 @@ interface ToastMessage {
 export const EntitySelector: React.FC<EntitySelectorProps> = ({
   selectedEntity,
   onSelectEntity,
+  entities = [],
+  onAddEntity,
 }) => {
   const isMounted = useIsMounted();
   const [isOpen, setIsOpen] = useState(false);
